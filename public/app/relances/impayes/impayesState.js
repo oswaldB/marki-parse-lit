@@ -55,6 +55,7 @@ function impayesState() {
     },
     // Ajouter les nouvelles propriétés pour la vue par payeur
     viewMode: 'list', // 'list' ou 'byPayeur'
+    showListDrawer: false,
     
     // Tableaux séparés pour les impayés et les payés
     get impayesUnpaid() {
@@ -198,6 +199,9 @@ function impayesState() {
     
     getViewModeLabel() {
       return this.viewMode === 'list' ? 'Vue par payeur' : 'Vue liste';
+    },
+    toggleListDrawer() {
+      this.showListDrawer = !this.showListDrawer;
     },
     formatDate(date) {
       if (!date) return 'N/A';
