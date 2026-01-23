@@ -23,6 +23,7 @@
     import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
     window.lit = { LitElement, html };
   </script>
+  <script src="/app/relances/lists/listsState.js"></script>
   <!-- Heroicons - Version spécifique pour éviter les problèmes de cache -->
   <script src="https://cdn.jsdelivr.net/npm/heroicons@2.0.18/dist/heroicons.min.js"></script>
   <style>
@@ -41,7 +42,7 @@
     }
   </style>
 </head>
-<body class="bg-gray-100" x-data="listsPage" x-init="init()">
+<body class="bg-gray-100" x-data="listsState()" x-init="init()">
   <!-- Formes originales en arrière-plan -->
   <galet-component></galet-component>
   <galet-component-dark></galet-component-dark>
@@ -68,6 +69,7 @@
             <tr>
               <th class="py-2 px-4 border-b text-left">Nom</th>
               <th class="py-2 px-4 border-b text-left">Statut</th>
+              <th class="py-2 px-4 border-b text-left">Peuplement automatique</th>
               <th class="py-2 px-4 border-b text-left">Date de création</th>
               <th class="py-2 px-4 border-b text-left">Actions</th>
             </tr>
@@ -86,6 +88,18 @@
                 <td class="py-2 px-4 border-b">
                   <span x-text="list.isActif ? 'Active' : 'Inactive'" 
                         :class="list.isActif ? 'text-green-500' : 'text-red-500'"></span>
+                </td>
+                <td class="py-2 px-4 border-b">
+                  <template x-if="list.is_auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  </template>
+                  <template x-if="!list.is_auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </template>
                 </td>
                 <td class="py-2 px-4 border-b" x-text="new Date(list.date_creation).toLocaleDateString()"></td>
                 <td class="py-2 px-4 border-b">
@@ -142,13 +156,23 @@
         isDrawerOpen: false,
         newListName: '',
         init() {
-          window.parseConfig.initializeParse();
+          // Initialisation du SDK Parse avec la configuration
+          if (window.parseConfig) {
+            Parse.initialize(window.parseConfig.appId, window.parseConfig.javascriptKey);
+            Parse.serverURL = window.parseConfig.serverURL;
+          }
           this.fetchLists();
         },
         async fetchLists() {
           try {
-            const records = await window.parseConfig.fetchDataFromParse('listes_relances', {});
-            this.lists = records;
+            // Utilisation directe du SDK Parse
+            const query = new Parse.Query('listes_relances');
+            query.limit(99999);
+            const results = await query.find();
+            this.lists = results.map(record => ({
+              ...record.toJSON(),
+              objectId: record.id
+            }));
           } catch (error) {
             console.error('Erreur lors de la récupération des listes:', error);
           }
@@ -178,11 +202,16 @@
             console.log('Données envoyées:', listData);
             
             // Création de la liste
-            const record = await window.parseConfig.createRecordInParse('listes_relances', listData);
+            const ListesRelances = Parse.Object.extend('listes_relances');
+            const newList = new ListesRelances();
+            Object.keys(listData).forEach(key => {
+              newList.set(key, listData[key]);
+            });
+            const savedList = await newList.save();
             this.closeDrawer();
             this.newListName = '';
             await this.fetchLists();
-            window.location.href = `/app/relances/list/#${record.id}`;
+            window.location.href = `/app/relances/list/#${savedList.id}`;
           } catch (error) {
             console.error('Erreur lors de la création de la liste:', error);
           }
