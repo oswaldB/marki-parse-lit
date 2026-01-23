@@ -1,30 +1,43 @@
 const { Pool } = require('pg');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config(); // Charger les variables d'environnement depuis .env
 
 // Configuration Parse Server
 const PARSE_COLLECTION = 'Impayes'; // Nom de la classe dans Parse Server
 
+// Configuration du fichier de log
+const LOG_FILE = path.join(__dirname, 'syncImpayes.logs');
+
+// Fonction pour écrire dans le fichier de log
+function log(message) {
+  const timestamp = new Date().toISOString();
+  const logMessage = `[${timestamp}] ${message}\n`;
+  fs.appendFileSync(LOG_FILE, logMessage, 'utf8');
+  console.log(logMessage.trim()); // Afficher également dans la console
+}
+
 Parse.Cloud.define('syncImpayes', async (request) => {
 
-  console.log('========================================');
-  console.log('Début de la synchronisation des impayés...');
-  console.log('========================================');
-  console.log('Configuration de la base PostgreSQL :');
-  console.log('Host :', process.env.DB_HOST);
-  console.log('Port :', process.env.DB_PORT);
-  console.log('User :', process.env.DB_USER);
-  console.log('Database :', process.env.DB_NAME);
+  log('========================================');
+  log('Début de la synchronisation des impayés...');
+  log('========================================');
+  log('Configuration de la base PostgreSQL :');
+  log('Host : ' + process.env.DB_HOST);
+  log('Port : ' + process.env.DB_PORT);
+  log('User : ' + process.env.DB_USER);
+  log('Database : ' + process.env.DB_NAME);
 
   // Connexion à PostgreSQL
-  console.log('\n========================================');
-  console.log('Connexion à la base PostgreSQL...');
-  console.log('========================================');
-  console.log('Paramètres de connexion :');
-  console.log('- Host:', process.env.DB_HOST);
-  console.log('- Port:', process.env.DB_PORT);
-  console.log('- User:', process.env.DB_USER);
-  console.log('- Database:', process.env.DB_NAME);
-  console.log('- Password:', process.env.DB_PASSWORD ? '********' : 'Non défini');
+  log('\n========================================');
+  log('Connexion à la base PostgreSQL...');
+  log('========================================');
+  log('Paramètres de connexion :');
+  log('- Host: ' + process.env.DB_HOST);
+  log('- Port: ' + process.env.DB_PORT);
+  log('- User: ' + process.env.DB_USER);
+  log('- Database: ' + process.env.DB_NAME);
+  log('- Password: ' + (process.env.DB_PASSWORD ? '********' : 'Non défini'));
 
   // Vérifier que les paramètres de connexion sont définis
   const dbHost = process.env.DB_HOST || 'localhost';
@@ -34,8 +47,8 @@ Parse.Cloud.define('syncImpayes', async (request) => {
   const dbPassword = process.env.DB_PASSWORD || '';
 
   if (!dbHost || !dbPort || !dbUser || !dbName) {
-    console.error('✗ Erreur : Certains paramètres de connexion à PostgreSQL ne sont pas définis.');
-    console.error('Veuillez vérifier votre fichier .env.');
+    log('✗ Erreur : Certains paramètres de connexion à PostgreSQL ne sont pas définis.');
+    log('Veuillez vérifier votre fichier .env.');
     throw new Error('Paramètres de connexion à PostgreSQL manquants.');
   }
 
@@ -49,30 +62,30 @@ Parse.Cloud.define('syncImpayes', async (request) => {
 
   // Écouter les événements de la connexion
   pgPool.on('error', (err) => {
-    console.error('✗ Erreur de connexion à PostgreSQL :', err.message);
-    console.error('Détails de l\'erreur :', err);
+    log('✗ Erreur de connexion à PostgreSQL : ' + err.message);
+    log('Détails de l\'erreur : ' + JSON.stringify(err));
   });
 
   // Tester la connexion
-  console.log('\nTest de la connexion à PostgreSQL...');
+  log('\nTest de la connexion à PostgreSQL...');
   try {
     const res = await pgPool.query('SELECT 1');
-    console.log('✓ Connexion à PostgreSQL établie avec succès.');
-    console.log('✓ La base de données est accessible.');
-    console.log('Résultat du test :', res.rows[0]);
+    log('✓ Connexion à PostgreSQL établie avec succès.');
+    log('✓ La base de données est accessible.');
+    log('Résultat du test : ' + JSON.stringify(res.rows[0]));
   } catch (err) {
-    console.error('✗ Échec de la connexion à PostgreSQL :', err.message);
-    console.error('Code d\'erreur :', err.code);
-    console.error('Détails de l\'erreur :', err);
+    log('✗ Échec de la connexion à PostgreSQL : ' + err.message);
+    log('Code d\'erreur : ' + err.code);
+    log('Détails de l\'erreur : ' + JSON.stringify(err));
     throw err;
   }
 
   try {
-    console.log('\n========================================');
-    console.log('Exécution de la requête PostgreSQL...');
-    console.log('========================================');
-    console.log('La requête peut prendre quelques secondes...');
-    console.log('Veuillez patienter...');
+    log('\n========================================');
+    log('Exécution de la requête PostgreSQL...');
+    log('========================================');
+    log('La requête peut prendre quelques secondes...');
+    log('Veuillez patienter...');
 
     // Exécuter la requête PostgreSQL avec un timeout
     const query = `
@@ -312,25 +325,25 @@ ORDER BY p."datepiece" DESC
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => {
           reject(new Error('Timeout: La requête PostgreSQL a dépassé le temps d\'exécution maximum de 10 secondes.'));
-        }, 10000);
+        }, 100000);
       });
 
-      console.log('Exécution de la requête PostgreSQL...');
-      console.log('Veuillez patienter, cela peut prendre un moment...');
-      console.log('Si le timeout est atteint, la requête sera annulée.');
+      log('Exécution de la requête PostgreSQL...');
+      log('Veuillez patienter, cela peut prendre un moment...');
+      log('Si le timeout est atteint, la requête sera annulée.');
 
       const res = await Promise.race([
         client.query(query),
         timeoutPromise
       ]);
       externalData = res.rows;
-      console.log(`Récupération de ${externalData.length} factures impayées depuis la base PostgreSQL.`);
-      console.log('Exemple de données externes :', externalData.length > 0 ? externalData[0] : 'Aucune donnée');
+      log(`Récupération de ${externalData.length} factures impayées depuis la base PostgreSQL.`);
+      log('Exemple de données externes : ' + JSON.stringify(externalData.length > 0 ? externalData[0] : 'Aucune donnée'));
     } catch (err) {
       if (err.message.startsWith('Timeout:')) {
-        console.error('Erreur :', err.message);
-        console.error('La requête PostgreSQL a été annulée en raison d\'un timeout.');
-        console.error('Veuillez vérifier la requête ou la connexion à la base de données.');
+        log('Erreur : ' + err.message);
+        log('La requête PostgreSQL a été annulée en raison d\'un timeout.');
+        log('Veuillez vérifier la requête ou la connexion à la base de données.');
       } else {
         throw err;
       }
@@ -340,15 +353,15 @@ ORDER BY p."datepiece" DESC
 
     // Vérifier si externalData contient des données valides
     if (externalData.length === 0) {
-      console.log('\nAucune donnée externe à synchroniser. Arrêt du script.');
-      console.log('========================================');
-      console.log('Fin du script de synchronisation.');
-      console.log('========================================');
+      log('\nAucune donnée externe à synchroniser. Arrêt du script.');
+      log('========================================');
+      log('Fin du script de synchronisation.');
+      log('========================================');
       return { success: true, message: 'Aucune donnée à synchroniser', inserted: 0, updated: 0, skipped: 0 };
     }
 
     // Récupérer les données locales depuis Parse Server
-    console.log('\nRécupération des données locales depuis Parse Server...');
+    log('\nRécupération des données locales depuis Parse Server...');
     let localData = [];
     try {
       // Créer une requête pour récupérer toutes les données existantes
@@ -360,27 +373,27 @@ ORDER BY p."datepiece" DESC
       const results = await query.find();
       localData = results.map(item => item.toJSON());
       
-      console.log(`✓ Récupération terminée. Total : ${localData.length} factures impayées.`);
-      console.log('Exemple de données locales :', localData.length > 0 ? localData[0] : 'Aucune donnée');
+      log(`✓ Récupération terminée. Total : ${localData.length} factures impayées.`);
+      log('Exemple de données locales : ' + JSON.stringify(localData.length > 0 ? localData[0] : 'Aucune donnée'));
     } catch (err) {
-      console.error('❌ Erreur lors de la récupération des données depuis Parse Server :');
-      console.error('Message d\'erreur :', err.message);
-      console.error('Détails :', err);
+      log('❌ Erreur lors de la récupération des données depuis Parse Server :');
+      log('Message d\'erreur : ' + err.message);
+      log('Détails : ' + JSON.stringify(err));
       throw err;
     }
 
     // Comparer et mettre à jour
-    console.log('\nComparaison et synchronisation des données...');
+    log('\nComparaison et synchronisation des données...');
     let updatedCount = 0;
     let insertedCount = 0;
     let skippedCount = 0;
 
     for (const externalRow of externalData) {
-      console.log(`\nTraitement de la facture ${externalRow.nfacture}...`);
+      log(`\nTraitement de la facture ${externalRow.nfacture}...`);
       
       // Valider les données avant l'envoi
       if (!externalRow.nfacture || !externalRow.idDossier) {
-        console.error(`❌ Erreur : Les champs requis (nfacture ou idDossier) sont manquants pour la facture ${externalRow.nfacture}.`);
+        log(`❌ Erreur : Les champs requis (nfacture ou idDossier) sont manquants pour la facture ${externalRow.nfacture}.`);
         continue;
       }
       
@@ -388,7 +401,7 @@ ORDER BY p."datepiece" DESC
       const requiredFields = ['nfacture', 'idDossier', 'datepiece', 'totalhtnet', 'totalttcnet', 'resteapayer', 'facturesoldee'];
       for (const field of requiredFields) {
         if (externalRow[field] === undefined || externalRow[field] === null) {
-          console.error(`❌ Erreur : Le champ requis ${field} est manquant ou null pour la facture ${externalRow.nfacture}.`);
+          log(`❌ Erreur : Le champ requis ${field} est manquant ou null pour la facture ${externalRow.nfacture}.`);
           continue;
         }
       }
@@ -405,21 +418,25 @@ ORDER BY p."datepiece" DESC
       const requiredNumericFields = ['nfacture', 'idDossier', 'totalhtnet', 'totalttcnet', 'resteapayer'];
       for (const field of requiredNumericFields) {
         if (typeof externalRow[field] !== 'number') {
-          console.error(`❌ Erreur : Le champ ${field} doit être un nombre pour la facture ${externalRow.nfacture}. Type actuel : ${typeof externalRow[field]}`);
+          log(`❌ Erreur : Le champ ${field} doit être un nombre pour la facture ${externalRow.nfacture}. Type actuel : ${typeof externalRow[field]}`);
           continue;
         }
       }
       
       // Vérifier les types de données booléens
       if (typeof externalRow.facturesoldee !== 'boolean') {
-        console.error(`❌ Erreur : Le champ facturesoldee doit être un booléen pour la facture ${externalRow.nfacture}. Type actuel : ${typeof externalRow.facturesoldee}`);
+        log(`❌ Erreur : Le champ facturesoldee doit être un booléen pour la facture ${externalRow.nfacture}. Type actuel : ${typeof externalRow.facturesoldee}`);
         continue;
       }
       
+      // Vérifier si la facture existe déjà dans Parse Server en utilisant nfacture et idDossier
       const localRow = localData.find(row => row.nfacture === externalRow.nfacture && row.idDossier === externalRow.idDossier);
-
+      log(`Vérification de l'existence de la facture ${externalRow.nfacture} (Dossier: ${externalRow.idDossier}) dans Parse Server...`);
+      log(localRow ? `✓ Facture trouvée dans Parse Server.` : `✗ Facture non trouvée dans Parse Server.`);
+      log('Données locales correspondantes : ' + JSON.stringify(localRow ? localRow : 'Aucune donnée'));
+      log('Données externes à comparer : ' + JSON.stringify(externalRow));
       if (!localRow) {
-        console.log(`La facture ${externalRow.nfacture} n'existe pas dans Parse Server. Insertion...`);
+        log(`La facture ${externalRow.nfacture} (Dossier: ${externalRow.idDossier}) n'existe pas dans Parse Server. Insertion...`);
         try {
           // Insérer une nouvelle entrée dans Parse Server
           const Impaye = Parse.Object.extend(PARSE_COLLECTION);
@@ -432,52 +449,122 @@ ORDER BY p."datepiece" DESC
           
           const savedItem = await newImpaye.save();
           insertedCount++;
-          console.log(`✓ Facture ${externalRow.nfacture} insérée avec succès. ID : ${savedItem.id}`);
+          log(`✓ Facture ${externalRow.nfacture} (Dossier: ${externalRow.idDossier}) insérée avec succès. ID : ${savedItem.id}`);
         } catch (err) {
-          console.error(`❌ Erreur lors de l'insertion de la facture ${externalRow.nfacture} :`);
-          console.error('Message d\'erreur :', err.message);
-          console.error('Détails :', err);
-          console.error('Données envoyées :', JSON.stringify(externalRow, null, 2));
-        }
-      } else if (JSON.stringify(localRow) !== JSON.stringify(externalRow)) {
-        console.log(`La facture ${externalRow.nfacture} existe déjà dans Parse Server mais est différente. Mise à jour...`);
-        try {
-          // Mettre à jour l'entrée existante dans Parse Server
-          const Impaye = Parse.Object.extend(PARSE_COLLECTION);
-          const query = new Parse.Query(Impaye);
-          query.equalTo('nfacture', externalRow.nfacture);
-          query.equalTo('idDossier', externalRow.idDossier);
-          
-          const itemToUpdate = await query.first();
-          if (itemToUpdate) {
-            // Mettre à jour toutes les propriétés
-            for (const [key, value] of Object.entries(externalRow)) {
-              itemToUpdate.set(key, value);
-            }
-            
-            await itemToUpdate.save();
-            updatedCount++;
-            console.log(`✓ Facture ${externalRow.nfacture} mise à jour avec succès.`);
-          }
-        } catch (err) {
-          console.error(`❌ Erreur lors de la mise à jour de la facture ${externalRow.nfacture} :`);
-          console.error('Message d\'erreur :', err.message);
-          console.error('Détails :', err);
-          console.error('Données envoyées :', JSON.stringify(externalRow, null, 2));
+          log(`❌ Erreur lors de l'insertion de la facture ${externalRow.nfacture} (Dossier: ${externalRow.idDossier}) :`);
+          log('Message d\'erreur : ' + err.message);
+          log('Détails : ' + JSON.stringify(err));
+          log('Données envoyées : ' + JSON.stringify(externalRow, null, 2));
         }
       } else {
-        console.log(`La facture ${externalRow.nfacture} existe déjà dans Parse Server et est identique. Aucune action nécessaire.`);
-        skippedCount++;
+        // Comparer les données pour voir si une mise à jour est nécessaire
+        // Liste des champs à comparer (exclure createdAt, updatedAt, objectId, etc.)
+        const fieldsToCompare = [
+          'nfacture', 'idDossier', 'datepiece', 'totalhtnet', 'totalttcnet', 'resteapayer', 'facturesoldee',
+          'commentaire_piece', 'refpiece', 'idStatut', 'statut_intitule', 'contactPlace', 'reference',
+          'referenceExterne', 'numero', 'idEmployeIntervention', 'commentaire_dossier', 'adresse',
+          'cptAdresse', 'codePostal', 'ville', 'numeroLot', 'etage', 'entree', 'escalier', 'porte',
+          'numVoie', 'cptNumVoie', 'typeVoie', 'dateDebutMission', 'employe_intervention',
+          'acquerur_nom', 'acquerur_email', 'acquerur_telephone',
+          'apporteur_affaire_nom', 'apporteur_affaire_email', 'apporteur_affaire_telephone',
+          'apporteur_affaire_typePersonne', 'apporteur_affaire_contact_nom', 'apporteur_affaire_contact_email',
+          'donneur_ordre_nom', 'donneur_ordre_email', 'donneur_ordre_telephone',
+          'locataire_entrant_nom', 'locataire_entrant_email', 'locataire_entrant_telephone',
+          'locataire_sortant_nom', 'locataire_sortant_email', 'locataire_sortant_telephone',
+          'notaire_nom', 'notaire_email', 'notaire_telephone',
+          'payeur_nom', 'payeur_email', 'payeur_telephone', 'payeur_typePersonne',
+          'payeur_contact_nom', 'payeur_contact_email',
+          'proprietaire_nom', 'proprietaire_email', 'proprietaire_telephone',
+          'proprietaire_typePersonne', 'proprietaire_contact_nom', 'proprietaire_contact_email',
+          'syndic_nom', 'syndic_email', 'syndic_telephone', 'payeur_type'
+        ];
+
+        let needsUpdate = false;
+        for (const field of fieldsToCompare) {
+          // Vérifier si le champ existe dans les données locales et externes
+          if (!localRow.hasOwnProperty(field) || !externalRow.hasOwnProperty(field)) {
+            log(`Champ manquant dans les données locales ou externes : ${field}`);
+            continue;
+          }
+
+          // Normaliser les valeurs pour la comparaison
+          let localValue = localRow[field];
+          let externalValue = externalRow[field];
+
+          // Gérer les valeurs nulles ou indéfinies
+          if (localValue === null || localValue === undefined || externalValue === null || externalValue === undefined) {
+            if (localValue !== externalValue) {
+              needsUpdate = true;
+              log(`Champ différent détecté : ${field} (local: ${localValue}, externe: ${externalValue})`);
+              break;
+            }
+            continue;
+          }
+
+          // Gérer les dates au format Parse (ex: {"__type":"Date","iso":"2023-01-04T00:00:00.000Z"})
+          if (localValue && localValue.__type === 'Date' && localValue.iso) {
+            localValue = new Date(localValue.iso).toISOString();
+          }
+          if (externalValue && externalValue.__type === 'Date' && externalValue.iso) {
+            externalValue = new Date(externalValue.iso).toISOString();
+          }
+
+          // Gérer les dates au format ISO string
+          if (typeof localValue === 'string' && !isNaN(new Date(localValue).getTime())) {
+            localValue = new Date(localValue).toISOString();
+          }
+          if (typeof externalValue === 'string' && !isNaN(new Date(externalValue).getTime())) {
+            externalValue = new Date(externalValue).toISOString();
+          }
+
+          // Comparer les valeurs normalisées
+          if (localValue !== externalValue) {
+            needsUpdate = true;
+            log(`Champ différent détecté : ${field} (local: ${localValue}, externe: ${externalValue})`);
+            break;
+          }
+        }
+
+        if (needsUpdate) {
+          log(`La facture ${externalRow.nfacture} (Dossier: ${externalRow.idDossier}) existe déjà dans Parse Server mais est différente. Mise à jour...`);
+          try {
+            // Mettre à jour l'entrée existante dans Parse Server
+            const Impaye = Parse.Object.extend(PARSE_COLLECTION);
+            const query = new Parse.Query(Impaye);
+            query.equalTo('nfacture', externalRow.nfacture);
+            query.equalTo('idDossier', externalRow.idDossier);
+            
+            const itemToUpdate = await query.first();
+            if (itemToUpdate) {
+              // Mettre à jour toutes les propriétés
+              for (const [key, value] of Object.entries(externalRow)) {
+                itemToUpdate.set(key, value);
+              }
+              
+              await itemToUpdate.save();
+              updatedCount++;
+              log(`✓ Facture ${externalRow.nfacture} (Dossier: ${externalRow.idDossier}) mise à jour avec succès.`);
+            }
+          } catch (err) {
+            log(`❌ Erreur lors de la mise à jour de la facture ${externalRow.nfacture} (Dossier: ${externalRow.idDossier}) :`);
+            log('Message d\'erreur : ' + err.message);
+            log('Détails : ' + JSON.stringify(err));
+            log('Données envoyées : ' + JSON.stringify(externalRow, null, 2));
+          }
+        } else {
+          log(`La facture ${externalRow.nfacture} (Dossier: ${externalRow.idDossier}) existe déjà dans Parse Server et est identique. Aucune action nécessaire.`);
+          skippedCount++;
+        }
       }
     }
 
-    console.log('\n========================================');
-    console.log('Synchronisation terminée avec succès !');
-    console.log('========================================');
-    console.log(`Nombre de nouvelles entrées ajoutées : ${insertedCount}`);
-    console.log(`Nombre d'entrées mises à jour : ${updatedCount}`);
-    console.log(`Nombre d'entrées inchangées : ${skippedCount}`);
-    console.log(`Total des entrées traitées : ${externalData.length}`);
+    log('\n========================================');
+    log('Synchronisation terminée avec succès !');
+    log('========================================');
+    log(`Nombre de nouvelles entrées ajoutées : ${insertedCount}`);
+    log(`Nombre d'entrées mises à jour : ${updatedCount}`);
+    log(`Nombre d'entrées inchangées : ${skippedCount}`);
+    log(`Total des entrées traitées : ${externalData.length}`);
 
     return {
       success: true,
@@ -488,12 +575,12 @@ ORDER BY p."datepiece" DESC
       total: externalData.length
     };
   } catch (err) {
-    console.error('\n========================================');
-    console.error('Erreur lors de la synchronisation :');
-    console.error('========================================');
-    console.error('Message d\'erreur :', err.message);
-    console.error('Détails de l\'erreur :', err.response ? err.response.data : err);
-    console.error('Stack trace :', err.stack);
+    log('\n========================================');
+    log('Erreur lors de la synchronisation :');
+    log('========================================');
+    log('Message d\'erreur : ' + err.message);
+    log('Détails de l\'erreur : ' + JSON.stringify(err.response ? err.response.data : err));
+    log('Stack trace : ' + err.stack);
     
     return {
       success: false,
@@ -503,11 +590,11 @@ ORDER BY p."datepiece" DESC
     };
   } finally {
     // Fermer la connexion à PostgreSQL
-    console.log('\nFermeture de la connexion à PostgreSQL...');
+    log('\nFermeture de la connexion à PostgreSQL...');
     await pgPool.end();
-    console.log('Connexion à PostgreSQL fermée avec succès.');
-    console.log('========================================');
-    console.log('Fin du script de synchronisation.');
-    console.log('========================================');
+    log('Connexion à PostgreSQL fermée avec succès.');
+    log('========================================');
+    log('Fin du script de synchronisation.');
+    log('========================================');
   }
 });

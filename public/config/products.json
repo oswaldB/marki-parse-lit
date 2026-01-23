@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "name": "Relances",
+    "description": "Automatisez vos relances clients pour améliorer votre trésorerie.",
+    "price": 49.99,
+    "image": "/assets/relances-automatiques.jpg",
+    "isActive": true,
+    "isPurchased": true
+  },
+  {
+    "id": 2,
+    "name": "Commissions techniciens",
+    "description": "Gérez les commissions de vos techniciens de manière transparente.",
+    "price": 79.99,
+    "image": "/assets/commissions-techniciens.jpg",
+    "isActive": true,
+    "isPurchased": false
+  },
+  {
+    "id": 3,
+    "name": "Portails agences",
+    "description": "Offrez un portail dédié à vos agences pour une meilleure collaboration.",
+    "price": 99.99,
+    "image": "/assets/portails-agences.jpg",
+    "isActive": true,
+    "isPurchased": false
+  },
+  {
+    "id": 4,
+    "name": "Portail client",
+    "description": "Un portail client pour une expérience utilisateur optimale.",
+    "price": 129.99,
+    "image": "/assets/portail-client.jpg",
+    "isActive": true,
+    "isPurchased": false
+  },
+  {
+    "id": 5,
+    "name": "App mobile achat",
+    "description": "Une application mobile pour faciliter les achats de vos clients.",
+    "price": 149.99,
+    "image": "/assets/app-mobile-achat.jpg",
+    "isActive": true,
+    "isPurchased": false
+  }
+]

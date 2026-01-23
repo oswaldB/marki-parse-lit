@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Marki-astro</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Initialisation des couleurs pour Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#509EE3',
+              dark: '#236CB9'
+            },
+            secondary: '#6D5DCF',
+            success: '#4CAF50',
+            error: '#F44336',
+            text: {
+              DEFAULT: '#333333',
+              light: '#666666'
+            },
+            border: '#CCCCCC',
+            'bg-light': '#F5F7FA'
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide-static@latest/dist/lucide.js"></script>
+  <!-- État Alpine.js pour la page dashboard -->
+  <script src="/dashboard/dashboardState.js"></script>
+  <!-- Lit Element pour les composants -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm"></script>
+  <!-- Configuration Parse -->
+  <script src="/components/parse-credentials.js"></script>
+  <!-- Composants Lit -->
+  <script type="module" src="/components/check-auth.js"></script>
+  <script type="module" src="/components/logout-button.js"></script>
+</head>
+<body class="bg-gray-100" x-data="dashboardState()" x-init="init()">
+  <!-- Composant check-auth pour vérifier l'authentification -->
+  <check-auth></check-auth>
+  <!-- Header avec logo -->
+  <header class="bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <div class="flex items-center space-x-2">
+          <img src="/assets/marki-logo.png" alt="Logo Marki-astro" class="h-10">
+          <span class="text-2xl font-bold text-text">MARKI</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <!-- Barre de recherche -->
+          <div class="relative">
+            <input
+              type="text"
+              placeholder="Rechercher un produit..."
+              class="w-64 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              x-model="searchQuery"
+            >
+            <i data-lucide="search" class="absolute inset-y-0 right-0 pr-3 flex items-center text-text-light"></i>
+          </div>
+          <!-- Bouton de notification -->
+          <button class="p-2 rounded-full hover:bg-gray-100">
+            <i data-lucide="bell" class="h-6 w-6 text-text"></i>
+          </button>
+          <!-- Menu utilisateur -->
+          <div class="relative">
+            <button class="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100">
+              <i data-lucide="user" class="h-10 w-10 text-text"></i>
+              <span class="text-text font-medium" x-text="username"></span>
+              <i data-lucide="chevron-down" class="h-4 w-4 text-text"></i>
+            </button>
+          </div>
+          <!-- Bouton de déconnexion -->
+          <logout-button class="bg-error hover:bg-error-dark text-white px-4 py-2 rounded-md font-medium transition-colors"></logout-button>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Contenu principal -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Statistiques -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Carte de statistique 1 -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-text-light">Produits achetés</p>
+            <p class="text-3xl font-bold text-text" x-text="purchasedProducts.length"></p>
+          </div>
+          <div class="bg-primary bg-opacity-10 p-3 rounded-full">
+            <i data-lucide="shopping-bag" class="h-6 w-6 text-primary"></i>
+          </div>
+        </div>
+      </div>
+      <!-- Carte de statistique 2 -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-text-light">Produits disponibles</p>
+            <p class="text-3xl font-bold text-text" x-text="nonPurchasedProducts.length"></p>
+          </div>
+          <div class="bg-secondary bg-opacity-10 p-3 rounded-full">
+            <i data-lucide="package" class="h-6 w-6 text-secondary"></i>
+          </div>
+        </div>
+      </div>
+      <!-- Carte de statistique 3 -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-text-light">Total des produits</p>
+            <p class="text-3xl font-bold text-text" x-text="products.length"></p>
+          </div>
+          <div class="bg-success bg-opacity-10 p-3 rounded-full">
+            <i data-lucide="archive" class="h-6 w-6 text-success"></i>
+          </div>
+        </div>
+      </div>
+      <!-- Carte de statistique 4 -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-text-light">Produits actifs</p>
+            <p class="text-3xl font-bold text-text" x-text="products.filter(p => p.isActive).length"></p>
+          </div>
+          <div class="bg-error bg-opacity-10 p-3 rounded-full">
+            <i data-lucide="zap" class="h-6 w-6 text-error"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Produits achetés -->
+    <div class="mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-medium text-text">Produits achetés</h2>
+        <a href="#" class="text-primary hover:text-primary-dark font-medium">Voir tous</a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <template x-for="product in filteredProducts(purchasedProducts)" :key="product.id">
+          <div class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <img :src="product.image" :alt="product.name" class="w-full h-32 object-cover rounded-md mb-4">
+            <h3 class="text-lg font-medium text-text" x-text="product.name"></h3>
+            <p class="text-text-light mb-2" x-text="product.description"></p>
+            <div class="flex space-x-2 mt-4">
+              <a :href="'/app/' + product.name.toLowerCase().replace(/\s+/g, '-')" class="bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary-dark transition-colors">
+                Accéder au produit
+              </a>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+    
+    <!-- Produits non achetés -->
+    <div>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-medium text-text">Produits disponibles</h2>
+        <a href="#" class="text-primary hover:text-primary-dark font-medium">Voir tous</a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <template x-for="product in filteredProducts(nonPurchasedProducts)" :key="product.id">
+          <div class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <img :src="product.image" :alt="product.name" class="w-full h-32 object-cover rounded-md mb-4">
+            <h3 class="text-lg font-medium text-text" x-text="product.name"></h3>
+            <p class="text-text-light mb-2" x-text="product.description"></p>
+            <p class="text-text font-medium">Prix : <span x-text="product.price"></span> €</p>
+            <div class="flex space-x-2 mt-4">
+              <button class="bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary-dark transition-colors" @click="purchaseProduct(product.id)">
+                Acheter
+              </button>
+              <a :href="'/app/' + product.name.toLowerCase().replace(/\s+/g, '-')" class="border border-border text-text px-4 py-2 rounded-md font-medium hover:bg-bg-light transition-colors">
+                Voir le produit
+              </a>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+  </main>
+</body>
+</html>

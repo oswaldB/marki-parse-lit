@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relances - Listes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="/assets/pockebase.js"></script>
+  <script type="module">
+    import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
+    window.lit = { LitElement, html };
+  </script>
+  <style>
+    .drawer {
+      transition: transform 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-gray-100" x-data="listsPage" x-init="init()">
+  <div class="flex h-screen">
+    <relance-sidebar currentPage="lists"></relance-sidebar>
+    <div class="main-content flex-1 p-6">
+      <h1 class="text-2xl font-bold mb-4">Listes de Relances</h1>
+      <div class="flex justify-between items-center mb-4">
+        <p class="text-gray-700">Gérez vos listes de relances ici.</p>
+        <button @click="openDrawer()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          Créer une nouvelle liste
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
+          <thead>
+            <tr>
+              <th class="py-2 px-4 border-b text-left">Nom</th>
+              <th class="py-2 px-4 border-b text-left">Statut</th>
+              <th class="py-2 px-4 border-b text-left">Date de création</th>
+              <th class="py-2 px-4 border-b text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-if="lists.length === 0">
+              <tr>
+                <td colspan="4" class="py-4 px-4 text-center text-gray-500">
+                  Aucune liste de relance trouvée. Créez une nouvelle liste pour commencer.
+                </td>
+              </tr>
+            </template>
+            <template x-for="list in lists" :key="list.id">
+              <tr>
+                <td class="py-2 px-4 border-b" x-text="list.nom"></td>
+                <td class="py-2 px-4 border-b">
+                  <span x-text="list.isActif ? 'Active' : 'Inactive'" 
+                        :class="list.isActif ? 'text-green-500' : 'text-red-500'"></span>
+                </td>
+                <td class="py-2 px-4 border-b" x-text="new Date(list.date_creation).toLocaleDateString()"></td>
+                <td class="py-2 px-4 border-b">
+                  <button @click="viewList(list.id)" class="text-blue-500 hover:underline">Voir</button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer pour créer une nouvelle liste -->
+  <div x-show="isDrawerOpen" @click.away="closeDrawer()" 
+       class="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-end">
+    <div x-show="isDrawerOpen" x-transition:enter="transform translate-x-full" 
+         x-transition:enter-start="transform translate-x-full" 
+         x-transition:enter-end="transform translate-x-0" 
+         x-transition:leave="transform translate-x-full" 
+         x-transition:leave-start="transform translate-x-0" 
+         x-transition:leave-end="transform translate-x-full" 
+         class="bg-white h-full w-1/2 shadow-lg drawer p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">Créer une nouvelle liste</h2>
+        <button @click="closeDrawer()" class="text-gray-500 hover:text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <form @submit.prevent="createList()" class="space-y-4">
+        <div>
+          <label for="listName" class="block text-sm font-medium text-gray-700">Nom de la liste</label>
+          <input type="text" id="listName" x-model="newListName" required 
+                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+        </div>
+        <div class="flex justify-end">
+          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Créer la liste
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/components/relance-sidebar.js"></script>
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('listsPage', () => ({
+        pb: null,
+        lists: [],
+        isDrawerOpen: false,
+        newListName: '',
+        init() {
+          this.pb = new PocketBase('http://localhost:8090');
+          this.fetchLists();
+        },
+        async fetchLists() {
+          try {
+            const records = await this.pb.collection('listes_relances').getFullList({
+              sort: 'nom',
+            });
+            this.lists = records;
+          } catch (error) {
+            console.error('Erreur lors de la récupération des listes:', error);
+          }
+        },
+        openDrawer() {
+          this.isDrawerOpen = true;
+        },
+        closeDrawer() {
+          this.isDrawerOpen = false;
+        },
+        async createList() {
+          try {
+            if (!this.pb) {
+              console.error('PocketBase n\'est pas initialisé.');
+              return;
+            }
+            
+            // Vérifier les données envoyées
+            const listData = {
+              nom: this.newListName,
+              is_auto: false,
+              isActif: true,
+              isArchive: false,
+              date_creation: new Date().toISOString(),
+              date_modification: new Date().toISOString(),
+            };
+            console.log('Données envoyées:', listData);
+            
+            // Création de la liste
+            const record = await this.pb.collection('listes_relances').create(listData);
+            this.closeDrawer();
+            this.newListName = '';
+            await this.fetchLists();
+            window.location.href = `/app/relances/list/#${record.id}`;
+          } catch (error) {
+            console.error('Erreur lors de la création de la liste:', error);
+          }
+        },
+        viewList(listId) {
+          window.location.href = `/app/relances/list/#${listId}`;
+        }
+      }));
+    });
+  </script>
+</body>
+</html>

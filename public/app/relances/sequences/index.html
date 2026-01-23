@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relances - Séquences</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module">
+    import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
+    window.lit = { LitElement, html };
+  </script>
+</head>
+<body class="bg-gray-100">
+  <div class="flex h-screen">
+    <relance-sidebar currentPage="sequences"></relance-sidebar>
+    <div class="main-content flex-1 p-6">
+      <h1 class="text-2xl font-bold mb-4">Séquences de Relances</h1>
+      <p class="text-gray-700">Gérez vos séquences de relances ici.</p>
+      <button class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        Créer une nouvelle séquence
+      </button>
+    </div>
+  </div>
+  <script type="module" src="/components/relance-sidebar.js"></script>
+</body>
+</html>
