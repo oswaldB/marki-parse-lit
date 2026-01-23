@@ -3,7 +3,7 @@ function impayesState() {
   return {
     impayes: [],
     searchQuery: '',
-    filterStatus: 'all',
+
     currentPage: 1,
     itemsPerPage: 1000,
     init() {
@@ -20,6 +20,7 @@ function impayesState() {
         // Utilisation directe du SDK Parse
         const query = new Parse.Query('Impayes');
         query.limit(99999);
+        query.notEqualTo('resteapayer', 0);
         
         const results = await query.find();
         
@@ -54,52 +55,27 @@ function impayesState() {
       return null;
     },
     // Ajouter les nouvelles propriétés pour la vue par payeur
-    viewMode: 'list', // 'list' ou 'byPayeur'
+    viewMode: 'byPayeur', // 'list' ou 'byPayeur'
     showListDrawer: false,
     
-    // Tableaux séparés pour les impayés et les payés
+    // Tableau des impayés (uniquement ceux non soldés)
     get impayesUnpaid() {
       return this.impayes.filter(impaye => !impaye.facturesoldee || (impaye.resteapayer && impaye.resteapayer > 0));
     },
     
-    get impayesPaid() {
-      return this.impayes.filter(impaye => impaye.facturesoldee || (impaye.resteapayer && impaye.resteapayer === 0));
-    },
-    
-    // Recherche sur les deux tableaux
+    // Recherche sur les impayés
     get filteredImpayes() {
-      let filtered = this.impayes;
+      let filtered = this.impayesUnpaid;
       
-      // Filtrer par statut
-      if (this.filterStatus === 'unpaid') {
-        filtered = this.impayesUnpaid;
-      } else if (this.filterStatus === 'paid') {
-        filtered = this.impayesPaid;
-      }
-      
-      // Filtrer par recherche sur les deux tableaux
+      // Filtrer par recherche
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        const unpaidFiltered = this.impayesUnpaid.filter(impaye =>
+        filtered = this.impayesUnpaid.filter(impaye =>
           impaye.nfacture.toString().includes(query) ||
           (impaye.payeur_nom && impaye.payeur_nom.toLowerCase().includes(query)) ||
           (impaye.payeur_email && impaye.payeur_email.toLowerCase().includes(query)) ||
           (impaye.reference && impaye.reference.toLowerCase().includes(query))
         );
-        const paidFiltered = this.impayesPaid.filter(impaye =>
-          impaye.nfacture.toString().includes(query) ||
-          (impaye.payeur_nom && impaye.payeur_nom.toLowerCase().includes(query)) ||
-          (impaye.payeur_email && impaye.payeur_email.toLowerCase().includes(query)) ||
-          (impaye.reference && impaye.reference.toLowerCase().includes(query))
-        );
-        
-        // Combiner les résultats
-        filtered = [...unpaidFiltered, ...paidFiltered];
-      } else {
-        // Si pas de recherche, utiliser le filtre de statut
-        if (this.filterStatus === 'all') {
-          filtered = [...this.impayesUnpaid, ...this.impayesPaid];
-        }
       }
       
       // Trier par nombre de jours de retard (les plus retardataires en haut)
@@ -117,12 +93,7 @@ function impayesState() {
       const grouped = {};
       
       // Filtrer d'abord selon le statut
-      let filtered = this.impayes;
-      if (this.filterStatus === 'unpaid') {
-        filtered = this.impayesUnpaid;
-      } else if (this.filterStatus === 'paid') {
-        filtered = this.impayesPaid;
-      }
+      let filtered = this.impayesUnpaid;
       
       // Appliquer la recherche
       if (this.searchQuery) {

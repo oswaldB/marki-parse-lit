@@ -3,19 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Relances - Listes</title>
+  <title>Relances - Impayés</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Plugin Alpine.js pour x-collapse -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+  
+  <!-- Initialisation des plugins Alpine.js -->
+  <script>
+    document.addEventListener('alpine:init', () => {
+      // Le plugin collapse est automatiquement enregistré
+      console.log('Alpine.js et plugins initialisés');
+    });
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/components/parse-credentials.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/parse@3.3.0/dist/parse.min.js"></script>
-  <script src="/assets/parse-config.js"></script>
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
   <script type="module">
     import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
     window.lit = { LitElement, html };
   </script>
+  <!-- Heroicons - Version spécifique pour éviter les problèmes de cache -->
+  <script src="https://cdn.jsdelivr.net/npm/heroicons@2.0.18/dist/heroicons.min.js"></script>
   <style>
     .drawer {
+      transition: transform 0.3s ease-in-out;
+    }
+    
+    /* Animation pour la flèche de pliage/dépliage */
+    .transform {
+      transform: rotate(180deg);
+    }
+    
+    /* Transition pour l'animation */
+    .transition-transform {
       transition: transform 0.3s ease-in-out;
     }
   </style>
