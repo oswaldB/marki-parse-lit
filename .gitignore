@@ -1,0 +1,29 @@
+# Ignorer les dépendances node_modules
+node_modules/
+
+# Ignorer les fichiers de configuration locaux
+.env
+
+# Ignorer les fichiers de log
+*.log
+
+# Ignorer les fichiers de cache
+*.cache
+
+# Ignorer les fichiers de build
+build/
+dist/
+
+# Ignorer les fichiers de configuration IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Ignorer les fichiers de coverage
+yarn-error.log
+coverage/
+
+# Ignorer les fichiers de lock (optionnel selon votre workflow)
+# package-lock.json
+yarn.lock

@@ -1,0 +1,15 @@
+{
+  "name": "parse-cloud-functions",
+  "version": "1.0.0",
+  "description": "Parse Server Cloud Functions",
+  "main": "main.js",
+  "dependencies": {
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Oswald Bernard",
+  "license": "MIT"
+}

@@ -28,7 +28,7 @@ services:
       PARSE_SERVER_JAVASCRIPT_KEY: "Careless7-Gore4-Guileless0-Jogger5-Clubbed9"
       PARSE_SERVER_MOUNT_PATH: "/"
       PARSE_SERVER_ALLOW_CLIENT_CLASS_CREATION: "true"
-      PARSE_SERVER_ENABLE_ANONYMOUS_USERS: "true"
+      PARSE_SERVER_ENABLE_ANONYMOUS_USERS: "false"
       PARSE_SERVER_MASTER_KEY_IPS: "0.0.0.0/0,::0"
       PARSE_SERVER_LOG_LEVEL: "info"  # ou "verbose" pour plus de détails
       JSON_LOGS: "false"  # Désactive les logs au format JSON (plus lisible)
@@ -37,9 +37,14 @@ services:
       PARSE_SERVER_DATABASE_URI: "mongodb://mongodb:27017/parse"
       PARSE_SERVER_MASTER_KEY: "Shaky4-Exception6"
       PARSE_SERVER_CLOUD: "/parse-server/cloud/main.js"
+      # Variables d'environnement pour PostgreSQL
+      DB_HOST: "195.15.233.213"
+      DB_PORT: "5432"
+      DB_USER: "webadmin2"
+      DB_PASSWORD: "Jury8-Deviate2-Droplet2-Ambush9-Unplowed1"
+      DB_NAME: "adn_adti"
     volumes:
       - ./parse-server/cloud:/parse-server/cloud
-      - ./parse-server/public:/parse-server/public
 
   parse-dashboard:
     image: parseplatform/parse-dashboard:latest
@@ -55,5 +60,22 @@ services:
       PARSE_DASHBOARD_USER_PASSWORD: "admin"
       PARSE_DASHBOARD_ALLOW_INSECURE_HTTP: "1"
 
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./public:/usr/share/caddy
+      - caddy_data:/data
+      - caddy_config:/config
+
 volumes:
   mongodb_data:
+  caddy_data:
+  caddy_config:
+
+  

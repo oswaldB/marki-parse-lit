@@ -1,0 +1,22 @@
+# Caddyfile for Marki-parse
+
+# Redirect HTTP to HTTPS
+http:// {
+    redir https://{host}{uri}
+}
+
+# Serve the Parse Dashboard
+parse-dashboard.marki-parse.localhost {
+    reverse_proxy parse-dashboard:4040
+}
+
+# Serve the Parse Server
+api.marki-parse.localhost {
+    reverse_proxy parse-server:1337
+}
+
+# Serve the static files
+marki.localhost {
+    root * /usr/share/caddy
+    file_server
+}
