@@ -8,7 +8,11 @@ function loginState() {
     errorMessage: '',
 
     init() {
-      // Les credentials sont disponibles directement dans window.parse
+      // Initialisation du SDK Parse avec la configuration
+      if (window.parseConfig) {
+        Parse.initialize(window.parseConfig.appId, window.parseConfig.javascriptKey);
+        Parse.serverURL = window.parseConfig.serverURL;
+      }
     },
 
     async login() {
@@ -16,25 +20,11 @@ function loginState() {
       this.errorMessage = '';
 
       try {
-        // Vérifier que window.parse est disponible
-        if (!window.parse) {
-          throw new Error('Configuration Parse non disponible');
-        }
-
-        // Appel à l'API Parse pour la connexion
-        const response = await axios.post(
-          `${window.parse.getUrl()}/login`,
-          {
-            username: this.username,
-            password: this.password
-          },
-          {
-            headers: window.parse.getHeaders()
-          }
-        );
+        // Utilisation du SDK Parse pour la connexion
+        const user = await Parse.User.logIn(this.username, this.password);
 
         // Récupérer le token de session et le username
-        const sessionToken = response.data.sessionToken;
+        const sessionToken = user.getSessionToken();
         const username = this.username;
 
         // Stocker le token et le username en fonction de l'option "Se souvenir de moi"

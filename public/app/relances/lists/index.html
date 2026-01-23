@@ -7,7 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="/assets/pockebase.js"></script>
+  <script src="/components/parse-credentials.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/parse@3.3.0/dist/parse.min.js"></script>
+  <script src="/assets/parse-config.js"></script>
   <script type="module">
     import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
     window.lit = { LitElement, html };
@@ -19,8 +21,18 @@
   </style>
 </head>
 <body class="bg-gray-100" x-data="listsPage" x-init="init()">
-  <div class="flex h-screen">
-    <relance-sidebar currentPage="lists"></relance-sidebar>
+  <!-- Formes originales en arrière-plan -->
+  <galet-component></galet-component>
+  <galet-component-dark></galet-component-dark>
+  <galet-component-wide></galet-component-wide>
+  
+  <relance-sidebar currentPage="lists"></relance-sidebar>
+  
+  <!-- Import des composants Lit pour les galets -->
+  <script type="module" src="/components/galet-component.js"></script>
+  <script type="module" src="/components/galet-component-dark.js"></script>
+  <script type="module" src="/components/galet-component-wide.js"></script>
+  <div class="p-4 sm:ml-64">
     <div class="main-content flex-1 p-6">
       <h1 class="text-2xl font-bold mb-4">Listes de Relances</h1>
       <div class="flex justify-between items-center mb-4">
@@ -100,6 +112,7 @@
   </div>
 
   <script type="module" src="/components/relance-sidebar.js"></script>
+
   <script>
     document.addEventListener('alpine:init', () => {
       Alpine.data('listsPage', () => ({
@@ -108,14 +121,12 @@
         isDrawerOpen: false,
         newListName: '',
         init() {
-          this.pb = new PocketBase('http://localhost:8090');
+          window.parseConfig.initializeParse();
           this.fetchLists();
         },
         async fetchLists() {
           try {
-            const records = await this.pb.collection('listes_relances').getFullList({
-              sort: 'nom',
-            });
+            const records = await window.parseConfig.fetchDataFromParse('listes_relances', {});
             this.lists = records;
           } catch (error) {
             console.error('Erreur lors de la récupération des listes:', error);
@@ -129,8 +140,8 @@
         },
         async createList() {
           try {
-            if (!this.pb) {
-              console.error('PocketBase n\'est pas initialisé.');
+            if (!window.parseConfig) {
+              console.error('Parse n\'est pas initialisé.');
               return;
             }
             
@@ -146,7 +157,7 @@
             console.log('Données envoyées:', listData);
             
             // Création de la liste
-            const record = await this.pb.collection('listes_relances').create(listData);
+            const record = await window.parseConfig.createRecordInParse('listes_relances', listData);
             this.closeDrawer();
             this.newListName = '';
             await this.fetchLists();
