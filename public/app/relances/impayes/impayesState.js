@@ -5,7 +5,7 @@ function impayesState() {
     searchQuery: '',
     filterStatus: 'all',
     currentPage: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 1000,
     init() {
       // Initialisation du SDK Parse avec la configuration
       if (window.parseConfig) {
@@ -146,6 +146,49 @@ function impayesState() {
       
       return grouped;
     },
+    
+    // Vue groupée par payeur avec totaux et triée par montant descendant
+    get sortedImpayesByPayeur() {
+      const grouped = this.impayesByPayeur;
+      
+      // Calculer le total pour chaque groupe en considérant les factures uniques
+      const groupsWithTotals = Object.keys(grouped).map(payeurNom => {
+        const impayes = grouped[payeurNom];
+        
+        // Créer un ensemble de factures uniques (par nfacture)
+        const uniqueImpayes = {};
+        impayes.forEach(impaye => {
+          if (!uniqueImpayes[impaye.nfacture]) {
+            uniqueImpayes[impaye.nfacture] = impaye;
+          }
+        });
+        
+        // Calculer le total à partir des factures uniques et arrondir à 2 décimales
+        const totalAmount = parseFloat(Object.values(uniqueImpayes).reduce((sum, impaye) => sum + (impaye.resteapayer || 0), 0).toFixed(2));
+        
+        // Calculer le nombre maximum de jours de retard
+        const maxDaysOverdue = Math.max(...Object.values(uniqueImpayes).map(impaye => this.calculateDaysOverdue(impaye)));
+        
+        return {
+          payeurNom: payeurNom,
+          impayes: impayes,
+          totalAmount: totalAmount,
+          maxDaysOverdue: maxDaysOverdue,
+          expanded: false // État initial: plié
+        };
+      });
+      
+      // Trier par montant total descendant
+      groupsWithTotals.sort((a, b) => b.totalAmount - a.totalAmount);
+      
+      // Convertir en objet pour compatibilité avec le template
+      const sortedGrouped = {};
+      groupsWithTotals.forEach(group => {
+        sortedGrouped[group.payeurNom] = group;
+      });
+      
+      return sortedGrouped;
+    },
     calculateDaysOverdue(impaye) {
       if (!impaye.datepiece || impaye.facturesoldee) {
         return 0;
@@ -192,14 +235,7 @@ function impayesState() {
       window.location.href = `/app/relances/impayes/${impayeId}`;
     },
     
-    toggleViewMode() {
-      this.viewMode = this.viewMode === 'list' ? 'byPayeur' : 'list';
-      this.currentPage = 1; // Réinitialiser à la première page lors du changement de mode
-    },
-    
-    getViewModeLabel() {
-      return this.viewMode === 'list' ? 'Vue par payeur' : 'Vue liste';
-    },
+
     toggleListDrawer() {
       this.showListDrawer = !this.showListDrawer;
     },
