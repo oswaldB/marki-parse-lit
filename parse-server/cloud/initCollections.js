@@ -1,7 +1,7 @@
 // initCollections.js - Script pour initialiser les collections nécessaires dans Parse Server
 
 Parse.Cloud.define('initCollections', async (request) => {
-  const collections = ['listes_relances', 'Impayes'];
+  const collections = ['listes_relances', 'Impayes', 'sequences'];
   
   for (const collection of collections) {
     try {
@@ -22,6 +22,14 @@ Parse.Cloud.define('initCollections', async (request) => {
             schema.addField('isArchive', { type: 'Boolean', defaultValue: false });
             schema.addField('date_creation', { type: 'Date' });
             schema.addField('date_modification', { type: 'Date' });
+          }
+          
+          // Définir les champs pour la collection sequences
+          if (collection === 'sequences') {
+            schema.addField('nom', { type: 'String', required: true });
+            schema.addField('description', { type: 'String' });
+            schema.addField('isActif', { type: 'Boolean', defaultValue: true });
+            schema.addField('actions', { type: 'Array', defaultValue: [] });
           }
           
           // Définir les champs pour la collection Impayes
