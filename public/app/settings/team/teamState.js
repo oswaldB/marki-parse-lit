@@ -27,14 +27,7 @@ export function initTeamState() {
 
         // Initialisation de Parse
         initializeParse() {
-            try {
-                // Vérifier si Parse est disponible
-                if (typeof Parse === 'undefined') {
-                    console.error('Parse SDK non chargé');
-                    window.location.href = '/login';
-                    return;
-                }
-                
+            try {           
                 // Vérifier si Parse est déjà initialisé
                 if (!Parse.applicationId) {
                     if (window.parseConfig) {

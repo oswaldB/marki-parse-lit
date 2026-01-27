@@ -787,14 +787,27 @@ ${exampleMessage}`;
         console.log('Description de la séquence mise à jour:', this.sequence.description);
         this.editingDescription = false;
         
-        // Utilisation de confirm au lieu des popups complexes
-        if (confirm('Description mise à jour avec succès!')) {
-          console.log('Utilisateur a confirmé la notification');
-        }
+        // Afficher un toaster de succès
+        window.toasterStore.addToast({
+          id: 'description-update-' + Date.now(),
+          type: 'success',
+          title: 'Succès',
+          message: 'La description a été mise à jour avec succès!',
+          autoDismiss: true
+        });
         
       } catch (error) {
         console.error('Erreur lors de la mise à jour de la description:', error);
-        alert('Erreur lors de la mise à jour de la description: ' + error.message);
+        
+        // Afficher un toaster d'erreur
+        window.toasterStore.addToast({
+          id: 'description-error-' + Date.now(),
+          type: 'error',
+          title: 'Erreur',
+          message: 'Une erreur est survenue: ' + error.message,
+          autoDismiss: true
+        });
+        
         this.editingDescription = false;
       }
     },
