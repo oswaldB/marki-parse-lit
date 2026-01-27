@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configuration SMTP - Marki</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
+    <script src="../../../components/parse-credentials.js"></script>
     <script src="../../../components/check-auth.js"></script>
     <script src="../../../components/sidebar.js"></script>
     <script src="../../../assets/parse-config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/parse@3.3.0/dist/parse.min.js"></script>
 </head>
 <body class="bg-gray-100">
+    <check-auth></check-auth>
     <div x-data="appState()" class="flex h-screen">
         <!-- Sidebar -->
         <sidebar-component></sidebar-component>
@@ -20,7 +22,10 @@
         <div class="flex-1 overflow-auto">
             <!-- Header -->
             <header class="bg-white shadow-sm p-4 flex justify-between items-center">
-                <h1 class="text-xl font-bold text-gray-800">Configuration SMTP</h1>
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="mail" class="w-6 h-6 text-gray-600"></i>
+                    <h1 class="text-xl font-bold text-gray-800">Configuration SMTP</h1>
+                </div>
             </header>
 
             <!-- Content -->
@@ -31,31 +36,46 @@
 
                     <form id="smtpForm" class="space-y-4">
                         <div>
-                            <label for="smtpHost" class="block text-sm font-medium text-gray-700 mb-1">Hôte SMTP</label>
+                            <label for="smtpHost" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i data-lucide="server" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                Hôte SMTP
+                            </label>
                             <input type="text" id="smtpHost" name="smtpHost" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
 
                         <div>
-                            <label for="smtpPort" class="block text-sm font-medium text-gray-700 mb-1">Port SMTP</label>
+                            <label for="smtpPort" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i data-lucide="hash" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                Port SMTP
+                            </label>
                             <input type="number" id="smtpPort" name="smtpPort" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
 
                         <div>
-                            <label for="smtpUsername" class="block text-sm font-medium text-gray-700 mb-1">Nom d'utilisateur</label>
+                            <label for="smtpUsername" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i data-lucide="user" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                Nom d'utilisateur
+                            </label>
                             <input type="text" id="smtpUsername" name="smtpUsername" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
 
                         <div>
-                            <label for="smtpPassword" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                            <label for="smtpPassword" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i data-lucide="lock" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                Mot de passe
+                            </label>
                             <input type="password" id="smtpPassword" name="smtpPassword" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
 
                         <div>
-                            <label for="smtpFrom" class="block text-sm font-medium text-gray-700 mb-1">Email expéditeur</label>
+                            <label for="smtpFrom" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i data-lucide="mail" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                Email expéditeur
+                            </label>
                             <input type="email" id="smtpFrom" name="smtpFrom" 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
@@ -63,18 +83,25 @@
                         <div class="flex items-center">
                             <input type="checkbox" id="smtpSSL" name="smtpSSL" 
                                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="smtpSSL" class="ml-2 block text-sm text-gray-700">Utiliser SSL</label>
+                            <label for="smtpSSL" class="ml-2 block text-sm text-gray-700 flex items-center">
+                                <i data-lucide="lock" class="w-4 h-4 mr-1 text-gray-500"></i>
+                                Utiliser SSL
+                            </label>
                         </div>
 
                         <div class="flex items-center">
                             <input type="checkbox" id="smtpTLS" name="smtpTLS" 
                                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="smtpTLS" class="ml-2 block text-sm text-gray-700">Utiliser TLS</label>
+                            <label for="smtpTLS" class="ml-2 block text-sm text-gray-700 flex items-center">
+                                <i data-lucide="shield" class="w-4 h-4 mr-1 text-gray-500"></i>
+                                Utiliser TLS
+                            </label>
                         </div>
 
                         <div class="pt-4">
                             <button type="submit" 
-                                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center">
+                                <i data-lucide="save" class="w-4 h-4 mr-2"></i>
                                 Sauvegarder
                             </button>
                         </div>
@@ -85,9 +112,15 @@
     </div>
 
     <script>
-        // Initialisation de Parse
-        Parse.initialize("marki");
-        Parse.serverURL = 'http://localhost:1337/parse';
+        // Initialisation de Parse avec la configuration propre
+        window.parseConfig = {
+            appId: 'marki',
+            javascriptKey: 'Careless7-Gore4-Guileless0-Jogger5-Clubbed9',
+            serverURL: 'https://dev.parse.markidiags.com'
+        };
+        
+        Parse.initialize(window.parseConfig.appId, window.parseConfig.javascriptKey);
+        Parse.serverURL = window.parseConfig.serverURL;
 
         // Chargement des configurations existantes
         async function loadSMTPConfig() {
@@ -132,6 +165,15 @@
 
         // Charger la configuration au démarrage
         loadSMTPConfig();
+    </script>
+    
+    <script>
+        // Initialiser les icônes Lucid
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
     </script>
 </body>
 </html>
