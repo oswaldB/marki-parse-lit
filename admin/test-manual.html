@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Manuel - Sequence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .console-output {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 1rem;
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+        .info { color: #2196f3; }
+        .success { color: #4caf50; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Test Manuel - Page Sequence</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Instructions</h2>
+            <ol class="list-decimal list-inside space-y-2 text-gray-600">
+                <li>Ouvrez les outils de développement (F12 ou Ctrl+Shift+I)</li>
+                <li>Allez dans l'onglet "Console"</li>
+                <li>Observez les erreurs et avertissements</li>
+                <li>Testez les fonctionnalités de la page</li>
+                <li>Notez les problèmes dans le formulaire ci-dessous</li>
+            </ol>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Lien à tester</h2>
+            <a href="http://localhost:8080/app/relances/sequence/?id=2pDnIvlk5m" 
+               class="text-blue-600 hover:text-blue-800 underline break-all" 
+               target="_blank">
+                http://localhost:8080/app/relances/sequence/?id=2pDnIvlk5m
+            </a>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Rapport Manuel</h2>
+            <form id="testForm" class="space-y-4">
+                <div>
+                    <label for="testerName" class="block text-sm font-medium text-gray-700 mb-1">Nom du testeur</label>
+                    <input type="text" id="testerName" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                           placeholder="Votre nom">
+                </div>
+                
+                <div>
+                    <label for="testDate" class="block text-sm font-medium text-gray-700 mb-1">Date du test</label>
+                    <input type="datetime-local" id="testDate" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label for="errors" class="block text-sm font-medium text-gray-700 mb-1">Erreurs Console (copiez-collez)</label>
+                    <textarea id="errors" rows="6" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm" 
+                              placeholder="Erreurs de la console..."></textarea>
+                </div>
+                
+                <div>
+                    <label for="warnings" class="block text-sm font-medium text-gray-700 mb-1">Avertissements Console (copiez-collez)</label>
+                    <textarea id="warnings" rows="4" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm" 
+                              placeholder="Avertissements de la console..."></textarea>
+                </div>
+                
+                <div>
+                    <label for="functionalityIssues" class="block text-sm font-medium text-gray-700 mb-1">Problèmes de fonctionnalité</label>
+                    <textarea id="functionalityIssues" rows="6" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                              placeholder="Décrivez les problèmes fonctionnels rencontrés..."></textarea>
+                </div>
+                
+                <div>
+                    <label for="suggestions" class="block text-sm font-medium text-gray-700 mb-1">Suggestions d'amélioration</label>
+                    <textarea id="suggestions" rows="4" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                              placeholder="Suggestions pour améliorer la page..."></textarea>
+                </div>
+                
+                <button type="button" onclick="generateManualReport()" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Générer Rapport
+                </button>
+            </form>
+        </div>
+        
+        <div id="reportOutput" class="bg-white rounded-lg shadow-md p-6 hidden">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Rapport Généré</h2>
+            <div class="console-output" id="reportContent"></div>
+            <button onclick="copyReportToClipboard()" 
+                    class="mt-4 bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                Copier le rapport
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function generateManualReport() {
+            const testerName = document.getElementById('testerName').value || 'Testeur Anonyme';
+            const testDate = document.getElementById('testDate').value || new Date().toISOString();
+            const errors = document.getElementById('errors').value;
+            const warnings = document.getElementById('warnings').value;
+            const functionalityIssues = document.getElementById('functionalityIssues').value;
+            const suggestions = document.getElementById('suggestions').value;
+            
+            const report = `# Rapport de Test Manuel - ${new Date().toISOString()}
+
+**Testeur:** ${testerName}
+**Date:** ${testDate}
+**URL testée:** http://localhost:8080/app/relances/sequence/?id=2pDnIvlk5m
+
+## Erreurs Console
+${errors ? '```\n' + errors + '\n```' : '_Aucune erreur_'}
+
+## Avertissements Console
+${warnings ? '```\n' + warnings + '\n```' : '_Aucun avertissement_'}
+
+## Problèmes de Fonctionnalité
+${functionalityIssues ? functionalityIssues : '_Aucun problème_'}
+
+## Suggestions d\'Amélioration
+${suggestions ? suggestions : '_Aucune suggestion_'}
+
+---
+*Rapport généré manuellement via l'interface de test*`;
+            
+            document.getElementById('reportContent').textContent = report;
+            document.getElementById('reportOutput').classList.remove('hidden');
+            
+            // Scroll to the report
+            document.getElementById('reportOutput').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function copyReportToClipboard() {
+            const reportContent = document.getElementById('reportContent').textContent;
+            navigator.clipboard.writeText(reportContent).then(() => {
+                alert('Rapport copié dans le presse-papiers !');
+            }).catch(err => {
+                console.error('Échec de la copie:', err);
+                alert('Échec de la copie dans le presse-papiers');
+            });
+        }
+        
+        // Set current date/time by default
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const formattedDate = now.toISOString().slice(0, 16); // YYYY-MM-DDTHH:MM
+            document.getElementById('testDate').value = formattedDate;
+        });
+    </script>
+</body>
+</html>
