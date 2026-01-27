@@ -17,6 +17,125 @@
     <!-- Composant Toaster -->
     <script type="module" src="/components/toaster.js"></script>
     <script src="/components/toaster-store.js"></script>
+    <script>
+        // Définir la fonction app avant qu'elle ne soit utilisée
+        function app() {
+            return {
+                sidebarOpen: false,
+                drawerOpen: false,
+                drawerTitle: 'Ajouter un membre',
+                currentUser: Parse.User.current(),
+                users: [],
+                currentUserData: {
+                    objectId: null,
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    password: '',
+                    is_admin: false
+                },
+
+                init() {
+                    this.checkAuth();
+                    this.loadUsers();
+                },
+
+                checkAuth() {
+                    if (!this.currentUser) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    
+                    // Vérifier si l'utilisateur est admin
+                    if (!this.currentUser.get('is_admin')) {
+                        window.location.href = '/dashboard';
+                        return;
+                    }
+                },
+
+                async loadUsers() {
+                    try {
+                        const query = new Parse.Query(Parse.User);
+                        const results = await query.find();
+                        this.users = results.map(user => ({
+                            objectId: user.id,
+                            firstName: user.get('firstName') || '',
+                            lastName: user.get('lastName') || '',
+                            email: user.get('email') || '',
+                            is_admin: user.get('is_admin') || false
+                        }));
+                    } catch (error) {
+                        console.error('Erreur lors du chargement des utilisateurs:', error);
+                        alert('Erreur lors du chargement des utilisateurs');
+                    }
+                },
+
+                openUserDrawer(user) {
+                    if (user) {
+                        this.drawerTitle = 'Modifier le membre';
+                        this.currentUserData = {
+                            objectId: user.objectId,
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            email: user.email,
+                            password: '',
+                            is_admin: user.is_admin
+                        };
+                    } else {
+                        this.drawerTitle = 'Ajouter un membre';
+                        this.currentUserData = {
+                            objectId: null,
+                            firstName: '',
+                            lastName: '',
+                            email: '',
+                            password: '',
+                            is_admin: false
+                        };
+                    }
+                    this.drawerOpen = true;
+                },
+
+                closeDrawer() {
+                    this.drawerOpen = false;
+                },
+
+                async saveUser() {
+                    try {
+                        const userData = { ...this.currentUserData };
+                        
+                        if (userData.objectId) {
+                            // Mise à jour d'un utilisateur existant
+                            await this.updateUser(userData);
+                        } else {
+                            // Création d'un nouvel utilisateur
+                            await this.createUser(userData);
+                        }
+                        
+                        this.closeDrawer();
+                        await this.loadUsers();
+                    } catch (error) {
+                        console.error('Erreur lors de l\'enregistrement de l\'utilisateur:', error);
+                        alert('Erreur lors de l\'enregistrement de l\'utilisateur: ' + error.message);
+                    }
+                },
+
+                async createUser(userData) {
+                    const response = await Parse.Cloud.run('createUser', userData, { useMasterKey: true });
+                    return response;
+                },
+
+                async updateUser(userData) {
+                    const response = await Parse.Cloud.run('updateUser', userData, { useMasterKey: true });
+                    return response;
+                },
+
+                async logout() {
+                    await Parse.User.logOut();
+                    window.location.href = '/login';
+                }
+            }
+        }
+    </script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -31,7 +150,7 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <div x-data="app()" class="flex h-screen">
+    <div x-data="app()" x-init="init()" class="flex h-screen">
         <!-- Sidebar -->
         <div x-show="sidebarOpen" class="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden" @click="sidebarOpen = false"></div>
         <div x-show="sidebarOpen" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg md:relative md:translate-x-0 transform transition-transform duration-200" :class="{ '-translate-x-full': !sidebarOpen }">
@@ -231,123 +350,6 @@
                 feather.replace();
             }
         });
-        
-        function app() {
-            return {
-                sidebarOpen: false,
-                drawerOpen: false,
-                drawerTitle: 'Ajouter un membre',
-                currentUser: Parse.User.current(),
-                users: [],
-                currentUserData: {
-                    objectId: null,
-                    firstName: '',
-                    lastName: '',
-                    email: '',
-                    password: '',
-                    is_admin: false
-                },
-
-                init() {
-                    this.checkAuth();
-                    this.loadUsers();
-                },
-
-                checkAuth() {
-                    if (!this.currentUser) {
-                        window.location.href = '/login';
-                        return;
-                    }
-                    
-                    // Vérifier si l'utilisateur est admin
-                    if (!this.currentUser.get('is_admin')) {
-                        window.location.href = '/dashboard';
-                        return;
-                    }
-                },
-
-                async loadUsers() {
-                    try {
-                        const query = new Parse.Query(Parse.User);
-                        const results = await query.find();
-                        this.users = results.map(user => ({
-                            objectId: user.id,
-                            firstName: user.get('firstName') || '',
-                            lastName: user.get('lastName') || '',
-                            email: user.get('email') || '',
-                            is_admin: user.get('is_admin') || false
-                        }));
-                    } catch (error) {
-                        console.error('Erreur lors du chargement des utilisateurs:', error);
-                        alert('Erreur lors du chargement des utilisateurs');
-                    }
-                },
-
-                openUserDrawer(user) {
-                    if (user) {
-                        this.drawerTitle = 'Modifier le membre';
-                        this.currentUserData = {
-                            objectId: user.objectId,
-                            firstName: user.firstName,
-                            lastName: user.lastName,
-                            email: user.email,
-                            password: '',
-                            is_admin: user.is_admin
-                        };
-                    } else {
-                        this.drawerTitle = 'Ajouter un membre';
-                        this.currentUserData = {
-                            objectId: null,
-                            firstName: '',
-                            lastName: '',
-                            email: '',
-                            password: '',
-                            is_admin: false
-                        };
-                    }
-                    this.drawerOpen = true;
-                },
-
-                closeDrawer() {
-                    this.drawerOpen = false;
-                },
-
-                async saveUser() {
-                    try {
-                        const userData = { ...this.currentUserData };
-                        
-                        if (userData.objectId) {
-                            // Mise à jour d'un utilisateur existant
-                            await this.updateUser(userData);
-                        } else {
-                            // Création d'un nouvel utilisateur
-                            await this.createUser(userData);
-                        }
-                        
-                        this.closeDrawer();
-                        await this.loadUsers();
-                    } catch (error) {
-                        console.error('Erreur lors de l\'enregistrement de l\'utilisateur:', error);
-                        alert('Erreur lors de l\'enregistrement de l\'utilisateur: ' + error.message);
-                    }
-                },
-
-                async createUser(userData) {
-                    const response = await Parse.Cloud.run('createUser', userData, { useMasterKey: true });
-                    return response;
-                },
-
-                async updateUser(userData) {
-                    const response = await Parse.Cloud.run('updateUser', userData, { useMasterKey: true });
-                    return response;
-                },
-
-                async logout() {
-                    await Parse.User.logOut();
-                    window.location.href = '/login';
-                }
-            }
-        }
     </script>
     <!-- Composant Toaster -->
     <toaster-component></toaster-component>
