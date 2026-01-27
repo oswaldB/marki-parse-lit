@@ -2,7 +2,7 @@
 
 # Redirect HTTP to HTTPS
 http:// {
-    redir https://{host}{uri}
+   redir https://{host}{uri}
 }
 
 # Serve the Parse Dashboard
@@ -19,4 +19,21 @@ api.marki-parse.localhost {
 marki.localhost {
     root * /usr/share/caddy
     file_server
+}
+
+dev.markidiags.com:5000 {
+    root * /usr/share/caddy
+    file_server
+}
+
+dev.parse.markidiags.com {
+    reverse_proxy parse-server:1337
+    header Access-Control-Allow-Origin "https://dev.markidiags.com:5000"
+    header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    header Access-Control-Allow-Headers "Content-Type, Authorization"
+    header Access-Control-Allow-Credentials "true"
+}
+
+dev.parse.dashboard.markidiags.com:4040 {
+    reverse_proxy parse-dashboard:4040
 }

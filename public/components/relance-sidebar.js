@@ -1,6 +1,11 @@
 // Utilisation du CDN de Lit pour éviter les problèmes d'importation
 const { LitElement, html } = lit;
-import './check-auth.js';
+
+// Import du composant check-auth avec chemin absolu
+const checkAuthScript = document.createElement('script');
+checkAuthScript.type = 'module';
+checkAuthScript.src = '/components/check-auth.js';
+document.head.appendChild(checkAuthScript);
 
 export class RelanceSidebar extends LitElement {
   static properties = {
@@ -10,6 +15,19 @@ export class RelanceSidebar extends LitElement {
   constructor() {
     super();
     this.currentPage = '';
+    this.checkAuthLoaded = false;
+    
+    // Attendre que le composant check-auth soit chargé
+    this.waitForCheckAuth();
+  }
+  
+  waitForCheckAuth() {
+    if (customElements.get('check-auth')) {
+      this.checkAuthLoaded = true;
+      this.requestUpdate();
+    } else {
+      setTimeout(() => this.waitForCheckAuth(), 100);
+    }
   }
 
   createRenderRoot() {
@@ -46,12 +64,7 @@ export class RelanceSidebar extends LitElement {
                 <span class="flex-1 ms-3 whitespace-nowrap">Séquences</span>
               </a>
             </li>
-            <li>
-              <a href="/app/relances/lists/" class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group ${this.currentPage === 'lists' ? 'bg-neutral-tertiary text-fg-brand' : ''}">
-                <svg class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v14M9 5v14M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/></svg>
-                <span class="flex-1 ms-3 whitespace-nowrap">Listes</span>
-              </a>
-            </li>
+
           </ul>
         </div>
       </aside>
@@ -71,10 +84,7 @@ export class RelanceSidebar extends LitElement {
             <svg class="w-6 h-6 mb-1 transition duration-75 group-hover:text-fg-brand" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h3v3H4V4Zm0 10h3v3H4v-3Zm0-10h3v3H4V4Zm10 0h3v3h-3V4Zm0 10h3v3h-3v-3Zm-5-5h3v3h-3v-3Z"/></svg>
             <span class="text-xs">Séquences</span>
           </a>
-          <a href="/app/relances/lists/" class="flex flex-col items-center justify-center px-4 py-2 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group ${this.currentPage === 'lists' ? 'bg-neutral-tertiary text-fg-brand' : ''}">
-            <svg class="w-6 h-6 mb-1 transition duration-75 group-hover:text-fg-brand" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v14M9 5v14M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/></svg>
-            <span class="text-xs">Listes</span>
-          </a>
+
         </div>
       </div>
     `;

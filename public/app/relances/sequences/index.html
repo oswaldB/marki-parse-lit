@@ -14,9 +14,6 @@
     window.lit = { LitElement, html };
   </script>
   <style>
-    .modal {
-      transition: opacity 0.3s ease;
-    }
     .action-card {
       transition: all 0.2s ease;
     }
@@ -74,7 +71,7 @@
           <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-4 p-6">
             <div class="flex justify-between items-start mb-4">
               <div>
-                <h3 class="text-xl font-bold" x-text="sequence.nom"></h3>
+                <a :href="'/app/relances/sequence/?id=' + sequence.objectId" class="text-xl font-bold text-blue-500 hover:text-blue-700" x-text="sequence.nom"></a>
                 <p class="text-sm text-gray-500 mt-1">
                   <span x-text="sequence.actions.length + ' action(s)'"></span>
                 </p>
@@ -85,9 +82,9 @@
                         :class="sequence.isActif ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'">
                   <span x-text="sequence.isActif ? 'Actif' : 'Inactif'"></span>
                 </button>
-                <button @click="openEditModal(sequence)"
-                        class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-md text-sm font-medium hover:bg-yellow-200 transition-colors">
-                  Modifier
+                <button @click="testSequenceFromList(sequence)"
+                        class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm font-medium hover:bg-green-200 transition-colors">
+                  Tester
                 </button>
                 <button @click="deleteSequence(sequence.objectId)"
                         class="px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm font-medium hover:bg-red-200 transition-colors">
@@ -117,9 +114,14 @@
   </div>
   
   <!-- Drawer de création -->
-  <template x-if="showCreateDrawer">
-    <div class="fixed inset-0 bg-black bg-opacity-50 z-40" @click="closeCreateDrawer"></div>
-    <div class="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out" x-show="showCreateDrawer" x-transition:enter="translate-x-full" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="translate-x-full" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
+  <div x-show="showCreateDrawer" class="fixed inset-0 bg-black bg-opacity-50 z-40" @click="closeCreateDrawer"></div>
+  <div x-show="showCreateDrawer" class="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out"
+       x-transition:enter="transform transition-transform duration-300 ease-in-out"
+       x-transition:enter-start="translate-x-full"
+       x-transition:enter-end="translate-x-0"
+       x-transition:leave="transform transition-transform duration-300 ease-in-out"
+       x-transition:leave-start="translate-x-0"
+       x-transition:leave-end="translate-x-full">
       <div class="h-full flex flex-col">
         <div class="p-6 border-b border-gray-200">
           <div class="flex justify-between items-center">
@@ -151,58 +153,56 @@
               <input type="checkbox" x-model="newSequence.isActif" id="isActif" class="rounded">
               <label for="isActif" class="text-sm text-gray-700">Séquence active</label>
             </div>
-          </div>
-        </div>
-        
-        <div class="p-6 border-t border-gray-200">
-          <div class="flex justify-end space-x-3">
-            <button @click="closeCreateDrawer"
-                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
-              Annuler
-            </button>
-            <button @click="createSequence()"
-                    class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                    :disabled="!newSequence.nom">
-              Créer la séquence
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </template>
-  
-  <!-- Modal d'édition -->
-  <template x-if="showEditModal && currentSequence">
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.away="closeEditModal">
-      <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" @click.stop>
-        <div class="p-6">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold">Modifier la séquence</h2>
-            <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
-          
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nom de la séquence</label>
-              <input type="text" x-model="currentSequence.nom" placeholder="Ex: Relance standard"
-                     class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+            <!-- Variables disponibles -->
+            <div class="mt-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Variables disponibles</label>
+              <div class="bg-gray-100 p-3 rounded-md">
+                <p class="text-xs text-gray-600 mb-2">Utilisez ces variables dans vos messages :</p>
+                <div class="flex flex-wrap gap-1">
+                  <span class="bg-white px-2 py-1 rounded border text-xs">{{nom}}</span>
+                  <span class="bg-white px-2 py-1 rounded border text-xs">{{prenom}}</span>
+                  <span class="bg-white px-2 py-1 rounded border text-xs">{{montant}}</span>
+                  <span class="bg-white px-2 py-1 rounded border text-xs">{{dateEcheance}}</span>
+                  <span class="bg-white px-2 py-1 rounded border text-xs">{{lienPaiement}}</span>
+                </div>
+              </div>
             </div>
-            
-            <div class="flex items-center space-x-2">
-              <input type="checkbox" x-model="currentSequence.isActif" id="editIsActif" class="rounded">
-              <label for="editIsActif" class="text-sm text-gray-700">Séquence active</label>
+
+            <!-- Prompt à copier -->
+            <div class="mt-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Prompt pour rédiger des emails</label>
+              <div class="bg-gray-100 p-3 rounded-md">
+                <textarea class="w-full p-2 border border-gray-300 rounded-md text-xs resize-none" rows="4" readonly>
+Rédigez un email de relance pour un impayé. Utilisez les variables suivantes :
+- Nom du client : {{nom}}
+- Prénom du client : {{prenom}}
+- Montant dû : {{montant}}
+- Date d'échéance : {{dateEcheance}}
+- Lien de paiement : {{lienPaiement}}
+
+Exemple de message :
+Bonjour {{prenom}} {{nom}},
+
+Nous vous rappelons que votre paiement de {{montant}} € est dû depuis le {{dateEcheance}}.
+Veuillez régulariser votre situation en cliquant sur le lien suivant : {{lienPaiement}}.
+
+Cordialement,
+L'équipe de relance.
+                </textarea>
+                <button @click="copyPrompt()" class="mt-2 w-full bg-gray-200 text-gray-700 py-1 rounded text-xs hover:bg-gray-300">
+                  Copier le prompt
+                </button>
+              </div>
             </div>
-            
-            <div>
+
+            <!-- Actions de la séquence -->
+            <div class="mt-6">
               <label class="block text-sm font-medium text-gray-700 mb-2">Actions de la séquence</label>
               
               <!-- Liste des actions -->
               <div class="space-y-3 mb-4">
-                <template x-for="(action, index) in currentSequence.actions" :key="index">
+                <template x-for="(action, index) in newSequence.actions" :key="index">
                   <div class="bg-gray-50 border border-gray-200 rounded-md p-3">
                     <div class="flex justify-between items-start mb-2">
                       <div class="flex items-center space-x-2">
@@ -210,7 +210,7 @@
                         <span class="font-medium" x-text="formatActionType(action.type)"></span>
                         <span class="text-sm text-gray-500">Jour <span x-text="action.delay"></span></span>
                       </div>
-                      <button @click="removeEditAction(index)" class="text-red-400 hover:text-red-600">
+                      <button @click="removeAction(index)" class="text-red-400 hover:text-red-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
@@ -250,30 +250,36 @@
                               rows="3"></textarea>
                   </div>
                   
-                  <button @click="addEditAction()"
+                  <button @click="addAction()"
                           class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors">
                     Ajouter l'action
                   </button>
                 </div>
               </div>
             </div>
-            
-            <div class="flex justify-end space-x-3 mt-6">
-              <button @click="closeEditModal"
-                      class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
-                Annuler
-              </button>
-              <button @click="updateSequence()"
-                      class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                      :disabled="!currentSequence.nom || currentSequence.actions.length === 0">
-                Mettre à jour la séquence
-              </button>
-            </div>
+          </div>
+        </div>
+        
+        <div class="p-6 border-t border-gray-200">
+          <div class="flex justify-end space-x-3">
+            <button @click="testSequence()"
+                    class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+              Tester la séquence
+            </button>
+            <button @click="closeCreateDrawer"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+              Annuler
+            </button>
+            <button @click="createSequence()"
+                    class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                    :disabled="!newSequence.nom">
+              Créer la séquence
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </template>
+  </div>
   
   <script type="module" src="/components/relance-sidebar.js"></script>
 </body>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relances - Détails de la séquence</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="/components/parse-credentials.js"></script>
+  <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+  <script src="/app/relances/sequence/sequenceState.js"></script>
+  <script type="module">
+    import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
+    window.lit = { LitElement, html };
+  </script>
+  
+  <!-- Load Lit components before they are used -->
+  <script type="module" src="/components/relance-sidebar.js"></script>
+  <script type="module" src="/components/galet-component.js"></script>
+  <script type="module" src="/components/galet-component-dark.js"></script>
+  <script type="module" src="/components/galet-component-wide.js"></script>
+
+</head>
+<body class="bg-gray-100" x-data="sequenceState()" x-init="init()">
+  <!-- Formes originales en arrière-plan -->
+  <galet-component></galet-component>
+  <galet-component-dark></galet-component-dark>
+  <galet-component-wide></galet-component-wide>
+  
+  <relance-sidebar currentPage="sequences"></relance-sidebar>
+  
+
+  <div class="p-4 sm:ml-64">
+    <div class="main-content flex-1">
+      <!-- En-tête -->
+      <div class="w-full bg-gray-100 z-10">
+        <div class="flex-1 p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h1 class="text-2xl font-bold">Détails de la séquence</h1>
+            <a href="/app/relances/sequences/" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+              Retour aux séquences
+            </a>
+          </div>
+          
+          <template x-if="sequence">
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
+              <!-- En-tête de la séquence -->
+              <div class="flex justify-between items-start mb-6">
+                <div>
+                  <h3 class="text-xl font-bold" x-text="sequence.nom"></h3>
+                  <p class="text-sm text-gray-500 mt-1">
+                    <span x-text="sequence.actions.length + ' action(s)'"></span>
+                  </p>
+                </div>
+                <div class="flex space-x-2">
+                  <button @click="toggleSequenceStatus()"
+                          class="px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                          :class="sequence.isActif ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'">
+                    <span x-text="sequence.isActif ? 'Actif' : 'Inactif'"></span>
+                  </button>
+                  <button @click="testSequence()"
+                          class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm font-medium hover:bg-green-200 transition-colors">
+                    Tester
+                  </button>
+                  <button @click="deleteSequence()"
+                          class="px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm font-medium hover:bg-red-200 transition-colors">
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <p class="text-gray-700" x-text="sequence.description || 'Aucune description' "></p>
+              </div>
+              
+              <!-- Contenu principal en 2 colonnes -->
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                <!-- Colonne de gauche : Flow des messages -->
+                <div class="lg:col-span-2 bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                  <h4 class="font-semibold text-gray-700 mb-4">Flow des messages et délais</h4>
+                  
+                  <!-- Affichage des actions existantes -->
+                  <div class="space-y-4">
+                    <template x-for="action in sequence.actions" :key="action.delay">
+                      <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                          <div class="flex items-center gap-2">
+                            <svg x-show="action.type === 'email'" class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <svg x-show="action.type === 'sms'" class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                            <span class="font-medium" x-text="action.type === 'email' ? 'Email' : 'SMS'"></span>
+                          </div>
+                          <span class="text-sm text-gray-500">Jour <span x-text="action.delay"></span></span>
+                        </div>
+                        <template x-if="action.type === 'email' && action.subject">
+                          <div class="mb-2">
+                            <span class="text-sm font-medium text-gray-700">Objet : </span>
+                            <span class="text-sm text-gray-600" x-text="action.subject"></span>
+                          </div>
+                        </template>
+                        <template x-if="action.type === 'email' && action.senderEmail">
+                          <div class="mb-2">
+                            <span class="text-sm font-medium text-gray-700">Émetteur : </span>
+                            <span class="text-sm text-gray-600" x-text="action.senderEmail"></span>
+                          </div>
+                        </template>
+                        <p class="text-gray-700" x-text="action.message"></p>
+                      </div>
+                    </template>
+
+                    <template x-if="sequence.actions.length === 0">
+                      <div class="text-center text-gray-500 py-4">
+                        Cette séquence ne contient aucune action.
+                      </div>
+                    </template>
+                  </div>
+
+                  <!-- Formulaire d'ajout de nouveaux nœuds -->
+                  <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <h5 class="font-medium text-gray-700 mb-3">Ajouter un nouveau message</h5>
+
+                    <div class="space-y-3">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Type de message</label>
+                        <select x-model="newNodeType" class="w-full p-2 border border-gray-300 rounded-md">
+                          <option value="email">Email</option>
+                          <option value="sms">SMS</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Délai (jours)</label>
+                        <input type="number" x-model="newNodeDelay" min="0" placeholder="0"
+                               class="w-full p-2 border border-gray-300 rounded-md">
+                      </div>
+
+                      <div x-show="newNodeType === 'email'">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Objet de l'email</label>
+                        <input type="text" x-model="newNodeSubject" 
+                               class="w-full p-2 border border-gray-300 rounded-md text-sm" 
+                               placeholder="Relance de paiement - {{nom}}">
+                      </div>
+
+                      <div x-show="newNodeType === 'email'">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email émetteur</label>
+                        <select x-model="newNodeSenderEmail" 
+                                class="w-full p-2 border border-gray-300 rounded-md text-sm" 
+                                :disabled="smtpProfiles.length === 0">
+                          <option value="">Sélectionnez un profil SMTP</option>
+                          <template x-for="profile in smtpProfiles" :key="profile.id">
+                            <option :value="profile.email" x-text="profile.name + ' (' + profile.email + ')'"></option>
+                          </template>
+                        </select>
+                        <div class="mt-1 text-xs">
+                          <a href="/app/settings/emails-smtp" class="text-blue-500 hover:text-blue-600 flex items-center">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <span>Gérer les profils SMTP</span>
+                          </a>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contenu du message</label>
+                        <textarea x-model="newNodeMessage" placeholder="Entrez votre message ici..."
+                                  rows="3" class="w-full p-2 border border-gray-300 rounded-md resize-none"></textarea>
+                      </div>
+
+                      <button @click="addNewNode()"
+                              class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">
+                        Ajouter le message
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Colonne de droite : Paramètres des messages -->
+                <div class="space-y-6">
+                    <!-- Variables disponibles -->
+                    <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                      <h4 class="font-semibold text-gray-700 mb-3">Variables disponibles</h4>
+                      <p class="text-xs text-gray-600 mb-3">Utilisez ces variables dans vos messages :</p>
+                      <div class="flex flex-wrap gap-2">
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{nom}}</span>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{prenom}}</span>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{montant}}</span>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{dateEcheance}}</span>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{lienPaiement}}</span>
+                      </div>
+                    </div>
+
+                    <!-- Prompt à copier -->
+                    <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                      <h4 class="font-semibold text-gray-700 mb-3">Prompt pour rédiger des emails</h4>
+                      <div class="bg-white p-3 rounded-md border border-gray-200">
+                        <textarea class="w-full p-2 border border-gray-300 rounded-md text-sm resize-none" rows="6" readonly>
+Rédigez un email de relance pour un impayé. Utilisez les variables suivantes :
+- Nom du client : {{nom}}
+- Prénom du client : {{prenom}}
+- Montant dû : {{montant}}
+- Date d'échéance : {{dateEcheance}}
+- Lien de paiement : {{lienPaiement}}
+
+Exemple de message :
+Bonjour {{prenom}} {{nom}},
+
+Nous vous rappelons que votre paiement de {{montant}} € est dû depuis le {{dateEcheance}}.
+Veuillez régulariser votre situation en cliquant sur le lien suivant : {{lienPaiement}}.
+
+Cordialement,
+L'équipe de relance.
+                        </textarea>
+                        <button @click="copyPrompt()" class="mt-3 w-full bg-gray-200 text-gray-700 py-2 rounded text-sm hover:bg-gray-300">
+                          Copier le prompt
+                        </button>
+                      </div>
+                    </div>
+
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+          
+
+          
+          <template x-if="!sequence">
+            <div class="text-center text-gray-500 py-8">
+              <p class="mb-2">Séquence non trouvée.</p>
+              <p class="text-sm">Veuillez vérifier l'ID de la séquence.</p>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paramètres Emails SMTP - Marki Parse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/lucide@latest/dist/lucide.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="/components/check-auth.js"></script>
+    <script src="/components/parse-credentials.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .sidebar-item:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        .sidebar-item.active {
+            background-color: rgba(59, 130, 246, 0.2);
+            border-left: 3px solid #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div x-data="appState()" class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-md flex flex-col">
+            <div class="p-4 border-b">
+                <img src="/assets/marki-logo.png" alt="Marki Parse Logo" class="h-8">
+            </div>
+            <nav class="flex-1 p-4">
+                <a href="/dashboard" class="sidebar-item flex items-center p-2 rounded mb-2">
+                    <i class="lucide-home w-5 h-5 mr-3"></i>
+                    <span>Tableau de bord</span>
+                </a>
+                <a href="/app/relances" class="sidebar-item flex items-center p-2 rounded mb-2">
+                    <i class="lucide-mail w-5 h-5 mr-3"></i>
+                    <span>Relances</span>
+                </a>
+                <div class="mt-6">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Paramètres</h3>
+                    <a href="/app/settings/emails-smtp" class="sidebar-item active flex items-center p-2 rounded mb-2">
+                        <i class="lucide-mail w-5 h-5 mr-3"></i>
+                        <span>Emails SMTP</span>
+                    </a>
+                </div>
+            </nav>
+            <div class="p-4 border-t">
+                <button @click="logout" class="w-full flex items-center justify-center p-2 text-red-500 hover:bg-red-50 rounded">
+                    <i class="lucide-log-out w-5 h-5 mr-2"></i>
+                    <span>Déconnexion</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm p-4 flex items-center justify-between">
+                <div>
+                    <h1 class="text-xl font-semibold text-gray-800">Paramètres Emails SMTP</h1>
+                    <p class="text-sm text-gray-500">Gérez vos profils SMTP pour l'envoi d'emails</p>
+                </div>
+                <button @click="createNewProfile" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center">
+                    <span class="mr-2">➕</span>
+                    <span>Nouveau profil</span>
+                </button>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- SMTP Profiles List -->
+                <div class="bg-white rounded-lg shadow-sm border">
+                    <div class="p-4 border-b">
+                        <h2 class="text-lg font-medium text-gray-800">Profils SMTP</h2>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hôte</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Port</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <template x-for="profile in smtpProfiles" :key="profile.id">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900" x-text="profile.name"></div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-500" x-text="profile.host"></div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-500" x-text="profile.port"></div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-500" x-text="profile.email"></div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button @click="editProfile(profile.id)" class="text-indigo-600 hover:text-indigo-900 mr-2">
+                                                <i class="lucide-edit w-4 h-4"></i>
+                                            </button>
+                                            <button @click="deleteProfile(profile.id)" class="text-red-600 hover:text-red-900">
+                                                <i class="lucide-trash-2 w-4 h-4"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                                
+                                <tr x-show="smtpProfiles.length === 0">
+                                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        Aucun profil SMTP trouvé. Créez-en un nouveau.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Profile Drawer -->
+        <div x-show="showProfileDrawer" x-transition class="fixed inset-0 bg-black bg-opacity-50 z-50" @click="closeProfileDrawer"></div>
+        <div x-show="showProfileDrawer" x-transition class="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out" :class="showProfileDrawer ? 'translate-x-0' : 'translate-x-full'">
+            <div class="h-full flex flex-col">
+                <div class="p-6 border-b">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-900" x-text="editingProfileId ? 'Modifier le profil' : 'Nouveau profil SMTP'"></h3>
+                        <button @click="closeProfileDrawer" class="text-gray-400 hover:text-gray-600">
+                            <i class="lucide-x w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <form @submit.prevent="saveProfile" class="flex-1 overflow-y-auto">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="profile-name" class="block text-sm font-medium text-gray-700 mb-1">Nom du profil</label>
+                                <input type="text" id="profile-name" x-model="currentProfile.name" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            </div>
+
+                            <div>
+                                <label for="profile-host" class="block text-sm font-medium text-gray-700 mb-1">Hôte SMTP</label>
+                                <input type="text" id="profile-host" x-model="currentProfile.host" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            </div>
+
+                            <div>
+                                <label for="profile-port" class="block text-sm font-medium text-gray-700 mb-1">Port</label>
+                                <input type="number" id="profile-port" x-model="currentProfile.port" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            </div>
+
+                            <div>
+                                <label for="profile-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" id="profile-email" x-model="currentProfile.email" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            </div>
+
+                            <div>
+                                <label for="profile-username" class="block text-sm font-medium text-gray-700 mb-1">Nom d'utilisateur</label>
+                                <input type="text" id="profile-username" x-model="currentProfile.username" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label for="profile-password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                                <input type="password" id="profile-password" x-model="currentProfile.password" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" x-model="currentProfile.useSSL" class="mr-2">
+                                    <span class="text-sm text-gray-700">Utiliser SSL</span>
+                                </label>
+                            </div>
+
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" x-model="currentProfile.useTLS" class="mr-2">
+                                    <span class="text-sm text-gray-700">Utiliser TLS</span>
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="p-6 border-t">
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" @click="closeProfileDrawer" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                            Annuler
+                        </button>
+                        <button type="submit" @click="saveProfile" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md">
+                            <span x-text="editingProfileId ? 'Enregistrer' : 'Créer'"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Vérifier que les variables Parse sont définies
+        const PARSE_APPLICATION_ID = window.PARSE_APPLICATION_ID || 'your-parse-app-id';
+        const PARSE_JAVASCRIPT_KEY = window.PARSE_JAVASCRIPT_KEY || 'your-parse-javascript-key';
+        const sessionToken = localStorage.getItem('sessionToken') || '';
+
+        function appState() {
+            return {
+                smtpProfiles: [],
+                showProfileDrawer: false,
+                editingProfileId: null,
+                currentProfile: {
+                    name: '',
+                    host: '',
+                    port: 587,
+                    email: '',
+                    username: '',
+                    password: '',
+                    useSSL: false,
+                    useTLS: true
+                },
+
+                init() {
+                    this.loadSmtpProfiles();
+                },
+
+                async loadSmtpProfiles() {
+                    try {
+                        const response = await fetch('/api/smtp-profiles', {
+                            headers: {
+                                'X-Parse-Application-Id': PARSE_APPLICATION_ID,
+                                'X-Parse-Javascript-Key': PARSE_JAVASCRIPT_KEY,
+                                'X-Parse-Session-Token': sessionToken
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            this.smtpProfiles = await response.json();
+                        }
+                    } catch (error) {
+                        console.error('Error loading SMTP profiles:', error);
+                    }
+                },
+
+                createNewProfile() {
+                    this.editingProfileId = null;
+                    this.currentProfile = {
+                        name: '',
+                        host: '',
+                        port: 587,
+                        email: '',
+                        username: '',
+                        password: '',
+                        useSSL: false,
+                        useTLS: true
+                    };
+                    this.showProfileDrawer = true;
+                },
+
+                editProfile(profileId) {
+                    const profile = this.smtpProfiles.find(p => p.id === profileId);
+                    if (profile) {
+                        this.editingProfileId = profileId;
+                        this.currentProfile = {...profile};
+                        this.showProfileDrawer = true;
+                    }
+                },
+
+                async saveProfile() {
+                    try {
+                        const method = this.editingProfileId ? 'PUT' : 'POST';
+                        const url = this.editingProfileId ? `/api/smtp-profiles/${this.editingProfileId}` : '/api/smtp-profiles';
+                        
+                        const response = await fetch(url, {
+                            method: method,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Parse-Application-Id': PARSE_APPLICATION_ID,
+                                'X-Parse-Javascript-Key': PARSE_JAVASCRIPT_KEY,
+                                'X-Parse-Session-Token': sessionToken
+                            },
+                            body: JSON.stringify(this.currentProfile)
+                        });
+                        
+                        if (response.ok) {
+                            await this.loadSmtpProfiles();
+                            this.closeProfileDrawer();
+                        }
+                    } catch (error) {
+                        console.error('Error saving profile:', error);
+                    }
+                },
+
+                async deleteProfile(profileId) {
+                    if (confirm('Êtes-vous sûr de vouloir supprimer ce profil ?')) {
+                        try {
+                            const response = await fetch(`/api/smtp-profiles/${profileId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-Parse-Application-Id': PARSE_APPLICATION_ID,
+                                    'X-Parse-Javascript-Key': PARSE_JAVASCRIPT_KEY,
+                                    'X-Parse-Session-Token': sessionToken
+                                }
+                            });
+                            
+                            if (response.ok) {
+                                await this.loadSmtpProfiles();
+                            }
+                        } catch (error) {
+                            console.error('Error deleting profile:', error);
+                        }
+                    }
+                },
+
+                closeProfileDrawer() {
+                    this.showProfileDrawer = false;
+                },
+
+                logout() {
+                    localStorage.removeItem('sessionToken');
+                    window.location.href = '/login';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

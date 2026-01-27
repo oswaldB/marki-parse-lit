@@ -1,7 +1,7 @@
 // initCollections.js - Script pour initialiser les collections nécessaires dans Parse Server
 
 Parse.Cloud.define('initCollections', async (request) => {
-  const collections = ['listes_relances', 'Impayes', 'sequences'];
+  const collections = ['listes_relances', 'Impayes', 'sequences', 'SMTPProfiles'];
   
   for (const collection of collections) {
     try {
@@ -30,6 +30,20 @@ Parse.Cloud.define('initCollections', async (request) => {
             schema.addField('description', { type: 'String' });
             schema.addField('isActif', { type: 'Boolean', defaultValue: true });
             schema.addField('actions', { type: 'Array', defaultValue: [] });
+            schema.addField('emailSubject', { type: 'String' });
+            schema.addField('senderEmail', { type: 'String' });
+          }
+          
+          // Définir les champs pour la collection SMTPProfiles
+          if (collection === 'SMTPProfiles') {
+            schema.addField('name', { type: 'String', required: true });
+            schema.addField('host', { type: 'String', required: true });
+            schema.addField('port', { type: 'Number', required: true });
+            schema.addField('email', { type: 'String', required: true });
+            schema.addField('username', { type: 'String' });
+            schema.addField('password', { type: 'String' });
+            schema.addField('useSSL', { type: 'Boolean', defaultValue: false });
+            schema.addField('useTLS', { type: 'Boolean', defaultValue: true });
           }
           
           // Définir les champs pour la collection Impayes

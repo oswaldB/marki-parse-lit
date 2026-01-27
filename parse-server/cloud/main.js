@@ -8,3 +8,6 @@ require('./initCollections');
 
 // Importer la fonction de synchronisation des impayés
 require('./syncImpayes');
+
+// Importer la gestion des profils SMTP
+require('./smtpProfiles');

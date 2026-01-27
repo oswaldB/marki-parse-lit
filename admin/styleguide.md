@@ -4,7 +4,7 @@ zVoici un document structuré avec **le style guide complet**, **la configuratio
 
 # **Documentation Style Guide – Steroids Studio**
 
-*Version 1.0 – Tailwind CSS (CDN) + Heroicons*
+*Version 1.0 – Tailwind CSS (CDN)*
 
 ---
 
