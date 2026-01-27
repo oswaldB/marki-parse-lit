@@ -26,9 +26,9 @@ function sequenceState() {
       this.fetchSequence();
     },
     
-    // Méthodes pour réorganiser les actions avec des boutons fléchés
-    async moveActionUp(index) {
-      if (!this.sequence || !this.sequence.actions || index <= 0) {
+    // Méthodes pour modifier le nombre de jours avec des boutons fléchés
+    async increaseActionDelay(index) {
+      if (!this.sequence || !this.sequence.actions || index < 0 || index >= this.sequence.actions.length) {
         return;
       }
       
@@ -36,10 +36,8 @@ function sequenceState() {
         // Créer une copie du tableau des actions
         const newActions = [...this.sequence.actions];
         
-        // Échanger les éléments
-        const temp = newActions[index];
-        newActions[index] = newActions[index - 1];
-        newActions[index - 1] = temp;
+        // Augmenter le délai de 1 jour
+        newActions[index].delay = (newActions[index].delay || 0) + 1;
         
         // Mettre à jour les actions
         this.sequence.actions = newActions;
@@ -47,15 +45,15 @@ function sequenceState() {
         // Sauvegarder les modifications
         await this.updateSequenceActions(newActions);
         
-        console.log('Action déplacée vers le haut:', index);
+        console.log('Délai augmenté pour l\'action à l\'index:', index, 'Nouveau délai:', newActions[index].delay);
       } catch (error) {
-        console.error('Erreur lors du déplacement de l\'action vers le haut:', error);
+        console.error('Erreur lors de l\'augmentation du délai:', error);
         alert('Erreur lors de la sauvegarde des modifications.');
       }
     },
     
-    async moveActionDown(index) {
-      if (!this.sequence || !this.sequence.actions || index >= this.sequence.actions.length - 1) {
+    async decreaseActionDelay(index) {
+      if (!this.sequence || !this.sequence.actions || index < 0 || index >= this.sequence.actions.length) {
         return;
       }
       
@@ -63,10 +61,8 @@ function sequenceState() {
         // Créer une copie du tableau des actions
         const newActions = [...this.sequence.actions];
         
-        // Échanger les éléments
-        const temp = newActions[index];
-        newActions[index] = newActions[index + 1];
-        newActions[index + 1] = temp;
+        // Diminuer le délai de 1 jour (minimum 0)
+        newActions[index].delay = Math.max((newActions[index].delay || 0) - 1, 0);
         
         // Mettre à jour les actions
         this.sequence.actions = newActions;
@@ -74,9 +70,9 @@ function sequenceState() {
         // Sauvegarder les modifications
         await this.updateSequenceActions(newActions);
         
-        console.log('Action déplacée vers le bas:', index);
+        console.log('Délai diminué pour l\'action à l\'index:', index, 'Nouveau délai:', newActions[index].delay);
       } catch (error) {
-        console.error('Erreur lors du déplacement de l\'action vers le bas:', error);
+        console.error('Erreur lors de la diminution du délai:', error);
         alert('Erreur lors de la sauvegarde des modifications.');
       }
     },
@@ -97,6 +93,11 @@ function sequenceState() {
           emailSubject: sequence.get('emailSubject') || '',
           senderEmail: sequence.get('senderEmail') || ''
         };
+        
+        // Trier les actions par ordre croissant de délai dès le chargement
+        if (this.sequence.actions && this.sequence.actions.length > 0) {
+          this.sequence.actions.sort((a, b) => (a.delay || 0) - (b.delay || 0));
+        }
         
         console.log('Séquence récupérée:', this.sequence);
         
@@ -482,19 +483,22 @@ ${exampleMessage}`;
       }
 
       try {
+        // Trier les actions par ordre croissant de délai
+        const sortedActions = [...newActions].sort((a, b) => (a.delay || 0) - (b.delay || 0));
+
         const Sequences = Parse.Object.extend('sequences');
         const sequence = new Sequences();
         sequence.id = this.sequence.objectId;
 
-        // Mettre à jour les actions
-        sequence.set('actions', newActions);
+        // Mettre à jour les actions (triées)
+        sequence.set('actions', sortedActions);
 
         await sequence.save();
 
-        // Mettre à jour localement
-        this.sequence.actions = newActions;
+        // Mettre à jour localement avec les actions triées
+        this.sequence.actions = sortedActions;
 
-        console.log('Séquence mise à jour avec succès');
+        console.log('Séquence mise à jour avec succès (actions triées)');
         return true;
       } catch (error) {
         console.error('Erreur lors de la mise à jour de la séquence:', error);
