@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paramètres Emails SMTP - Marki Parse</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://unpkg.com/lucide@latest/dist/lucide.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="/components/check-auth.js"></script>
     <script src="/components/parse-credentials.js"></script>
@@ -49,7 +49,7 @@
             </nav>
             <div class="p-4 border-t">
                 <button @click="logout" class="w-full flex items-center justify-center p-2 text-red-500 hover:bg-red-50 rounded">
-                    <i class="lucide-log-out w-5 h-5 mr-2"></i>
+                    <i data-lucide="log-out" class="w-5 h-5 mr-2"></i>
                     <span>Déconnexion</span>
                 </button>
             </div>
@@ -63,7 +63,7 @@
                     <p class="text-sm text-gray-500">Gérez vos profils SMTP pour l'envoi d'emails</p>
                 </div>
                 <button @click="createNewProfile" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center">
-                    <i class="lucide-plus-circle w-5 h-5 mr-2"></i>
+                    <i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i>
                     <span>Nouveau profil</span>
                 </button>
             </header>
@@ -103,10 +103,10 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button @click="editProfile(profile.id)" class="text-indigo-600 hover:text-indigo-900 mr-2">
-                                                <i class="lucide-edit w-4 h-4"></i>
+                                                <i data-lucide="edit" class="w-4 h-4"></i>
                                             </button>
                                             <button @click="deleteProfile(profile.id)" class="text-red-600 hover:text-red-900">
-                                                <i class="lucide-trash-2 w-4 h-4"></i>
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
                                             </button>
                                         </td>
                                     </tr>
@@ -136,7 +136,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-medium text-gray-900">Envoyer un email de test</h3>
                         <button @click="closeTestEmailDrawer" class="text-gray-400 hover:text-gray-600">
-                            <i class="lucide-x w-5 h-5"></i>
+                            <i data-lucide="x" class="w-5 h-5"></i>
                         </button>
                     </div>
                     
@@ -160,7 +160,7 @@
                             Annuler
                         </button>
                         <button type="button" @click="sendTestEmail" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md">
-                            <i class="lucide-send w-4 h-4 mr-1"></i>
+                            <i data-lucide="send" class="w-4 h-4 mr-1"></i>
                             <span>Envoyer</span>
                         </button>
                     </div>
@@ -172,7 +172,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-medium text-gray-900" x-text="editingProfileId ? 'Modifier le profil' : 'Nouveau profil SMTP'"></h3>
                         <button @click="closeProfileDrawer" class="text-gray-400 hover:text-gray-600">
-                            <i class="lucide-x w-5 h-5"></i>
+                            <i data-lucide="x" class="w-5 h-5"></i>
                         </button>
                     </div>
 
@@ -239,7 +239,7 @@
                             <span x-text="editingProfileId ? 'Enregistrer' : 'Créer'"></span>
                         </button>
                         <button type="button" @click="testEmail" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md">
-                            <i class="lucide-send w-4 h-4 mr-1"></i>
+                            <i data-lucide="send" class="w-4 h-4 mr-1"></i>
                             <span>Test</span>
                         </button>
                     </div>
@@ -253,6 +253,11 @@
         const PARSE_APPLICATION_ID = window.PARSE_APPLICATION_ID || 'your-parse-app-id';
         const PARSE_JAVASCRIPT_KEY = window.PARSE_JAVASCRIPT_KEY || 'your-parse-javascript-key';
         const sessionToken = localStorage.getItem('sessionToken') || '';
+
+        // Initialiser Lucide icons
+        document.addEventListener('alpine:init', () => {
+            lucide.createIcons();
+        });
 
         function appState() {
             return {
