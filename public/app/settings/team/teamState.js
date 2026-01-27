@@ -7,7 +7,7 @@ document.addEventListener('alpine:init', () => {
         sidebarOpen: false,
         drawerOpen: false,
         drawerTitle: 'Ajouter un membre',
-        currentUser: Parse.User.current(),
+        currentUser: null,
         users: [],
         currentUserData: {
             objectId: null,
@@ -20,16 +20,48 @@ document.addEventListener('alpine:init', () => {
 
         // Initialisation
         init() {
-            this.checkAuth();
-            this.loadUsers();
-            
-            // Mettre à jour le composant sidebar avec l'utilisateur courant
-            this.$nextTick(() => {
-                const sidebar = document.getElementById('settingsSidebar');
-                if (sidebar) {
-                    sidebar.updateCurrentUser(this.currentUser);
+            // Initialiser Parse si ce n'est pas déjà fait
+            this.initializeParse();
+        },
+
+        // Initialisation de Parse
+        initializeParse() {
+            try {
+                // Vérifier si Parse est disponible
+                if (typeof Parse === 'undefined') {
+                    console.error('Parse SDK non chargé');
+                    window.location.href = '/login';
+                    return;
                 }
-            });
+                
+                // Vérifier si Parse est déjà initialisé
+                if (!Parse.applicationId) {
+                    if (window.parseConfig) {
+                        Parse.initialize(window.parseConfig.appId, window.parseConfig.javascriptKey);
+                        Parse.serverURL = window.parseConfig.serverURL;
+                    } else {
+                        console.error('Configuration Parse non disponible');
+                        window.location.href = '/login';
+                        return;
+                    }
+                }
+                
+                // Une fois Parse initialisé, vérifier l'authentification
+                this.currentUser = Parse.User.current();
+                this.checkAuth();
+                this.loadUsers();
+                
+                // Mettre à jour le composant sidebar avec l'utilisateur courant
+                this.$nextTick(() => {
+                    const sidebar = document.getElementById('settingsSidebar');
+                    if (sidebar) {
+                        sidebar.updateCurrentUser(this.currentUser);
+                    }
+                });
+            } catch (error) {
+                console.error('Erreur lors de l\'initialisation de Parse:', error);
+                window.location.href = '/login';
+            }
         },
 
         // Vérification de l'authentification et des permissions
