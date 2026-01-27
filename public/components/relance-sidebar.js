@@ -64,6 +64,12 @@ export class RelanceSidebar extends LitElement {
                 <span class="flex-1 ms-3 whitespace-nowrap">Séquences</span>
               </a>
             </li>
+            <li>
+              <a href="/app/settings/" class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group ${this.currentPage === 'settings' ? 'bg-neutral-tertiary text-fg-brand' : ''}">
+                <svg class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.092 1.21-.138 2.431-.138 3.662C4.5 17.255 10.08 21 12 21c1.93 0 3.839-.744 5.5-2.088a5.002 5.002 0 0 0 1.912-11.812M12 21v-6"/></svg>
+                <span class="flex-1 ms-3 whitespace-nowrap">Paramètres</span>
+              </a>
+            </li>
 
           </ul>
         </div>
@@ -83,6 +89,10 @@ export class RelanceSidebar extends LitElement {
           <a href="/app/relances/sequences/" class="flex flex-col items-center justify-center px-4 py-2 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group ${this.currentPage === 'sequences' ? 'bg-neutral-tertiary text-fg-brand' : ''}">
             <svg class="w-6 h-6 mb-1 transition duration-75 group-hover:text-fg-brand" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h3v3H4V4Zm0 10h3v3H4v-3Zm0-10h3v3H4V4Zm10 0h3v3h-3V4Zm0 10h3v3h-3v-3Zm-5-5h3v3h-3v-3Z"/></svg>
             <span class="text-xs">Séquences</span>
+          </a>
+          <a href="/app/settings/" class="flex flex-col items-center justify-center px-4 py-2 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group ${this.currentPage === 'settings' ? 'bg-neutral-tertiary text-fg-brand' : ''}">
+            <svg class="w-6 h-6 mb-1 transition duration-75 group-hover:text-fg-brand" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.092 1.21-.138 2.431-.138 3.662C4.5 17.255 10.08 21 12 21c1.93 0 3.839-.744 5.5-2.088a5.002 5.002 0 0 0 1.912-11.812M12 21v-6"/></svg>
+            <span class="text-xs">Paramètres</span>
           </a>
 
         </div>
