@@ -1,5 +1,5 @@
 // Utilisation du CDN de Lit pour éviter les problèmes d'importation
-const { LitElement, html } = lit;
+import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
 
 export class Sidebar extends LitElement {
   createRenderRoot() {
@@ -22,4 +22,6 @@ export class Sidebar extends LitElement {
   }
 }
 
-customElements.define('sidebar-component', Sidebar);
+if (!customElements.get('sidebar-component')) {
+  customElements.define('sidebar-component', Sidebar);
+}

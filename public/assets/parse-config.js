@@ -1,15 +1,21 @@
 // parse-config.js - Configuration pour Parse Server
 // Ce fichier définit les fonctions nécessaires pour interagir avec Parse Server
 
-// Vérifier que window.parse est disponible
-if (!window.parse) {
-  console.error('Configuration Parse non disponible. Veuillez inclure parse-credentials.js avant ce fichier.');
-}
+// Configuration par défaut pour le développement
+window.parseConfig = window.parseConfig || {
+  appId: 'YOUR_APP_ID',
+  javascriptKey: 'YOUR_JS_KEY',
+  serverURL: 'http://localhost:1337/parse'
+};
 
 // Fonction pour initialiser Parse
 function initializeParse() {
-  Parse.initialize(window.parse.appId, window.parse.javascriptKey);
-  Parse.serverURL = window.parse.serverUrl;
+  if (window.parseConfig) {
+    Parse.initialize(window.parseConfig.appId, window.parseConfig.javascriptKey);
+    Parse.serverURL = window.parseConfig.serverURL;
+  } else {
+    console.error('Configuration Parse non disponible.');
+  }
 }
 
 // Fonction pour récupérer les données depuis Parse Server

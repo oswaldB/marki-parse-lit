@@ -43,4 +43,6 @@ export class CheckAuth extends LitElement {
   }
 }
 
-customElements.define('check-auth', CheckAuth);
+if (!customElements.get('check-auth')) {
+  customElements.define('check-auth', CheckAuth);
+}

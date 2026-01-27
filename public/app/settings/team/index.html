@@ -8,9 +8,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
+    <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+    <script src="/components/parse-credentials.js"></script>
     <script src="/assets/parse-config.js"></script>
-    <script src="/components/check-auth.js"></script>
-    <script src="/components/sidebar.js"></script>
+    <script type="module" src="/components/check-auth.js"></script>
+    <script type="module" src="/components/sidebar.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -202,6 +204,23 @@
     </div>
 
     <script>
+        // Initialiser Parse
+        if (window.parseConfig) {
+            Parse.initialize(window.parseConfig.appId, window.parseConfig.javascriptKey);
+            Parse.serverURL = window.parseConfig.serverURL;
+        } else {
+            console.error('Configuration Parse non disponible');
+        }
+        
+        // Initialiser Lucide
+        document.addEventListener('alpine:init', () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            } else {
+                console.error('Lucide non disponible');
+            }
+        });
+        
         function app() {
             return {
                 sidebarOpen: false,
