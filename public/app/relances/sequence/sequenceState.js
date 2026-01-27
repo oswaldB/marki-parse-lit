@@ -260,13 +260,79 @@ function sequenceState() {
     
     testSequence() {
       if (!this.sequence || this.sequence.actions.length === 0) {
-        alert('Cette séquence ne contient aucune action à tester.');
+        this.showPopupMessage('Aucune action', 'Cette séquence ne contient aucune action à tester.', 'warning');
         return;
       }
       
-      // Simuler l'envoi des actions
-      console.log('Test de la séquence:', this.sequence.actions);
-      alert('Test envoyé avec succès ! Vérifiez vos emails/SMS.');
+      // Vérifier si des profils SMTP sont disponibles
+      if (this.smtpProfiles.length === 0) {
+        this.showPopupMessage(
+          'Configuration requise',
+          'Aucun profil SMTP configuré. Veuillez ajouter un profil SMTP avant de tester l\'envoi.',
+          'error'
+        );
+        return;
+      }
+      
+      // Ouvrir le drawer de test
+      this.showTestDrawer = true;
+      this.testRecipient = '';
+      
+      // Charger les emails disponibles pour le test
+      this.loadAvailableTestEmails();
+      
+      console.log('Ouverture du drawer de test pour la séquence:', this.sequence.actions);
+    },
+    
+    loadAvailableTestEmails() {
+      // Charger les emails depuis les profils SMTP
+      this.availableTestEmails = this.smtpProfiles.map(profile => profile.email);
+      
+      // Ajouter quelques emails de test par défaut
+      const defaultTestEmails = [
+        'test@example.com',
+        'demo@marki-parse.com',
+        'relance@test.com'
+      ];
+      
+      this.availableTestEmails = [...new Set([...this.availableTestEmails, ...defaultTestEmails])];
+    },
+    
+    async sendTestSequence() {
+      if (!this.testRecipient || !this.testRecipient.trim()) {
+        this.showPopupMessage('Adresse requise', 'Veuillez entrer une adresse email valide.', 'warning');
+        return;
+      }
+      
+      try {
+        // Simuler l'envoi du test
+        console.log('Envoi du test à:', this.testRecipient);
+        console.log('Actions à tester:', this.sequence.actions);
+        
+        // Fermer le drawer
+        this.showTestDrawer = false;
+        
+        // Afficher un message de succès
+        this.showPopupMessage(
+          'Test envoyé',
+          'Le test a été envoyé avec succès à ' + this.testRecipient + '. Vérifiez votre boîte de réception.',
+          'success'
+        );
+        
+        // Ici, vous pourriez appeler une fonction cloud pour envoyer réellement le test
+        // await Parse.Cloud.run('sendTestSequence', {
+        //   sequenceId: this.sequenceId,
+        //   recipient: this.testRecipient
+        // });
+        
+      } catch (error) {
+        console.error('Erreur lors de l\'envoi du test:', error);
+        this.showPopupMessage(
+          'Erreur d\'envoi',
+          'Une erreur est survenue lors de l\'envoi du test. Veuillez réessayer.',
+          'error'
+        );
+      }
     },
     
     async deleteSequence() {
@@ -274,22 +340,31 @@ function sequenceState() {
         return;
       }
       
-      if (confirm('Êtes-vous sûr de vouloir supprimer cette séquence ?')) {
-        try {
-          const Sequences = Parse.Object.extend('sequences');
-          const sequence = new Sequences();
-          sequence.id = this.sequence.objectId;
-          
-          await sequence.destroy();
-          
-          console.log('Séquence supprimée avec succès');
-          
-          // Redirection vers la liste des séquences
-          window.location.href = '/app/relances/sequences/';
-        } catch (error) {
-          console.error('Erreur lors de la suppression de la séquence:', error);
+      this.confirmAction(
+        'Supprimer la séquence',
+        'Êtes-vous sûr de vouloir supprimer cette séquence ? Cette action est irréversible.',
+        async () => {
+          try {
+            const Sequences = Parse.Object.extend('sequences');
+            const sequence = new Sequences();
+            sequence.id = this.sequence.objectId;
+            
+            await sequence.destroy();
+            
+            console.log('Séquence supprimée avec succès');
+            
+            // Redirection vers la liste des séquences
+            window.location.href = '/app/relances/sequences/';
+          } catch (error) {
+            console.error('Erreur lors de la suppression de la séquence:', error);
+            this.showPopupMessage(
+              'Erreur de suppression',
+              'Une erreur est survenue lors de la suppression de la séquence.',
+              'error'
+            );
+          }
         }
-      }
+      );
     },
     
     formatActionType(type) {
@@ -473,8 +548,20 @@ ${exampleMessage}`;
     editActionSenderEmail: '',
     editActionMessage: '',
     
-    // État pour le drawer
+    // État pour les drawers
     showEditDrawer: false,
+    showTestDrawer: false,
+    
+    // État pour les popups
+    showPopup: false,
+    popupTitle: '',
+    popupMessage: '',
+    popupType: 'info', // info, success, warning, error
+    
+    // État pour le test d'envoi
+    testRecipient: '',
+    testRecipients: [],
+    availableTestEmails: [],
     
     // Gestion des actions de la séquence
     async updateSequenceActions(newActions) {
@@ -578,30 +665,78 @@ ${exampleMessage}`;
     },
     
     showFullMessage(message) {
-      alert(message);
+      this.showPopup = true;
+      this.popupTitle = 'Message complet';
+      this.popupMessage = message;
+      this.popupType = 'info';
     },
+    
+    // Méthodes pour les popups
+    showPopupMessage(title, message, type = 'info') {
+      this.popupTitle = title;
+      this.popupMessage = message;
+      this.popupType = type;
+      this.showPopup = true;
+      
+      console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
+    },
+    
+    closePopup() {
+      this.showPopup = false;
+    },
+    
+    confirmAction(title, message, callback) {
+      this.popupTitle = title;
+      this.popupMessage = message;
+      this.popupType = 'warning';
+      this.showPopup = true;
+      this.currentConfirmCallback = callback;
+    },
+    
+    executeConfirm() {
+      if (this.currentConfirmCallback && typeof this.currentConfirmCallback === 'function') {
+        this.currentConfirmCallback();
+      }
+      this.closePopup();
+      this.currentConfirmCallback = null;
+    },
+    
+    currentConfirmCallback: null,
     
     async deleteAction(index) {
       if (!this.sequence || !this.sequence.actions || index < 0 || index >= this.sequence.actions.length) {
         return;
       }
       
-      if (confirm('Êtes-vous sûr de vouloir supprimer cette action ?')) {
-        try {
-          // Créer une copie des actions sans l'élément supprimé
-          const newActions = this.sequence.actions.filter((_, i) => i !== index);
-          
-          // Sauvegarder les modifications
-          const success = await this.updateSequenceActions(newActions);
-          
-          if (success) {
-            console.log('Action supprimée avec succès');
+      this.confirmAction(
+        'Supprimer l\'action',
+        'Êtes-vous sûr de vouloir supprimer cette action ? Cette action est irréversible.',
+        async () => {
+          try {
+            // Créer une copie des actions sans l'élément supprimé
+            const newActions = this.sequence.actions.filter((_, i) => i !== index);
+            
+            // Sauvegarder les modifications
+            const success = await this.updateSequenceActions(newActions);
+            
+            if (success) {
+              console.log('Action supprimée avec succès');
+              this.showPopupMessage(
+                'Action supprimée',
+                'L\'action a été supprimée avec succès.',
+                'success'
+              );
+            }
+          } catch (error) {
+            console.error('Erreur lors de la suppression de l\'action:', error);
+            this.showPopupMessage(
+              'Erreur de suppression',
+              'Une erreur est survenue lors de la suppression de l\'action.',
+              'error'
+            );
           }
-        } catch (error) {
-          console.error('Erreur lors de la suppression de l\'action:', error);
-          alert('Erreur lors de la suppression de l\'action.');
         }
-      }
+      );
     },
     
 
