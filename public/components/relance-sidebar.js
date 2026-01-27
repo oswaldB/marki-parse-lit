@@ -20,25 +20,25 @@ export class RelanceSidebar extends LitElement {
           <ul class="space-y-2 font-medium">
             <li>
               <a href="/app/relances/" class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group ${this.currentPage === 'dashboard' ? 'bg-neutral-tertiary text-fg-brand' : ''}">
-                <i data-lucide="home" class="w-5 h-5 transition duration-75 group-hover:text-fg-brand"></i>
+                <i data-feather="home" class="w-5 h-5 transition duration-75 group-hover:text-fg-brand"></i>
                 <span class="ms-3">Dashboard</span>
               </a>
             </li>
              <li>
               <a href="/app/relances/impayes/" class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group ${this.currentPage === 'impayes' ? 'bg-neutral-tertiary text-fg-brand' : ''}">
-                <i data-lucide="file-text" class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"></i>
+                <i data-feather="file-text" class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"></i>
                 <span class="flex-1 ms-3 whitespace-nowrap">Impayés</span>
               </a>
             </li>
             <li>
               <a href="/app/relances/sequences/" class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group ${this.currentPage === 'sequences' ? 'bg-neutral-tertiary text-fg-brand' : ''}">
-                <i data-lucide="clock" class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"></i>
+                <i data-feather="clock" class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"></i>
                 <span class="flex-1 ms-3 whitespace-nowrap">Séquences</span>
               </a>
             </li>
             <li>
               <a href="/app/settings/" class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group ${this.currentPage === 'settings' ? 'bg-neutral-tertiary text-fg-brand' : ''}">
-                <i data-lucide="settings" class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"></i>
+                <i data-feather="settings" class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"></i>
                 <span class="flex-1 ms-3 whitespace-nowrap">Paramètres</span>
               </a>
             </li>
@@ -51,19 +51,19 @@ export class RelanceSidebar extends LitElement {
       <div id="mobile-dock" class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-default">
         <div class="flex justify-around items-center h-16 px-4">
           <a href="/app/relances/" class="flex flex-col items-center justify-center px-4 py-2 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group ${this.currentPage === 'dashboard' ? 'bg-neutral-tertiary text-fg-brand' : ''}">
-            <i data-lucide="home" class="w-6 h-6 mb-1 transition duration-75 group-hover:text-fg-brand"></i>
+            <i data-feather="home" class="w-6 h-6 mb-1 transition duration-75 group-hover:text-fg-brand"></i>
             <span class="text-xs">Dashboard</span>
           </a>
           <a href="/app/relances/impayes/" class="flex flex-col items-center justify-center px-4 py-2 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group ${this.currentPage === 'impayes' ? 'bg-neutral-tertiary text-fg-brand' : ''}">
-            <i data-lucide="file-text" class="w-6 h-6 mb-1 transition duration-75 group-hover:text-fg-brand"></i>
+            <i data-feather="file-text" class="w-6 h-6 mb-1 transition duration-75 group-hover:text-fg-brand"></i>
             <span class="text-xs">Impayés</span>
           </a>
           <a href="/app/relances/sequences/" class="flex flex-col items-center justify-center px-4 py-2 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group ${this.currentPage === 'sequences' ? 'bg-neutral-tertiary text-fg-brand' : ''}">
-            <i data-lucide="clock" class="w-6 h-6 mb-1 transition duration-75 group-hover:text-fg-brand"></i>
+            <i data-feather="clock" class="w-6 h-6 mb-1 transition duration-75 group-hover:text-fg-brand"></i>
             <span class="text-xs">Séquences</span>
           </a>
           <a href="/app/settings/" class="flex flex-col items-center justify-center px-4 py-2 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group ${this.currentPage === 'settings' ? 'bg-neutral-tertiary text-fg-brand' : ''}">
-            <i data-lucide="settings" class="w-6 h-6 mb-1 transition duration-75 group-hover:text-fg-brand"></i>
+            <i data-feather="settings" class="w-6 h-6 mb-1 transition duration-75 group-hover:text-fg-brand"></i>
             <span class="text-xs">Paramètres</span>
           </a>
 

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des profils SMTP - Marki</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <!-- Configuration Parse -->
     <script src="../../../components/parse-credentials.js"></script>
     <!-- Alpine.js -->
@@ -73,31 +73,31 @@
                 <ul class="space-y-2">
                     <li>
                         <a href="/dashboard" class="flex items-center px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
-                            <i data-lucide="home" class="w-5 h-5 mr-3"></i>
+                            <i data-feather="home" class="w-5 h-5 mr-3"></i>
                             Tableau de bord
                         </a>
                     </li>
                     <li>
                         <a href="/app/relances/sequences" class="flex items-center px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
-                            <i data-lucide="clock" class="w-5 h-5 mr-3"></i>
+                            <i data-feather="clock" class="w-5 h-5 mr-3"></i>
                             Séquences de relance
                         </a>
                     </li>
                     <li>
                         <a href="/app/settings/emails-smtp" class="flex items-center px-3 py-2 bg-blue-50 text-blue-600 rounded-md font-medium">
-                            <i data-lucide="mail" class="w-5 h-5 mr-3"></i>
+                            <i data-feather="mail" class="w-5 h-5 mr-3"></i>
                             Profils SMTP
                         </a>
                     </li>
                     <li>
                         <a href="/app/settings/team" class="flex items-center px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
-                            <i data-lucide="users" class="w-5 h-5 mr-3"></i>
+                            <i data-feather="users" class="w-5 h-5 mr-3"></i>
                             Équipe
                         </a>
                     </li>
                     <li>
                         <a href="/logout" class="flex items-center px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
-                            <i data-lucide="log-out" class="w-5 h-5 mr-3"></i>
+                            <i data-feather="log-out" class="w-5 h-5 mr-3"></i>
                             Déconnexion
                         </a>
                     </li>
@@ -110,12 +110,12 @@
             <!-- Header -->
             <header class="bg-white shadow-sm p-4 flex justify-between items-center">
                 <div class="flex items-center space-x-2">
-                    <i data-lucide="mail" class="w-6 h-6 text-gray-600"></i>
+                    <i data-feather="mail" class="w-6 h-6 text-gray-600"></i>
                     <h1 class="text-xl font-bold text-gray-800">Gestion des profils SMTP</h1>
                 </div>
                 <button @click="openProfileDrawer()" 
                         class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center transition-colors">
-                    <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                    <i data-feather="plus" class="w-4 h-4 mr-2"></i>
                     Ajouter un profil
                 </button>
             </header>
@@ -150,7 +150,7 @@
                     <!-- Liste vide -->
                     <template x-if="!isLoading && profiles.length === 0">
                         <div class="text-center py-12">
-                            <i data-lucide="inbox" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+                            <i data-feather="inbox" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
                             <h3 class="text-lg font-medium text-gray-600 mb-2">Aucun profil SMTP</h3>
                             <p class="text-gray-500">Commencez par ajouter un profil SMTP en cliquant sur le bouton ci-dessus.</p>
                         </div>
@@ -163,7 +163,7 @@
                                 <div class="bg-white border border-gray-200 rounded-lg p-6 card-hover transition-all">
                                     <div class="flex justify-between items-start mb-4">
                                         <div class="flex items-center space-x-2">
-                                            <i data-lucide="server" class="w-5 h-5 text-gray-500"></i>
+                                            <i data-feather="server" class="w-5 h-5 text-gray-500"></i>
                                             <h3 class="font-semibold text-gray-800" x-text="profile.name"></h3>
                                         </div>
                                         <span class="status-badge" :class="profile.isActive ? 'status-active' : 'status-inactive'" x-text="profile.isActive ? 'Actif' : 'Inactif'"></span>
@@ -171,15 +171,15 @@
                                     
                                     <div class="space-y-2 text-sm mb-6">
                                         <div class="flex items-center text-gray-600">
-                                            <i data-lucide="mail" class="w-4 h-4 mr-2 text-gray-400"></i>
+                                            <i data-feather="mail" class="w-4 h-4 mr-2 text-gray-400"></i>
                                             <span x-text="profile.email"></span>
                                         </div>
                                         <div class="flex items-center text-gray-600">
-                                            <i data-lucide="server" class="w-4 h-4 mr-2 text-gray-400"></i>
+                                            <i data-feather="server" class="w-4 h-4 mr-2 text-gray-400"></i>
                                             <span x-text="profile.host + ':' + profile.port"></span>
                                         </div>
                                         <div class="flex items-center text-gray-600">
-                                            <i data-lucide="user" class="w-4 h-4 mr-2 text-gray-400"></i>
+                                            <i data-feather="user" class="w-4 h-4 mr-2 text-gray-400"></i>
                                             <span x-text="profile.username || 'Aucun utilisateur'"></span>
                                         </div>
                                     </div>

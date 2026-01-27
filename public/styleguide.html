@@ -6,7 +6,7 @@
     <title>Style Guide Moderne – Steroids Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/lucide-static@latest/dist/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -154,8 +154,13 @@
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
     </style>
+    <!-- Composant Toaster -->
+    <script type="module" src="/components/toaster.js"></script>
+    <script src="/components/toaster-store.js"></script>
 </head>
 <body class="bg-gray-50 relative overflow-x-hidden">
+    <!-- Composant Toaster -->
+    <toaster-component></toaster-component>
     <!-- Formes originales en arrière-plan -->
     <galet-component></galet-component>
     <galet-component-dark></galet-component-dark>
@@ -180,7 +185,7 @@
                         <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        Version 2.0 – Design Moderne avec Tailwind CSS + Lucide
+                        Version 2.0 – Design Moderne avec Tailwind CSS + Feather Icons
                     </p>
                 </div>
                 <span class="badge-modern badge-info">
@@ -602,7 +607,7 @@
                 <div class="mb-6">
                     <h4 class="text-xl font-semibold text-text mb-2">Bouton avec Icône</h4>
                     <button class="bg-primary text-white px-4 py-2 rounded-md font-medium flex items-center space-x-2 transition-colors hover:bg-primary-dark">
-                        <i data-lucide="plus"></i>
+                        <i data-feather="plus"></i>
                         <span>Ajouter</span>
                     </button>
                 </div>
@@ -655,7 +660,7 @@
                         <label for="search" class="block text-text font-medium mb-1">Rechercher</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i data-lucide="search"></i>
+                                <i data-feather="search"></i>
                             </span>
                             <input type="text" id="search" class="w-full pl-10 pr-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Rechercher...">
                         </div>
@@ -693,7 +698,7 @@
                 <div class="mb-6">
                     <h4 class="text-xl font-semibold text-text mb-2">Notification avec Icône</h4>
                     <div class="flex items-start p-3 rounded-md bg-primary bg-opacity-10 border-l-4 border-primary max-w-sm">
-                        <i data-lucide="info"></i>
+                        <i data-feather="info"></i>
                         <div class="ml-3">
                             <p class="text-sm text-primary font-medium">
                                 Information importante à connaître.
@@ -712,13 +717,13 @@
                         <div class="flex items-center justify-between px-4">
                             <span class="text-xl font-bold text-text">Steroids</span>
                             <button id="close-sidebar" class="md:hidden p-2 rounded-md hover:bg-bg-light">
-                                <i data-lucide="x"></i>
+                                <i data-feather="x"></i>
                             </button>
                         </div>
 
                         <nav>
                             <a href="#" class="flex items-center px-4 py-2.5 text-text hover:bg-bg-light rounded-md transition-colors">
-                                <i data-lucide="home"></i>
+                                <i data-feather="home"></i>
                                 <span>Dashboard</span>
                             </a>
                         </nav>
@@ -727,7 +732,7 @@
                     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden hidden"></div>
 
                     <button id="open-sidebar" class="md:hidden mb-4 p-2 rounded-md bg-white border border-border">
-                        <i data-lucide="menu"></i>
+                        <i data-feather="menu"></i>
                     </button>
                 </div>
             </div>
@@ -756,7 +761,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button class="text-primary hover:text-primary-dark">
-                                            <i data-lucide="more-horizontal"></i>
+                                            <i data-feather="more-horizontal"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -780,7 +785,7 @@
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-xl font-semibold text-text">Titre de la Modale</h3>
                                 <button onclick="document.getElementById('modal').classList.add('hidden')" class="p-1 rounded-full hover:bg-bg-light transition-colors">
-                                    <i data-lucide="x"></i>
+                                    <i data-feather="x"></i>
                                 </button>
                             </div>
                             <p class="text-text-light mb-4">
@@ -807,7 +812,7 @@
                     <div class="border border-border rounded-md mb-2 max-w-sm">
                         <button onclick="toggleAccordion('accordion-1')" class="w-full p-4 text-left flex justify-between items-center focus:outline-none">
                             <span class="font-medium text-text">Titre de l'Accordéon</span>
-                            <i data-lucide="chevron-down"></i>
+                            <i data-feather="chevron-down"></i>
                         </button>
                         <div id="accordion-1" class="hidden p-4 border-t border-border text-text-light">
                             Contenu caché de l'accordéon.
@@ -909,7 +914,7 @@
 
         function toggleAccordion(id) {
             const content = document.getElementById(id);
-            const icon = document.querySelector(`[data-lucide="chevron-down"]`);
+            const icon = document.querySelector(`[data-feather="chevron-down"]`);
             if (content.classList.contains('hidden')) {
                 content.classList.remove('hidden');
                 icon.classList.add('rotate-180', 'transform');
@@ -920,7 +925,7 @@
         }
     </script>
     <script>
-        lucide.createIcons();
+        feather.replace();
     </script>
 </body>
 </html>

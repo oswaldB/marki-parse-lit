@@ -35,8 +35,8 @@
   </script>
   <!-- Alpine.js -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <!-- Lucide Icons -->
-  <script src="https://cdn.jsdelivr.net/npm/lucide-static@latest/dist/lucide.js"></script>
+  <!-- Feather Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
   <!-- État Alpine.js pour la page dashboard -->
   <script src="/dashboard/dashboardState.js"></script>
   <!-- Lit Element pour les composants -->
@@ -70,18 +70,18 @@
               class="w-64 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               x-model="searchQuery"
             >
-            <i data-lucide="search" class="absolute inset-y-0 right-0 pr-3 flex items-center text-text-light"></i>
+            <i data-feather="search" class="absolute inset-y-0 right-0 pr-3 flex items-center text-text-light"></i>
           </div>
           <!-- Bouton de notification -->
           <button class="p-2 rounded-full hover:bg-gray-100">
-            <i data-lucide="bell" class="h-6 w-6 text-text"></i>
+            <i data-feather="bell" class="h-6 w-6 text-text"></i>
           </button>
           <!-- Menu utilisateur -->
           <div class="relative">
             <button class="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100">
-              <i data-lucide="user" class="h-10 w-10 text-text"></i>
+              <i data-feather="user" class="h-10 w-10 text-text"></i>
               <span class="text-text font-medium" x-text="username"></span>
-              <i data-lucide="chevron-down" class="h-4 w-4 text-text"></i>
+              <i data-feather="chevron-down" class="h-4 w-4 text-text"></i>
             </button>
           </div>
           <!-- Bouton de déconnexion -->
@@ -104,7 +104,7 @@
             <p class="text-3xl font-bold text-text" x-text="purchasedProducts.length"></p>
           </div>
           <div class="bg-primary bg-opacity-10 p-3 rounded-full">
-            <i data-lucide="shopping-bag" class="h-6 w-6 text-primary"></i>
+            <i data-feather="shopping-bag" class="h-6 w-6 text-primary"></i>
           </div>
         </div>
       </div>
@@ -116,7 +116,7 @@
             <p class="text-3xl font-bold text-text" x-text="nonPurchasedProducts.length"></p>
           </div>
           <div class="bg-secondary bg-opacity-10 p-3 rounded-full">
-            <i data-lucide="package" class="h-6 w-6 text-secondary"></i>
+            <i data-feather="package" class="h-6 w-6 text-secondary"></i>
           </div>
         </div>
       </div>
@@ -128,7 +128,7 @@
             <p class="text-3xl font-bold text-text" x-text="products.length"></p>
           </div>
           <div class="bg-success bg-opacity-10 p-3 rounded-full">
-            <i data-lucide="archive" class="h-6 w-6 text-success"></i>
+            <i data-feather="archive" class="h-6 w-6 text-success"></i>
           </div>
         </div>
       </div>
@@ -140,7 +140,7 @@
             <p class="text-3xl font-bold text-text" x-text="products.filter(p => p.isActive).length"></p>
           </div>
           <div class="bg-error bg-opacity-10 p-3 rounded-full">
-            <i data-lucide="zap" class="h-6 w-6 text-error"></i>
+            <i data-feather="zap" class="h-6 w-6 text-error"></i>
           </div>
         </div>
       </div>

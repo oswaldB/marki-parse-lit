@@ -298,25 +298,10 @@ function sequenceState() {
       this.showTestDrawer = true;
       this.testRecipient = '';
       
-      // Charger les emails disponibles pour le test
-      this.loadAvailableTestEmails();
-      
       console.log('Ouverture du drawer de test pour la séquence:', this.sequence.actions);
     },
     
-    loadAvailableTestEmails() {
-      // Charger les emails depuis les profils SMTP
-      this.availableTestEmails = this.smtpProfiles.map(profile => profile.email);
-      
-      // Ajouter quelques emails de test par défaut
-      const defaultTestEmails = [
-        'test@example.com',
-        'demo@marki-parse.com',
-        'relance@test.com'
-      ];
-      
-      this.availableTestEmails = [...new Set([...this.availableTestEmails, ...defaultTestEmails])];
-    },
+
     
     async sendTestSequence() {
       if (!this.testRecipient || !this.testRecipient.trim()) {
@@ -584,8 +569,6 @@ ${exampleMessage}`;
     
     // État pour le test d'envoi
     testRecipient: '',
-    testRecipients: [],
-    availableTestEmails: [],
     
     // État pour le toggle de statut
     isTogglingStatus: false,
