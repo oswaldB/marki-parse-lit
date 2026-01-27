@@ -11,6 +11,10 @@
     <script src="/assets/parse-config.js"></script>
     <script src="/components/check-auth.js"></script>
     <script src="/components/sidebar.js"></script>
+    <script type="module">
+        import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
+        window.lit = { LitElement, html };
+    </script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -18,6 +22,16 @@
     </style>
 </head>
 <body class="bg-gray-50">
+    <!-- Logo Marki -->
+    <div class="fixed top-4 left-4 z-50">
+        <img src="/assets/marki-logo.png" alt="Marki Logo" class="w-12 h-12">
+    </div>
+    
+    <!-- Galets en arrière-plan -->
+    <galet-component></galet-component>
+    <galet-component-dark></galet-component-dark>
+    <galet-component-wide></galet-component-wide>
+    
     <div x-data="appState()" class="flex h-screen">
         <!-- Sidebar -->
         <sidebar-component></sidebar-component>
@@ -95,6 +109,11 @@
         </div>
     </div>
 
+    <!-- Import des composants Lit pour les galets -->
+    <script type="module" src="/components/galet-component.js"></script>
+    <script type="module" src="/components/galet-component-dark.js"></script>
+    <script type="module" src="/components/galet-component-wide.js"></script>
+    
     <script>
         // Initialiser les icônes Lucide
         document.addEventListener('alpine:init', () => {
