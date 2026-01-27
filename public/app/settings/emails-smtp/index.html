@@ -6,10 +6,9 @@
     <title>Paramètres Emails SMTP - Marki Parse</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <script src="/components/check-auth.js"></script>
-    <script src="/components/parse-credentials.js"></script>
     <script src="https://www.parsecdn.com/js/parse-latest.js"></script>
+    <script src="/components/parse-credentials.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -254,8 +253,8 @@
         const PARSE_JAVASCRIPT_KEY = window.PARSE_JAVASCRIPT_KEY || 'your-parse-javascript-key';
         const sessionToken = localStorage.getItem('sessionToken') || '';
 
-        // Initialiser Lucide icons
-        document.addEventListener('alpine:init', () => {
+        // Initialiser Lucide icons après le chargement du DOM
+        document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
         });
 
@@ -278,20 +277,24 @@
                 },
 
                 init() {
+                    // Vérifier l'authentification d'abord
+                    if (!sessionToken) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    
+                    // Initialiser Parse
                     Parse.initialize(PARSE_APPLICATION_ID, PARSE_JAVASCRIPT_KEY);
-                    Parse.serverURL = 'https://parse-server:1337/parse';
+                    Parse.serverURL = window.PARSE_SERVER_URL || 'http://localhost:1337/parse';
                     Parse.User.enableUnsafeCurrentUser();
                     
-                    if (sessionToken) {
-                        Parse.User.become(sessionToken).then(() => {
-                            this.loadSmtpProfiles();
-                        }, (error) => {
-                            console.error('Error becoming user:', error);
-                            window.location.href = '/login';
-                        });
-                    } else {
+                    // Vérifier la session
+                    Parse.User.become(sessionToken).then(() => {
+                        this.loadSmtpProfiles();
+                    }, (error) => {
+                        console.error('Error becoming user:', error);
                         window.location.href = '/login';
-                    }
+                    });
                 },
 
                 async loadSmtpProfiles() {
@@ -398,30 +401,16 @@
 
                 async sendTestEmail() {
                     try {
-                        const response = await fetch('https://parse-server:1337/parse/functions/sendTestEmail', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Parse-Application-Id': PARSE_APPLICATION_ID,
-                                'X-Parse-Javascript-Key': PARSE_JAVASCRIPT_KEY,
-                                'X-Parse-Session-Token': sessionToken
-                            },
-                            body: JSON.stringify({
-                                recipient: this.testEmailRecipient,
-                                smtpProfile: this.currentProfile
-                            })
+                        const result = await Parse.Cloud.run('sendTestEmail', {
+                            recipient: this.testEmailRecipient,
+                            smtpProfile: this.currentProfile
                         });
                         
-                        if (response.ok) {
-                            alert('Email de test envoyé avec succès !');
-                            this.closeTestEmailDrawer();
-                        } else {
-                            const error = await response.json();
-                            alert('Erreur lors de l\'envoi de l\'email: ' + (error.error || 'Unknown error'));
-                        }
+                        alert('Email de test envoyé avec succès !');
+                        this.closeTestEmailDrawer();
                     } catch (error) {
                         console.error('Error sending test email:', error);
-                        alert('Erreur lors de l\'envoi de l\'email');
+                        alert('Erreur lors de l\'envoi de l\'email: ' + (error.message || error.error || 'Unknown error'));
                     }
                 },
 
