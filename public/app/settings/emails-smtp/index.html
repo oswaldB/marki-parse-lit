@@ -6,6 +6,7 @@
     <title>Gestion des profils SMTP - Marki</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
     <!-- Configuration Parse -->
     <script src="../../../components/parse-credentials.js"></script>
     <!-- Alpine.js -->
@@ -423,10 +424,25 @@
     </div>
 
     <script>
+        // Initialiser Parse
+        if (window.parseConfig) {
+            Parse.initialize(window.parseConfig.appId, window.parseConfig.javascriptKey);
+            Parse.serverURL = window.parseConfig.serverURL;
+        } else {
+            console.error('Configuration Parse non disponible');
+        }
+        
         // Initialiser les icônes Feather
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof feather !== 'undefined') {
                 feather.replace();
+            }
+        });
+        
+        // Initialiser les icônes Lucide
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
             }
         });
     </script>

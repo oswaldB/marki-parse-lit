@@ -7,10 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
+    <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
+    <script src="/components/parse-credentials.js"></script>
     <script src="/assets/parse-config.js"></script>
-    <script src="/components/check-auth.js"></script>
-    <script src="/components/sidebar.js"></script>
+    <script type="module" src="/components/check-auth.js"></script>
+    <script type="module" src="/components/sidebar.js"></script>
     <script type="module">
         import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
         window.lit = { LitElement, html };
@@ -118,9 +121,24 @@
     <script src="/components/toaster-store.js"></script>
     
     <script>
+        // Initialiser Parse
+        if (window.parseConfig) {
+            Parse.initialize(window.parseConfig.appId, window.parseConfig.javascriptKey);
+            Parse.serverURL = window.parseConfig.serverURL;
+        } else {
+            console.error('Configuration Parse non disponible');
+        }
+        
         // Initialiser les icônes Feather
         document.addEventListener('alpine:init', () => {
             feather.replace();
+        });
+        
+        // Initialiser les icônes Lucide
+        document.addEventListener('alpine:init', () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         });
     </script>
     <!-- Composant Toaster -->
