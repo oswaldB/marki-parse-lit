@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuration SMTP - Marki</title>
+    <title>Gestion des profils SMTP - Marki</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
     <!-- Configuration Parse -->
@@ -18,10 +18,48 @@
         window.lit = { LitElement, html };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/parse@3.3.0/dist/parse.min.js"></script>
-    <!-- État Alpine.js pour la page SMTP -->
-    <script src="./smtpState.js"></script>
+    <!-- État Alpine.js pour la gestion des profils SMTP -->
+    <script src="./smtpProfilesState.js"></script>
+    
+    <style>
+        .drawer {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .drawer.open {
+            transform: translateX(0);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .status-inactive {
+            background-color: #F3F4F6;
+            color: #6B7280;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        
+        .transition-all {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
 </head>
-<body class="bg-gray-100" x-data="smtpState()" x-init="init()">
+<body class="bg-gray-100" x-data="smtpProfilesState()" x-init="init()">
     <check-auth></check-auth>
     <div class="flex h-screen">
         <!-- Sidebar -->
@@ -33,128 +71,317 @@
             <header class="bg-white shadow-sm p-4 flex justify-between items-center">
                 <div class="flex items-center space-x-2">
                     <i data-lucide="mail" class="w-6 h-6 text-gray-600"></i>
-                    <h1 class="text-xl font-bold text-gray-800">Configuration SMTP</h1>
+                    <h1 class="text-xl font-bold text-gray-800">Gestion des profils SMTP</h1>
                 </div>
+                <button @click="openProfileDrawer()" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center transition-colors">
+                    <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                    Ajouter un profil
+                </button>
             </header>
 
             <!-- Content -->
             <main class="p-6">
+                <!-- Messages d'état -->
+                <template x-if="successMessage">
+                    <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md relative" role="alert">
+                        <span class="block sm:inline" x-text="successMessage"></span>
+                    </div>
+                </template>
+                
+                <template x-if="errorMessage">
+                    <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative" role="alert">
+                        <span class="block sm:inline" x-text="errorMessage"></span>
+                    </div>
+                </template>
+                
+                <!-- Liste des profils SMTP -->
                 <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-lg font-semibold mb-4">Paramètres SMTP</h2>
-                    <p class="text-gray-600 mb-6">Configurez les paramètres SMTP pour l'envoi des emails.</p>
-
-                    <form @submit.prevent="saveSMTPConfig()" class="space-y-4">
-                        <!-- Messages d'état -->
-                        <template x-if="successMessage">
-                            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                                <span class="block sm:inline" x-text="successMessage"></span>
-                            </div>
-                        </template>
-                        
-                        <template x-if="errorMessage">
-                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                                <span class="block sm:inline" x-text="errorMessage"></span>
-                            </div>
-                        </template>
-                        
-                        <div>
-                            <label for="smtpHost" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                                <i data-lucide="server" class="w-4 h-4 mr-2 text-gray-500"></i>
-                                Hôte SMTP
-                            </label>
-                            <input type="text" id="smtpHost" 
-                                   x-model="smtpConfig.host"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <h2 class="text-lg font-semibold mb-4">Profils SMTP</h2>
+                    <p class="text-gray-600 mb-6">Gérez vos configurations SMTP pour l'envoi des emails.</p>
+                    
+                    <!-- Indicateur de chargement -->
+                    <template x-if="isLoading">
+                        <div class="flex justify-center items-center py-12">
+                            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                         </div>
-
-                        <div>
-                            <label for="smtpPort" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                                <i data-lucide="hash" class="w-4 h-4 mr-2 text-gray-500"></i>
-                                Port SMTP
-                            </label>
-                            <input type="number" id="smtpPort" 
-                                   x-model="smtpConfig.port"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </template>
+                    
+                    <!-- Liste vide -->
+                    <template x-if="!isLoading && profiles.length === 0">
+                        <div class="text-center py-12">
+                            <i data-lucide="inbox" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+                            <h3 class="text-lg font-medium text-gray-600 mb-2">Aucun profil SMTP</h3>
+                            <p class="text-gray-500">Commencez par ajouter un profil SMTP en cliquant sur le bouton ci-dessus.</p>
                         </div>
-
-                        <div>
-                            <label for="smtpUsername" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                                <i data-lucide="user" class="w-4 h-4 mr-2 text-gray-500"></i>
-                                Nom d'utilisateur
-                            </label>
-                            <input type="text" id="smtpUsername" 
-                                   x-model="smtpConfig.username"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </template>
+                    
+                    <!-- Grille des profils -->
+                    <template x-if="!isLoading && profiles.length > 0">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <template x-for="profile in profiles" :key="profile.objectId">
+                                <div class="bg-white border border-gray-200 rounded-lg p-6 card-hover transition-all">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div class="flex items-center space-x-2">
+                                            <i data-lucide="server" class="w-5 h-5 text-gray-500"></i>
+                                            <h3 class="font-semibold text-gray-800" x-text="profile.name"></h3>
+                                        </div>
+                                        <span class="status-badge" :class="profile.isActive ? 'status-active' : 'status-inactive'" x-text="profile.isActive ? 'Actif' : 'Inactif'"></span>
+                                    </div>
+                                    
+                                    <div class="space-y-2 text-sm mb-6">
+                                        <div class="flex items-center text-gray-600">
+                                            <i data-lucide="mail" class="w-4 h-4 mr-2 text-gray-400"></i>
+                                            <span x-text="profile.email"></span>
+                                        </div>
+                                        <div class="flex items-center text-gray-600">
+                                            <i data-lucide="server" class="w-4 h-4 mr-2 text-gray-400"></i>
+                                            <span x-text="profile.host + ':' + profile.port"></span>
+                                        </div>
+                                        <div class="flex items-center text-gray-600">
+                                            <i data-lucide="user" class="w-4 h-4 mr-2 text-gray-400"></i>
+                                            <span x-text="profile.username || 'Aucun utilisateur'"></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex space-x-2">
+                                            <button @click="toggleProfileStatus(profile.objectId)" 
+                                                    :disabled="isLoading"
+                                                    class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    :class="{
+                                                        'bg-green-500': profile.isActive,
+                                                        'bg-gray-300': !profile.isActive
+                                                    }"
+                                                    title="Basculer le statut actif/inactif">
+                                                <span class="sr-only">Basculer le statut</span>
+                                                <span class="inline-block w-4 h-4 transform bg-white rounded-full shadow transition-transform"
+                                                      :class="{ 'translate-x-6': profile.isActive, 'translate-x-1': !profile.isActive }"></span>
+                                            </button>
+                                            <span class="text-xs text-gray-500" x-text="formatDate(profile.updatedAt)"></span>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <button @click="openProfileDrawer(profile)" 
+                                                    class="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors" 
+                                                    title="Modifier le profil">
+                                                <i data-lucide="edit" class="w-4 h-4"></i>
+                                            </button>
+                                            <button @click="archiveProfile(profile.objectId)" 
+                                                    class="p-2 text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors" 
+                                                    title="Archiver le profil">
+                                                <i data-lucide="archive" class="w-4 h-4"></i>
+                                            </button>
+                                            <button @click="deleteProfile(profile.objectId)" 
+                                                    class="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors" 
+                                                    title="Supprimer le profil">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
-
-                        <div>
-                            <label for="smtpPassword" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                                <i data-lucide="lock" class="w-4 h-4 mr-2 text-gray-500"></i>
-                                Mot de passe
-                            </label>
-                            <input type="password" id="smtpPassword" 
-                                   x-model="smtpConfig.password"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-
-                        <div>
-                            <label for="smtpFrom" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                                <i data-lucide="mail" class="w-4 h-4 mr-2 text-gray-500"></i>
-                                Email expéditeur
-                            </label>
-                            <input type="email" id="smtpFrom" 
-                                   x-model="smtpConfig.from"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-
-                        <div class="flex items-center">
-                            <input type="checkbox" id="smtpSSL" 
-                                   x-model="smtpConfig.ssl"
-                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="smtpSSL" class="ml-2 block text-sm text-gray-700 flex items-center">
-                                <i data-lucide="lock" class="w-4 h-4 mr-1 text-gray-500"></i>
-                                Utiliser SSL
-                            </label>
-                        </div>
-
-                        <div class="flex items-center">
-                            <input type="checkbox" id="smtpTLS" 
-                                   x-model="smtpConfig.tls"
-                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="smtpTLS" class="ml-2 block text-sm text-gray-700 flex items-center">
-                                <i data-lucide="shield" class="w-4 h-4 mr-1 text-gray-500"></i>
-                                Utiliser TLS
-                            </label>
-                        </div>
-
-                        <div class="pt-4 flex space-x-2">
-                            <button type="submit" 
-                                    :disabled="isLoading"
-                                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
-                                <template x-if="isLoading">
-                                    <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                </template>
-                                <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-                                <span x-text="isLoading ? 'Sauvegarde...' : 'Sauvegarder'"></span>
-                            </button>
-                            <button type="button" 
-                                    @click="resetForm()"
-                                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center">
-                                <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
-                                Réinitialiser
-                            </button>
-                        </div>
-                    </form>
+                    </template>
                 </div>
             </main>
         </div>
     </div>
 
+    <!-- Drawer pour la gestion des profils SMTP -->
+    <div x-show="drawerOpen" class="fixed inset-0 z-50 overflow-hidden">
+        <div class="absolute inset-0 overflow-hidden">
+            <!-- Background overlay -->
+            <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity" @click="closeDrawer"></div>
 
-    
+            <!-- Drawer panel -->
+            <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex" @click.away="closeDrawer">
+                <div class="w-screen max-w-2xl bg-white shadow-xl drawer" :class="{ 'open': drawerOpen }">
+                    <div class="flex flex-col h-full">
+                        <!-- Drawer header -->
+                        <div class="flex items-center justify-between p-6 border-b">
+                            <h3 class="text-lg font-medium text-gray-900" x-text="drawerTitle"></h3>
+                            <button @click="closeDrawer" class="text-gray-400 hover:text-gray-500">
+                                <i data-lucide="x" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+
+                        <!-- Drawer content -->
+                        <div class="flex-1 overflow-y-auto p-6">
+                            <form @submit.prevent="saveProfile" class="space-y-6">
+                                <div>
+                                    <label for="profileName" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                        <i data-lucide="tag" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                        Nom du profil
+                                    </label>
+                                    <input type="text" id="profileName" x-model="profileForm.name" required 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="profileHost" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                        <i data-lucide="server" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                        Hôte SMTP
+                                    </label>
+                                    <input type="text" id="profileHost" x-model="profileForm.host" required 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="profilePort" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                        <i data-lucide="hash" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                        Port SMTP
+                                    </label>
+                                    <input type="number" id="profilePort" x-model="profileForm.port" required 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="profileUsername" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                        <i data-lucide="user" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                        Nom d'utilisateur
+                                    </label>
+                                    <input type="text" id="profileUsername" x-model="profileForm.username" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+
+                                <div>
+                                    <label for="profilePassword" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                        <i data-lucide="lock" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                        Mot de passe
+                                    </label>
+                                    <input type="password" id="profilePassword" x-model="profileForm.password" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <p class="text-xs text-gray-500 mt-1">Laissez vide pour ne pas changer le mot de passe existant.</p>
+                                </div>
+
+                                <div>
+                                    <label for="profileEmail" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                        <i data-lucide="mail" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                        Email expéditeur
+                                    </label>
+                                    <input type="email" id="profileEmail" x-model="profileForm.email" required 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="profileSSL" x-model="profileForm.useSSL" 
+                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                        <label for="profileSSL" class="ml-2 block text-sm text-gray-700 flex items-center">
+                                            <i data-lucide="lock" class="w-4 h-4 mr-1 text-gray-500"></i>
+                                            Utiliser SSL
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="profileTLS" x-model="profileForm.useTLS" 
+                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                        <label for="profileTLS" class="ml-2 block text-sm text-gray-700 flex items-center">
+                                            <i data-lucide="shield" class="w-4 h-4 mr-1 text-gray-500"></i>
+                                            Utiliser TLS
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="profileActive" x-model="profileForm.isActive" 
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label for="profileActive" class="ml-2 block text-sm text-gray-700">
+                                        Profil actif
+                                    </label>
+                                </div>
+
+                                <!-- Section de test (uniquement en mode édition) -->
+                                <template x-if="currentProfile && showTestSection">
+                                    <div class="border-t pt-6">
+                                        <h4 class="text-sm font-medium text-gray-700 mb-4 flex items-center">
+                                            <i data-lucide="send" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                            Tester le profil SMTP
+                                        </h4>
+                                        
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label for="testEmail" class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Email de test
+                                                </label>
+                                                <input type="email" id="testEmail" x-model="testEmail" required 
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                            </div>
+                                            
+                                            <button type="button" @click="testSMTPProfile()" 
+                                                    :disabled="isTesting || !testEmail"
+                                                    class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                                                <template x-if="isTesting">
+                                                    <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                </template>
+                                                <i data-lucide="send" class="w-4 h-4 mr-2"></i>
+                                                <span x-text="isTesting ? 'Test en cours...' : 'Envoyer un email de test'"></span>
+                                            </button>
+                                            
+                                            <!-- Résultat du test -->
+                                            <template x-if="testResult">
+                                                <div class="p-4 rounded-md" :class="testResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'">
+                                                    <template x-if="testResult.success">
+                                                        <div class="flex items-center">
+                                                            <i data-lucide="check-circle" class="w-5 h-5 text-green-400 mr-2"></i>
+                                                            <span class="text-green-700" x-text="testResult.message"></span>
+                                                        </div>
+                                                        <div class="text-xs text-green-600 mt-1">
+                                                            Message ID: <span x-text="testResult.messageId"></span>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="!testResult.success">
+                                                        <div class="flex items-center">
+                                                            <i data-lucide="alert-circle" class="w-5 h-5 text-red-400 mr-2"></i>
+                                                            <span class="text-red-700" x-text="testResult.message"></span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Bouton pour basculer la section de test -->
+                                <template x-if="currentProfile">
+                                    <div class="border-t pt-4">
+                                        <button type="button" @click="toggleTestSection()" 
+                                                class="w-full flex items-center justify-center px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
+                                            <i data-lucide="send" class="w-4 h-4 mr-2"></i>
+                                            <span x-text="showTestSection ? 'Masquer le test' : 'Tester ce profil'"></span>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <!-- Boutons d'action -->
+                                <div class="flex justify-end space-x-3 pt-6 border-t">
+                                    <button type="button" @click="closeDrawer" 
+                                            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                                        Annuler
+                                    </button>
+                                    <button type="submit" :disabled="isLoading" 
+                                            class="px-4 py-2 bg-blue-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                        <template x-if="isLoading">
+                                            <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </template>
+                                        <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                                        <span x-text="isLoading ? 'Sauvegarde...' : 'Enregistrer'"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Initialiser les icônes Lucid
         document.addEventListener('DOMContentLoaded', function() {

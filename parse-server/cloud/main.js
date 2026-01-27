@@ -15,5 +15,6 @@ require('./getSchema');
 // Importer la fonction pour envoyer un email de test
 require('./sendTestEmail');
 
-// Importer les fonctions de configuration SMTP
-require('./smtpConfig');
+// Importer les fonctions pour la gestion des profils SMTP
+require('./smtpProfiles');
+
