@@ -846,3 +846,4 @@ ${exampleMessage}`;
         this.confirmCallback();
       }
       this.closeConfirmPopup();
+};
