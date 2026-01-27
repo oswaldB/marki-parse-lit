@@ -677,8 +677,20 @@ ${exampleMessage}`;
       this.popupMessage = message;
       this.popupType = type;
       this.showPopup = true;
+      this.showConfirmButton = false;
       
       console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
+    },
+    
+    showConfirmation(title, message, callback) {
+      this.popupTitle = title;
+      this.popupMessage = message;
+      this.popupType = 'confirm';
+      this.showPopup = true;
+      this.showConfirmButton = true;
+      this.currentConfirmCallback = callback;
+      
+      console.log(`[CONFIRM] ${title}: ${message}`);
     },
     
     closePopup() {
@@ -686,11 +698,7 @@ ${exampleMessage}`;
     },
     
     confirmAction(title, message, callback) {
-      this.popupTitle = title;
-      this.popupMessage = message;
-      this.popupType = 'warning';
-      this.showPopup = true;
-      this.currentConfirmCallback = callback;
+      this.showConfirmation(title, message, callback);
     },
     
     executeConfirm() {

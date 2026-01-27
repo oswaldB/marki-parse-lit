@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="/components/check-auth.js"></script>
     <script src="/components/parse-credentials.js"></script>
+    <script src="https://www.parsecdn.com/js/parse-latest.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -62,7 +63,7 @@
                     <p class="text-sm text-gray-500">Gérez vos profils SMTP pour l'envoi d'emails</p>
                 </div>
                 <button @click="createNewProfile" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center">
-                    <span class="mr-2">➕</span>
+                    <i class="lucide-plus-circle w-5 h-5 mr-2"></i>
                     <span>Nouveau profil</span>
                 </button>
             </header>
@@ -231,17 +232,21 @@
 
                 async loadSmtpProfiles() {
                     try {
-                        const response = await fetch('/api/smtp-profiles', {
-                            headers: {
-                                'X-Parse-Application-Id': PARSE_APPLICATION_ID,
-                                'X-Parse-Javascript-Key': PARSE_JAVASCRIPT_KEY,
-                                'X-Parse-Session-Token': sessionToken
-                            }
-                        });
+                        const SmtpProfile = Parse.Object.extend('SmtpProfile');
+                        const query = new Parse.Query(SmtpProfile);
+                        const results = await query.find();
                         
-                        if (response.ok) {
-                            this.smtpProfiles = await response.json();
-                        }
+                        this.smtpProfiles = results.map(profile => ({
+                            id: profile.id,
+                            name: profile.get('name'),
+                            host: profile.get('host'),
+                            port: profile.get('port'),
+                            email: profile.get('email'),
+                            username: profile.get('username'),
+                            password: profile.get('password'),
+                            useSSL: profile.get('useSSL'),
+                            useTLS: profile.get('useTLS')
+                        }));
                     } catch (error) {
                         console.error('Error loading SMTP profiles:', error);
                     }
@@ -273,24 +278,28 @@
 
                 async saveProfile() {
                     try {
-                        const method = this.editingProfileId ? 'PUT' : 'POST';
-                        const url = this.editingProfileId ? `/api/smtp-profiles/${this.editingProfileId}` : '/api/smtp-profiles';
+                        const SmtpProfile = Parse.Object.extend('SmtpProfile');
+                        let profile;
                         
-                        const response = await fetch(url, {
-                            method: method,
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Parse-Application-Id': PARSE_APPLICATION_ID,
-                                'X-Parse-Javascript-Key': PARSE_JAVASCRIPT_KEY,
-                                'X-Parse-Session-Token': sessionToken
-                            },
-                            body: JSON.stringify(this.currentProfile)
-                        });
-                        
-                        if (response.ok) {
-                            await this.loadSmtpProfiles();
-                            this.closeProfileDrawer();
+                        if (this.editingProfileId) {
+                            profile = new SmtpProfile();
+                            profile.id = this.editingProfileId;
+                        } else {
+                            profile = new SmtpProfile();
                         }
+                        
+                        profile.set('name', this.currentProfile.name);
+                        profile.set('host', this.currentProfile.host);
+                        profile.set('port', this.currentProfile.port);
+                        profile.set('email', this.currentProfile.email);
+                        profile.set('username', this.currentProfile.username);
+                        profile.set('password', this.currentProfile.password);
+                        profile.set('useSSL', this.currentProfile.useSSL);
+                        profile.set('useTLS', this.currentProfile.useTLS);
+                        
+                        await profile.save();
+                        await this.loadSmtpProfiles();
+                        this.closeProfileDrawer();
                     } catch (error) {
                         console.error('Error saving profile:', error);
                     }
@@ -299,18 +308,11 @@
                 async deleteProfile(profileId) {
                     if (confirm('Êtes-vous sûr de vouloir supprimer ce profil ?')) {
                         try {
-                            const response = await fetch(`/api/smtp-profiles/${profileId}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'X-Parse-Application-Id': PARSE_APPLICATION_ID,
-                                    'X-Parse-Javascript-Key': PARSE_JAVASCRIPT_KEY,
-                                    'X-Parse-Session-Token': sessionToken
-                                }
-                            });
-                            
-                            if (response.ok) {
-                                await this.loadSmtpProfiles();
-                            }
+                            const SmtpProfile = Parse.Object.extend('SmtpProfile');
+                            const profile = new SmtpProfile();
+                            profile.id = profileId;
+                            await profile.destroy();
+                            await this.loadSmtpProfiles();
                         } catch (error) {
                             console.error('Error deleting profile:', error);
                         }

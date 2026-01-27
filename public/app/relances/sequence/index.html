@@ -77,7 +77,7 @@
     
     /* Styles pour les différents types de popups */
     .popup-info {
-      border-top: 4px solid #3b82f6;
+      border-top: 4px solid #007ACE;
     }
     
     .popup-success {
@@ -85,11 +85,15 @@
     }
     
     .popup-warning {
-      border-top: 4px solid #f59e0b;
+      border-top: 4px solid #007ACE;
     }
     
     .popup-error {
       border-top: 4px solid #ef4444;
+    }
+    
+    .popup-confirm {
+      border-top: 4px solid #007ACE;
     }
     
     /* Style pour les callouts */
@@ -407,7 +411,8 @@
       'popup-info': popupType === 'info',
       'popup-success': popupType === 'success',
       'popup-warning': popupType === 'warning',
-      'popup-error': popupType === 'error'
+      'popup-error': popupType === 'error',
+      'popup-confirm': popupType === 'confirm'
     }" @click.stop>
       <div class="p-6">
         <div class="flex justify-between items-start mb-4">
@@ -423,15 +428,15 @@
         </div>
         <p class="text-gray-700 mb-6" x-text="popupMessage"></p>
         <div class="flex justify-end gap-3">
-          <template x-if="popupType === 'warning'">
+          <template x-if="popupType === 'warning' || popupType === 'confirm'">
             <button @click="closePopup" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
               Annuler
             </button>
-            <button @click="executeConfirm" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">
+            <button @click="executeConfirm" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
               Confirmer
             </button>
           </template>
-          <template x-if="popupType !== 'warning'">
+          <template x-if="popupType !== 'warning' && popupType !== 'confirm'">
             <button @click="closePopup" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
               OK
             </button>
