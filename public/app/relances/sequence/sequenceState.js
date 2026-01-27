@@ -24,6 +24,51 @@ function sequenceState() {
       this.sequenceId = urlParams.get('id');
       
       this.fetchSequence();
+      
+      // Initialiser le glisser-déposer après un court délai pour s'assurer que le DOM est prêt
+      setTimeout(() => this.initSortable(), 100);
+    },
+    
+    initSortable() {
+      // Vérifier que le conteneur existe et que Sortable est disponible
+      if (!this.$refs.actionsContainer || !Sortable) {
+        console.log('Sortable non disponible ou conteneur non trouvé, réessai dans 500ms');
+        setTimeout(() => this.initSortable(), 500);
+        return;
+      }
+      
+      // Initialiser Sortable sur le conteneur des actions
+      new Sortable(this.$refs.actionsContainer, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        handle: '.sortable-item',
+        onEnd: (evt) => {
+          this.onSortEnd(evt);
+        }
+      });
+      
+      console.log('Sortable initialisé avec succès');
+    },
+    
+    onSortEnd(evt) {
+      if (!this.sequence || !this.sequence.actions) {
+        return;
+      }
+      
+      // Créer une copie du tableau des actions
+      const newActions = [...this.sequence.actions];
+      
+      // Déplacer l'élément dans le tableau
+      const [movedItem] = newActions.splice(evt.oldIndex, 1);
+      newActions.splice(evt.newIndex, 0, movedItem);
+      
+      // Mettre à jour les actions
+      this.sequence.actions = newActions;
+      
+      // Sauvegarder les modifications
+      this.updateSequenceActions(newActions);
+      
+      console.log('Actions réorganisées:', newActions);
     },
     
     async fetchSequence() {
@@ -409,6 +454,17 @@ ${exampleMessage}`;
     // Profils SMTP
     smtpProfiles: [],
     
+    // État pour le drawer d'édition
+    editingActionIndex: null,
+    editActionType: 'email',
+    editActionDelay: 0,
+    editActionSubject: '',
+    editActionSenderEmail: '',
+    editActionMessage: '',
+    
+    // État pour le drawer
+    showEditDrawer: false,
+    
     // Gestion des actions de la séquence
     async updateSequenceActions(newActions) {
       if (!this.sequence) {
@@ -434,6 +490,99 @@ ${exampleMessage}`;
         console.error('Erreur lors de la mise à jour de la séquence:', error);
         alert('Erreur lors de la sauvegarde des modifications');
         return false;
+      }
+    },
+    
+    // Méthodes pour l'édition des actions
+    editAction(index) {
+      if (!this.sequence || !this.sequence.actions || index < 0 || index >= this.sequence.actions.length) {
+        return;
+      }
+      
+      const action = this.sequence.actions[index];
+      
+      // Remplir les champs d'édition
+      this.editingActionIndex = index;
+      this.editActionType = action.type || 'email';
+      this.editActionDelay = action.delay || 0;
+      this.editActionSubject = action.subject || '';
+      this.editActionSenderEmail = action.senderEmail || '';
+      this.editActionMessage = action.message || '';
+      
+      // Ouvrir le drawer
+      this.showEditDrawer = true;
+      
+      console.log('Édition de l\'action à l\'index:', index, action);
+    },
+    
+    async saveEditedAction() {
+      if (this.editingActionIndex === null || !this.sequence || !this.sequence.actions) {
+        return;
+      }
+      
+      if (!this.editActionMessage.trim()) {
+        alert('Veuillez remplir le message.');
+        return;
+      }
+      
+      try {
+        // Créer une copie des actions
+        const newActions = [...this.sequence.actions];
+        
+        // Mettre à jour l'action
+        newActions[this.editingActionIndex] = {
+          type: this.editActionType,
+          delay: parseInt(this.editActionDelay),
+          message: this.editActionMessage
+        };
+        
+        // Ajouter les champs spécifiques aux emails
+        if (this.editActionType === 'email') {
+          newActions[this.editingActionIndex].subject = this.editActionSubject;
+          newActions[this.editingActionIndex].senderEmail = this.editActionSenderEmail;
+        }
+        
+        // Sauvegarder les modifications
+        const success = await this.updateSequenceActions(newActions);
+        
+        if (success) {
+          // Fermer le drawer
+          this.showEditDrawer = false;
+          this.editingActionIndex = null;
+          
+          console.log('Action mise à jour avec succès');
+        }
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour de l\'action:', error);
+        alert('Erreur lors de la sauvegarde des modifications.');
+      }
+    },
+    
+    cancelEditAction() {
+      this.showEditDrawer = false;
+      this.editingActionIndex = null;
+    },
+    
+    async deleteAction(index) {
+      if (!this.sequence || !this.sequence.actions || index < 0 || index >= this.sequence.actions.length) {
+        return;
+      }
+      
+      if (confirm('Êtes-vous sûr de vouloir supprimer cette action ?')) {
+        try {
+          // Créer une copie des actions sans l'élément supprimé
+          const newActions = this.sequence.actions.filter((_, i) => i !== index);
+          
+          // Sauvegarder les modifications
+          const success = await this.updateSequenceActions(newActions);
+          
+          if (success) {
+            console.log('Action supprimée avec succès');
+          }
+        } catch (error) {
+          console.error('Erreur lors de la suppression de l\'action:', error);
+          alert('Erreur lors de la suppression de l\'action.');
+        }
       }
     },
     
