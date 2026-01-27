@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relances - Impayés</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <!-- Plugin Alpine.js pour x-collapse -->
   <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
@@ -206,10 +206,12 @@
       console.error('Configuration Parse non disponible');
     }
     
-    // Initialiser les icônes Lucide
+    // Initialiser les icônes Feather
     document.addEventListener('DOMContentLoaded', function() {
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
+      if (typeof feather !== 'undefined') {
+        feather.replace();
+        // Déclencher un événement pour informer que Feather est prêt
+        document.dispatchEvent(new Event('featherLoaded'));
       }
     });
   </script>

@@ -227,7 +227,7 @@ function sequenceState() {
       
       // Vérifier si des profils SMTP sont disponibles
       if (this.smtpProfiles.length === 0) {
-        this.showPopupMessage(
+        await this.showPopupMessage(
           'Configuration requise',
           'Aucun profil SMTP configuré. Veuillez ajouter un profil SMTP avant de changer le statut.',
           'error'
@@ -239,43 +239,46 @@ function sequenceState() {
       const newStatus = !this.sequence.isActif;
       const action = newStatus ? 'activer' : 'désactiver';
       
-      this.showConfirmation(
+      const confirmed = await this.confirm(
         newStatus ? 'Activer la séquence' : 'Désactiver la séquence',
-        `Êtes-vous sûr de vouloir ${action} cette séquence ?`,
-        async () => {
-          try {
-            this.isTogglingStatus = true;
-            
-            const Sequences = Parse.Object.extend('sequences');
-            const sequence = new Sequences();
-            sequence.id = this.sequence.objectId;
-            
-            sequence.set('isActif', newStatus);
-            
-            await sequence.save();
-            
-            this.sequence.isActif = newStatus;
-            
-            console.log('Statut de la séquence mis à jour:', newStatus ? 'Actif' : 'Inactif');
-            
-            this.showPopupMessage(
-              'Statut mis à jour',
-              `La séquence a été ${action}ée avec succès.`,
-              'success'
-            );
-            
-          } catch (error) {
-            console.error('Erreur lors de la mise à jour du statut:', error);
-            this.showPopupMessage(
-              'Erreur de mise à jour',
-              'Une erreur est survenue lors de la mise à jour du statut.',
-              'error'
-            );
-          } finally {
-            this.isTogglingStatus = false;
-          }
-        }
+        `Êtes-vous sûr de vouloir ${action} cette séquence ?`
       );
+      
+      if (!confirmed) {
+        return;
+      }
+      
+      try {
+        this.isTogglingStatus = true;
+        
+        const Sequences = Parse.Object.extend('sequences');
+        const sequence = new Sequences();
+        sequence.id = this.sequence.objectId;
+        
+        sequence.set('isActif', newStatus);
+        
+        await sequence.save();
+        
+        this.sequence.isActif = newStatus;
+        
+        console.log('Statut de la séquence mis à jour:', newStatus ? 'Actif' : 'Inactif');
+        
+        await this.showPopupMessage(
+          'Statut mis à jour',
+          `La séquence a été ${action}ée avec succès.`,
+          'success'
+        );
+        
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour du statut:', error);
+        await this.showPopupMessage(
+          'Erreur de mise à jour',
+          'Une erreur est survenue lors de la mise à jour du statut.',
+          'error'
+        );
+      } finally {
+        this.isTogglingStatus = false;
+      }
     },
     
     testSequence() {
@@ -345,31 +348,34 @@ function sequenceState() {
         return;
       }
       
-      this.confirmAction(
+      const confirmed = await this.confirm(
         'Supprimer la séquence',
-        'Êtes-vous sûr de vouloir supprimer cette séquence ? Cette action est irréversible.',
-        async () => {
-          try {
-            const Sequences = Parse.Object.extend('sequences');
-            const sequence = new Sequences();
-            sequence.id = this.sequence.objectId;
-            
-            await sequence.destroy();
-            
-            console.log('Séquence supprimée avec succès');
-            
-            // Redirection vers la liste des séquences
-            window.location.href = '/app/relances/sequences/';
-          } catch (error) {
-            console.error('Erreur lors de la suppression de la séquence:', error);
-            this.showPopupMessage(
-              'Erreur de suppression',
-              'Une erreur est survenue lors de la suppression de la séquence.',
-              'error'
-            );
-          }
-        }
+        'Êtes-vous sûr de vouloir supprimer cette séquence ? Cette action est irréversible.'
       );
+      
+      if (!confirmed) {
+        return;
+      }
+      
+      try {
+        const Sequences = Parse.Object.extend('sequences');
+        const sequence = new Sequences();
+        sequence.id = this.sequence.objectId;
+        
+        await sequence.destroy();
+        
+        console.log('Séquence supprimée avec succès');
+        
+        // Redirection vers la liste des séquences
+        window.location.href = '/app/relances/sequences/';
+      } catch (error) {
+        console.error('Erreur lors de la suppression de la séquence:', error);
+        await this.showPopupMessage(
+          'Erreur de suppression',
+          'Une erreur est survenue lors de la suppression de la séquence.',
+          'error'
+        );
+      }
     },
     
     formatActionType(type) {
@@ -561,7 +567,14 @@ ${exampleMessage}`;
     showPopup: false,
     popupTitle: '',
     popupMessage: '',
-    popupType: 'info', // info, success, warning, error
+    popupType: 'info', // info, success, warning, error, confirm
+    
+    // État pour les confirmations basées sur les promesses
+    confirmResolution: {
+      resolve: null,
+      reject: null,
+      action: null
+    },
     
     // État pour l'édition du nom de la séquence
     editingSequenceName: false,
@@ -684,7 +697,7 @@ ${exampleMessage}`;
       this.popupType = 'info';
     },
     
-    // Méthodes pour les popups
+    // Méthodes pour les popups basées sur les promesses
     showPopupMessage(title, message, type = 'info') {
       this.popupTitle = title;
       this.popupMessage = message;
@@ -692,58 +705,83 @@ ${exampleMessage}`;
       this.showPopup = true;
       
       console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
+      
+      // Retourner une promesse qui se résout lorsque le popup est fermé
+      return new Promise((resolve) => {
+        this.confirmResolution.resolve = resolve;
+      });
     },
     
-    showConfirmation(title, message, callback) {
+    confirm(title, message) {
       this.popupTitle = title;
       this.popupMessage = message;
       this.popupType = 'confirm';
       this.showPopup = true;
-      this.currentConfirmCallback = callback;
       
       console.log(`[CONFIRM] ${title}: ${message}`);
+      
+      // Retourner une promesse qui se résout avec true si confirmé, false si annulé
+      return new Promise((resolve, reject) => {
+        this.confirmResolution = {
+          resolve: resolve,
+          reject: reject,
+          action: null
+        };
+      });
     },
     
     closePopup() {
       this.showPopup = false;
-      this.currentConfirmCallback = null;
+      
+      // Réinitialiser la résolution de confirmation
+      if (this.confirmResolution && this.confirmResolution.reject) {
+        this.confirmResolution.reject(false);
+      }
+      
+      // Réinitialiser l'état
+      this.confirmResolution = {
+        resolve: null,
+        reject: null,
+        action: null
+      };
       this.isExecutingAction = false;
     },
     
-    confirmAction(title, message, callback) {
-      this.showConfirmation(title, message, callback);
-    },
-    
-    async executeConfirm() {
-      if (this.currentConfirmCallback && typeof this.currentConfirmCallback === 'function') {
-        try {
-          this.isExecutingAction = true;
-          
-          // Exécuter le callback et attendre sa résolution
-          const result = this.currentConfirmCallback();
-          
-          // Si le callback retourne une promesse, attendre sa résolution
-          if (result && typeof result.then === 'function') {
-            await result;
-          }
-          
-          console.log('✅ Callback de confirmation exécuté avec succès');
-          
-          // Fermer le popup uniquement après l'exécution réussie du callback
-          this.closePopup();
-        } catch (error) {
-          console.error('❌ Erreur lors de l\'exécution du callback de confirmation:', error);
-          // Réinitialiser l'état en cas d'erreur
-          this.isExecutingAction = false;
-          // Ne pas fermer le popup en cas d'erreur pour permettre à l'utilisateur de réessayer
+    async handleConfirm() {
+      if (this.isExecutingAction) {
+        return;
+      }
+      
+      this.isExecutingAction = true;
+      
+      try {
+        // Résoudre la promesse avec true (confirmé)
+        if (this.confirmResolution && this.confirmResolution.resolve) {
+          this.confirmResolution.resolve(true);
         }
-      } else {
-        // Fermer le popup si aucun callback n'est défini
+        
+        console.log('✅ Action confirmée par l\'utilisateur');
         this.closePopup();
+      } catch (error) {
+        console.error('❌ Erreur lors de la confirmation:', error);
+        this.isExecutingAction = false;
       }
     },
     
-    currentConfirmCallback: null,
+    async handleCancel() {
+      try {
+        // Résoudre la promesse avec false (annulé)
+        if (this.confirmResolution && this.confirmResolution.resolve) {
+          this.confirmResolution.resolve(false);
+        }
+        
+        console.log('ℹ️ Action annulée par l\'utilisateur');
+        this.closePopup();
+      } catch (error) {
+        console.error('❌ Erreur lors de l\'annulation:', error);
+        this.closePopup();
+      }
+    },
     
     // Méthodes pour l'édition du nom de la séquence
     startEditingSequenceName() {
@@ -801,35 +839,38 @@ ${exampleMessage}`;
         return;
       }
       
-      this.confirmAction(
+      const confirmed = await this.confirm(
         'Supprimer l\'action',
-        'Êtes-vous sûr de vouloir supprimer cette action ? Cette action est irréversible.',
-        async () => {
-          try {
-            // Créer une copie des actions sans l'élément supprimé
-            const newActions = this.sequence.actions.filter((_, i) => i !== index);
-            
-            // Sauvegarder les modifications
-            const success = await this.updateSequenceActions(newActions);
-            
-            if (success) {
-              console.log('Action supprimée avec succès');
-              this.showPopupMessage(
-                'Action supprimée',
-                'L\'action a été supprimée avec succès.',
-                'success'
-              );
-            }
-          } catch (error) {
-            console.error('Erreur lors de la suppression de l\'action:', error);
-            this.showPopupMessage(
-              'Erreur de suppression',
-              'Une erreur est survenue lors de la suppression de l\'action.',
-              'error'
-            );
-          }
-        }
+        'Êtes-vous sûr de vouloir supprimer cette action ? Cette action est irréversible.'
       );
+      
+      if (!confirmed) {
+        return;
+      }
+      
+      try {
+        // Créer une copie des actions sans l'élément supprimé
+        const newActions = this.sequence.actions.filter((_, i) => i !== index);
+        
+        // Sauvegarder les modifications
+        const success = await this.updateSequenceActions(newActions);
+        
+        if (success) {
+          console.log('Action supprimée avec succès');
+          await this.showPopupMessage(
+            'Action supprimée',
+            'L\'action a été supprimée avec succès.',
+            'success'
+          );
+        }
+      } catch (error) {
+        console.error('Erreur lors de la suppression de l\'action:', error);
+        await this.showPopupMessage(
+          'Erreur de suppression',
+          'Une erreur est survenue lors de la suppression de l\'action.',
+          'error'
+        );
+      }
     },
     
 
