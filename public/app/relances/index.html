@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relances - Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
   <script src="/components/parse-credentials.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/parse@3.3.0/dist/parse.min.js"></script>
   <script src="/assets/parse-config.js"></script>
@@ -39,6 +40,23 @@
     </div>
   </div>
   <script type="module" src="/components/relance-sidebar.js"></script>
+  <!-- Initialisation de Parse -->
+  <script>
+    // Initialiser Parse
+    if (window.parseConfig) {
+      Parse.initialize(window.parseConfig.appId, window.parseConfig.javascriptKey);
+      Parse.serverURL = window.parseConfig.serverURL;
+    } else {
+      console.error('Configuration Parse non disponible');
+    }
+    
+    // Initialiser les icônes Lucide
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    });
+  </script>
   <!-- Composant Toaster -->
   <toaster-component></toaster-component>
 </body>

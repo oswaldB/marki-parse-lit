@@ -37,12 +37,16 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <!-- Feather Icons -->
   <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
   <!-- État Alpine.js pour la page dashboard -->
   <script src="/dashboard/dashboardState.js"></script>
   <!-- Lit Element pour les composants -->
   <script type="module" src="https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm"></script>
   <!-- Configuration Parse -->
   <script src="/components/parse-credentials.js"></script>
+  <!-- Parse SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/parse@3.3.0/dist/parse.min.js"></script>
   <!-- Composants Lit -->
   <script type="module" src="/components/check-auth.js"></script>
   <script type="module" src="/components/logout-button.js"></script>
@@ -195,6 +199,30 @@
     </div>
   </div>
   </main>
+  <!-- Initialisation de Parse -->
+  <script>
+    // Initialiser Parse
+    if (window.parseConfig) {
+      Parse.initialize(window.parseConfig.appId, window.parseConfig.javascriptKey);
+      Parse.serverURL = window.parseConfig.serverURL;
+    } else {
+      console.error('Configuration Parse non disponible');
+    }
+    
+    // Initialiser les icônes Feather
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof feather !== 'undefined') {
+        feather.replace();
+      }
+    });
+    
+    // Initialiser les icônes Lucide
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    });
+  </script>
   <!-- Composant Toaster -->
   <toaster-component></toaster-component>
 </body>

@@ -6,6 +6,7 @@
   <title>Relances - Détails de la séquence</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="/components/parse-credentials.js"></script>
   <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
@@ -953,6 +954,30 @@
       </div>
     </div>
   </div>
+  <!-- Initialisation de Parse -->
+  <script>
+    // Initialiser Parse
+    if (window.parseConfig) {
+      Parse.initialize(window.parseConfig.appId, window.parseConfig.javascriptKey);
+      Parse.serverURL = window.parseConfig.serverURL;
+    } else {
+      console.error('Configuration Parse non disponible');
+    }
+    
+    // Initialiser les icônes Feather
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof feather !== 'undefined') {
+        feather.replace();
+      }
+    });
+    
+    // Initialiser les icônes Lucide
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    });
+  </script>
   <!-- Composant Toaster -->
   <toaster-component></toaster-component>
 </body>
