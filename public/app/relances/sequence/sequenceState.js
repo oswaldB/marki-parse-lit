@@ -111,31 +111,6 @@ function sequenceState() {
       }
     },
     
-    async loadSmtpProfiles() {
-      try {
-        // Utiliser directement le SDK Parse pour récupérer les profils SMTP
-        const query = new Parse.Query('SMTPProfiles');
-        const profiles = await query.find();
-        
-        this.smtpProfiles = profiles.map(profile => {
-          return {
-            id: profile.id,
-            name: profile.get('name'),
-            host: profile.get('host'),
-            port: profile.get('port'),
-            email: profile.get('email'),
-            username: profile.get('username')
-          };
-        });
-        
-        console.log('Profils SMTP chargés:', this.smtpProfiles);
-      } catch (error) {
-        console.error('Erreur lors du chargement des profils SMTP:', error);
-        // Si la classe n'existe pas, on initialise un tableau vide
-        this.smtpProfiles = [];
-      }
-    },
-
     // Méthode pour filtrer les variables
     get filteredVariables() {
       if (!this.variableSearch) {
@@ -213,8 +188,11 @@ function sequenceState() {
     
     async loadSmtpProfiles() {
       try {
+        console.log('📧 Chargement des profils SMTP...');
+        
         // Utiliser directement le SDK Parse pour récupérer les profils SMTP
-        const query = new Parse.Query('SMTPProfiles');
+        // Note: Le nom de la classe est SMTPProfile (sans "s")
+        const query = new Parse.Query('SMTPProfile');
         const profiles = await query.find();
         
         this.smtpProfiles = profiles.map(profile => {
@@ -228,9 +206,15 @@ function sequenceState() {
           };
         });
         
-        console.log('Profils SMTP chargés:', this.smtpProfiles);
+        console.log('✅ Profils SMTP chargés:', this.smtpProfiles);
+        
+        if (this.smtpProfiles.length === 0) {
+          console.log('ℹ️ Aucun profil SMTP trouvé dans la base de données');
+        }
+        
       } catch (error) {
-        console.error('Erreur lors du chargement des profils SMTP:', error);
+        console.error('❌ Erreur lors du chargement des profils SMTP:', error);
+        console.error('Détails:', error.message);
         // Si la classe n'existe pas, on initialise un tableau vide
         this.smtpProfiles = [];
       }
@@ -594,6 +578,10 @@ ${exampleMessage}`;
     popupMessage: '',
     popupType: 'info', // info, success, warning, error
     
+    // État pour l'édition du nom de la séquence
+    editingSequenceName: false,
+    originalSequenceName: '',
+    
     // État pour le test d'envoi
     testRecipient: '',
     testRecipients: [],
@@ -601,6 +589,9 @@ ${exampleMessage}`;
     
     // État pour le toggle de statut
     isTogglingStatus: false,
+    
+    // État pour le chargement des actions
+    isExecutingAction: false,
     
     // Gestion des actions de la séquence
     async updateSequenceActions(newActions) {
@@ -740,15 +731,86 @@ ${exampleMessage}`;
       this.showConfirmation(title, message, callback);
     },
     
-    executeConfirm() {
+    async executeConfirm() {
       if (this.currentConfirmCallback && typeof this.currentConfirmCallback === 'function') {
-        this.currentConfirmCallback();
+        try {
+          this.isExecutingAction = true;
+          
+          // Exécuter le callback et attendre sa résolution si c'est une promesse
+          const result = this.currentConfirmCallback();
+          
+          // Si le callback retourne une promesse, attendre sa résolution
+          if (result && typeof result.then === 'function') {
+            await result;
+          }
+          
+          console.log('✅ Callback de confirmation exécuté avec succès');
+        } catch (error) {
+          console.error('❌ Erreur lors de l\'exécution du callback de confirmation:', error);
+          // Ne pas fermer le popup en cas d'erreur pour permettre à l'utilisateur de réessayer
+          this.isExecutingAction = false;
+          return;
+        }
       }
+      
+      // Fermer le popup uniquement après l'exécution réussie du callback
       this.closePopup();
       this.currentConfirmCallback = null;
+      this.isExecutingAction = false;
     },
     
     currentConfirmCallback: null,
+    
+    // Méthodes pour l'édition du nom de la séquence
+    startEditingSequenceName() {
+      if (!this.sequence) return;
+      this.originalSequenceName = this.sequence.nom;
+      this.editingSequenceName = true;
+    },
+    
+    async saveSequenceName() {
+      if (!this.sequence || !this.sequence.nom || !this.sequence.nom.trim()) {
+        this.showPopupMessage('Nom invalide', 'Le nom de la séquence ne peut pas être vide.', 'error');
+        this.cancelEditingSequenceName();
+        return;
+      }
+      
+      try {
+        const Sequences = Parse.Object.extend('sequences');
+        const sequence = new Sequences();
+        sequence.id = this.sequence.objectId;
+        
+        sequence.set('nom', this.sequence.nom.trim());
+        
+        await sequence.save();
+        
+        console.log('Nom de la séquence mis à jour:', this.sequence.nom);
+        this.editingSequenceName = false;
+        
+        this.showPopupMessage(
+          'Nom mis à jour',
+          'Le nom de la séquence a été mis à jour avec succès.',
+          'success'
+        );
+        
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour du nom:', error);
+        this.showPopupMessage(
+          'Erreur de mise à jour',
+          'Une erreur est survenue lors de la mise à jour du nom.',
+          'error'
+        );
+        this.cancelEditingSequenceName();
+      }
+    },
+    
+    cancelEditingSequenceName() {
+      if (this.sequence) {
+        this.sequence.nom = this.originalSequenceName;
+      }
+      this.editingSequenceName = false;
+      this.originalSequenceName = '';
+    },
     
     async deleteAction(index) {
       if (!this.sequence || !this.sequence.actions || index < 0 || index >= this.sequence.actions.length) {

@@ -1,35 +1,7 @@
 // Utilisation du CDN de Lit pour éviter les problèmes d'importation
 const { LitElement, html } = lit;
 
-// Import du composant check-auth avec chemin absolu
-const checkAuthScript = document.createElement('script');
-checkAuthScript.type = 'module';
-checkAuthScript.src = '/components/check-auth.js';
-document.head.appendChild(checkAuthScript);
-
 export class RelanceSidebar extends LitElement {
-  static properties = {
-    currentPage: { type: String }
-  };
-
-  constructor() {
-    super();
-    this.currentPage = '';
-    this.checkAuthLoaded = false;
-    
-    // Attendre que le composant check-auth soit chargé
-    this.waitForCheckAuth();
-  }
-  
-  waitForCheckAuth() {
-    if (customElements.get('check-auth')) {
-      this.checkAuthLoaded = true;
-      this.requestUpdate();
-    } else {
-      setTimeout(() => this.waitForCheckAuth(), 100);
-    }
-  }
-
   createRenderRoot() {
     return this; // Désactive le shadow DOM
   }

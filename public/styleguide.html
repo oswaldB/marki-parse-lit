@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Style Guide – Steroids Studio</title>
+    <title>Style Guide Moderne – Steroids Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide-static@latest/dist/lucide.js"></script>
@@ -11,17 +11,18 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        /* Couleurs modernes */
         .bg-primary {
-            background-color: #509EE3;
+            background-color: #3b82f6;
         }
         .bg-primary-dark {
-            background-color: #236CB9;
+            background-color: #1e40af;
         }
         .text-primary {
-            color: #509EE3;
+            color: #3b82f6;
         }
         .text-primary-dark {
-            color: #236CB9;
+            color: #1e40af;
         }
         .bg-secondary {
             background-color: #6D5DCF;
@@ -30,43 +31,131 @@
             color: #6D5DCF;
         }
         .bg-success {
-            background-color: #4CAF50;
+            background-color: #10b981;
         }
         .text-success {
-            color: #4CAF50;
+            color: #10b981;
         }
         .bg-error {
-            background-color: #F44336;
+            background-color: #ef4444;
         }
         .text-error {
-            color: #F44336;
+            color: #ef4444;
         }
         .bg-warning {
-            color: #F39C12;
+            background-color: #f59e0b;
         }
         .text-warning {
-            color: #F39C12;
+            color: #f59e0b;
+        }
+        .bg-info {
+            background-color: #3b82f6;
+        }
+        .text-info {
+            color: #3b82f6;
         }
         .text-text {
-            color: #333333;
+            color: #1f2937;
         }
         .text-text-light {
-            color: #666666;
+            color: #6b7280;
         }
         .border-border {
-            border-color: #CCCCCC;
+            border-color: #d1d5db;
         }
         .bg-light {
-            background-color: #F5F7FA;
+            background-color: #f9fafb;
         }
         .galet {
             position: fixed;
             opacity: 0.1;
             z-index: -1;
         }
+        
+        /* Classes CSS personnalisées - Design moderne */
+        .card-modern {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .card-modern:hover {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        
+        .badge-modern {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            line-height: 1.25rem;
+        }
+        
+        .badge-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-warning {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .badge-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .input-modern {
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease-in-out;
+            font-size: 0.875rem;
+        }
+        
+        .input-modern:focus {
+            border-color: #3b82f6;
+            ring: 2px;
+            ring-color: #3b82f6;
+            ring-opacity: 0.5;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn-modern {
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .transition-modern {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .shadow-modern {
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        }
+        
+        .shadow-modern-lg {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
     </style>
 </head>
-<body class="bg-light relative overflow-x-hidden">
+<body class="bg-gray-50 relative overflow-x-hidden">
     <!-- Formes originales en arrière-plan -->
     <galet-component></galet-component>
     <galet-component-dark></galet-component-dark>
@@ -78,89 +167,281 @@
     <script type="module" src="./components/galet-component-wide.js"></script>
 
     <div class="max-w-7xl mx-auto p-6 relative z-10">
-        <header class="mb-8">
-            <h1 class="text-4xl font-bold text-text">Style Guide – Steroids Studio</h1>
-            <p class="text-text-light mt-2">Version 1.0 – Tailwind CSS (CDN) + Lucide</p>
+        <header class="mb-12">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                        <svg class="w-8 h-8 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                        </svg>
+                        Style Guide Moderne – Steroids Studio
+                    </h1>
+                    <p class="text-gray-500 mt-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Version 2.0 – Design Moderne avec Tailwind CSS + Lucide
+                    </p>
+                </div>
+                <span class="badge-modern badge-info">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Nouveau
+                </span>
+            </div>
+            
+            <!-- Navigation rapide -->
+            <nav class="bg-white rounded-lg p-4 border border-gray-100 shadow-modern">
+                <div class="flex flex-wrap gap-2">
+                    <a href="#couleurs" class="btn-modern bg-blue-600 text-white px-3 py-1.5 text-sm hover:bg-blue-700 transition-modern">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
+                        </svg>
+                        Couleurs
+                    </a>
+                    <a href="#typographie" class="btn-modern bg-gray-100 text-gray-700 px-3 py-1.5 text-sm hover:bg-gray-200 transition-modern border border-gray-200">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                        </svg>
+                        Typographie
+                    </a>
+                    <a href="#composants" class="btn-modern bg-gray-100 text-gray-700 px-3 py-1.5 text-sm hover:bg-gray-200 transition-modern border border-gray-200">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                        </svg>
+                        Composants
+                    </a>
+                </div>
+            </nav>
         </header>
 
-        <section class="mb-12">
-            <h2 class="text-3xl font-semibold text-text mb-4">📌 1. Style Guide Complet</h2>
+        <section id="couleurs" class="mb-12">
+            <h2 class="text-3xl font-semibold text-gray-900 mb-6 flex items-center">
+                <svg class="w-8 h-8 mr-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
+                </svg>
+                📌 1. Couleurs - Design Moderne
+            </h2>
 
             <div class="mb-8">
-                <h3 class="text-2xl font-semibold text-text mb-4">Couleurs</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-border">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-text uppercase tracking-wider">Nom</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-text uppercase tracking-wider">Couleur</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-text uppercase tracking-wider">Usage</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-text uppercase tracking-wider">Classes CSS</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-border">
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Primary</td>
-                                <td class="px-6 py-4 whitespace-nowrap"><div class="w-6 h-6 bg-primary rounded"></div></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Boutons, liens, accents</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">bg-primary, text-primary</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Primary Dark</td>
-                                <td class="px-6 py-4 whitespace-nowrap"><div class="w-6 h-6 bg-primary-dark rounded"></div></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Hover des boutons, en-têtes</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">bg-primary-dark</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Secondary</td>
-                                <td class="px-6 py-4 whitespace-nowrap"><div class="w-6 h-6 bg-secondary rounded"></div></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Accents secondaires</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">bg-secondary, text-secondary</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Success</td>
-                                <td class="px-6 py-4 whitespace-nowrap"><div class="w-6 h-6 bg-success rounded"></div></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Messages de succès</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">bg-success, text-success</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Error</td>
-                                <td class="px-6 py-4 whitespace-nowrap"><div class="w-6 h-6 bg-error rounded"></div></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Erreurs, alertes</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">bg-error, text-error</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Warning</td>
-                                <td class="px-6 py-4 whitespace-nowrap"><div class="w-6 h-6 bg-warning rounded"></div></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Alertes modérées</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">bg-warning, text-warning</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Text</td>
-                                <td class="px-6 py-4 whitespace-nowrap"><div class="w-6 h-6 bg-text rounded"></div></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Texte principal</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">text-text</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Text Light</td>
-                                <td class="px-6 py-4 whitespace-nowrap"><div class="w-6 h-6 bg-text-light rounded"></div></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Texte secondaire</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">text-text-light</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Border</td>
-                                <td class="px-6 py-4 whitespace-nowrap"><div class="w-6 h-6 border border-border rounded"></div></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Bordures, séparateurs</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">border-border</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Background Light</td>
-                                <td class="px-6 py-4 whitespace-nowrap"><div class="w-6 h-6 bg-light rounded"></div></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">Arrière-plans clairs</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-text">bg-light</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <h3 class="text-2xl font-semibold text-gray-900 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
+                    </svg>
+                    Palette de Couleurs Modernes
+                </h3>
+                <p class="text-gray-600 mb-4 flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Palette moderne avec des tons plus doux et professionnels
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Couleur Primary -->
+                    <div class="card-modern p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-900 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
+                                </svg>
+                                Primary
+                            </h4>
+                            <div class="w-6 h-6 bg-primary rounded"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">#3b82f6</p>
+                        <p class="text-sm text-gray-500 mb-2">Boutons principaux, accents, liens</p>
+                        <div class="flex gap-2">
+                            <span class="badge-modern badge-info text-xs">bg-primary</span>
+                            <span class="badge-modern badge-info text-xs">text-primary</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Couleur Primary Dark -->
+                    <div class="card-modern p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-900 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
+                                </svg>
+                                Primary Dark
+                            </h4>
+                            <div class="w-6 h-6 bg-primary-dark rounded"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">#1e40af</p>
+                        <p class="text-sm text-gray-500 mb-2">Hover des boutons, en-têtes</p>
+                        <div class="flex gap-2">
+                            <span class="badge-modern badge-info text-xs">bg-primary-dark</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Couleur Secondary -->
+                    <div class="card-modern p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-900 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
+                                </svg>
+                                Secondary
+                            </h4>
+                            <div class="w-6 h-6 bg-secondary rounded"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">#6D5DCF</p>
+                        <p class="text-sm text-gray-500 mb-2">Accents secondaires</p>
+                        <div class="flex gap-2">
+                            <span class="badge-modern badge-info text-xs">bg-secondary</span>
+                            <span class="badge-modern badge-info text-xs">text-secondary</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Couleur Success -->
+                    <div class="card-modern p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-900 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Success
+                            </h4>
+                            <div class="w-6 h-6 bg-success rounded"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">#10b981</p>
+                        <p class="text-sm text-gray-500 mb-2">Messages de succès</p>
+                        <div class="flex gap-2">
+                            <span class="badge-modern badge-info text-xs">bg-success</span>
+                            <span class="badge-modern badge-info text-xs">text-success</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Couleur Error -->
+                    <div class="card-modern p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-900 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Error
+                            </h4>
+                            <div class="w-6 h-6 bg-error rounded"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">#ef4444</p>
+                        <p class="text-sm text-gray-500 mb-2">Erreurs, alertes</p>
+                        <div class="flex gap-2">
+                            <span class="badge-modern badge-info text-xs">bg-error</span>
+                            <span class="badge-modern badge-info text-xs">text-error</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Couleur Warning -->
+                    <div class="card-modern p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-900 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                                Warning
+                            </h4>
+                            <div class="w-6 h-6 bg-warning rounded"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">#f59e0b</p>
+                        <p class="text-sm text-gray-500 mb-2">Alertes modérées</p>
+                        <div class="flex gap-2">
+                            <span class="badge-modern badge-info text-xs">bg-warning</span>
+                            <span class="badge-modern badge-info text-xs">text-warning</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Couleur Info -->
+                    <div class="card-modern p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-900 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Info
+                            </h4>
+                            <div class="w-6 h-6 bg-info rounded"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">#3b82f6</p>
+                        <p class="text-sm text-gray-500 mb-2">Informations, callouts</p>
+                        <div class="flex gap-2">
+                            <span class="badge-modern badge-info text-xs">bg-info</span>
+                            <span class="badge-modern badge-info text-xs">text-info</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Couleur Text -->
+                    <div class="card-modern p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-900 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                                </svg>
+                                Text
+                            </h4>
+                            <div class="w-6 h-6 bg-gray-900 rounded"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">#1f2937</p>
+                        <p class="text-sm text-gray-500 mb-2">Texte principal</p>
+                        <div class="flex gap-2">
+                            <span class="badge-modern badge-info text-xs">text-text</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Couleur Text Light -->
+                    <div class="card-modern p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-900 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                                </svg>
+                                Text Light
+                            </h4>
+                            <div class="w-6 h-6 bg-gray-500 rounded"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">#6b7280</p>
+                        <p class="text-sm text-gray-500 mb-2">Texte secondaire</p>
+                        <div class="flex gap-2">
+                            <span class="badge-modern badge-info text-xs">text-text-light</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Couleur Border -->
+                    <div class="card-modern p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-900 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                Border
+                            </h4>
+                            <div class="w-6 h-6 border-2 border-border rounded"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">#d1d5db</p>
+                        <p class="text-sm text-gray-500 mb-2">Bordures, séparateurs</p>
+                        <div class="flex gap-2">
+                            <span class="badge-modern badge-info text-xs">border-border</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Couleur Background Light -->
+                    <div class="card-modern p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-900 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                Background Light
+                            </h4>
+                            <div class="w-6 h-6 bg-gray-50 rounded"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">#f9fafb</p>
+                        <p class="text-sm text-gray-500 mb-2">Arrière-plans clairs</p>
+                        <div class="flex gap-2">
+                            <span class="badge-modern badge-info text-xs">bg-light</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
