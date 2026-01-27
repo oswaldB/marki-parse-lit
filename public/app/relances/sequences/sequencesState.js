@@ -62,6 +62,7 @@ function sequencesState() {
         isActif: true,
         actions: []
       };
+      this.editingSequence = null; // Réinitialiser le mode édition
       this.showCreateDrawer = true;
     },
     
@@ -83,6 +84,11 @@ function sequencesState() {
         const Sequences = Parse.Object.extend('sequences');
         const sequence = new Sequences();
         
+        // Si on est en mode édition, utiliser l'ID existant
+        if (this.editingSequence && this.editingSequence.objectId) {
+          sequence.id = this.editingSequence.objectId;
+        }
+        
         sequence.set('nom', this.newSequence.nom);
         sequence.set('description', this.newSequence.description);
         sequence.set('isActif', this.newSequence.isActif);
@@ -91,11 +97,12 @@ function sequencesState() {
         await sequence.save();
         
         this.closeCreateDrawer();
+        this.editingSequence = null; // Réinitialiser le mode édition
         await this.fetchSequences();
         
-        console.log('Séquence créée avec succès');
+        console.log(this.editingSequence ? 'Séquence mise à jour avec succès' : 'Séquence créée avec succès');
       } catch (error) {
-        console.error('Erreur lors de la création de la séquence:', error);
+        console.error('Erreur lors de la sauvegarde de la séquence:', error);
       }
     },
     
@@ -115,6 +122,14 @@ function sequencesState() {
           console.error('Erreur lors de la suppression de la séquence:', error);
         }
       }
+    },
+
+    editSequence(sequence) {
+      // Stocker la séquence à éditer
+      this.editingSequence = {...sequence};
+      this.newSequence = {...sequence};
+      this.showCreateDrawer = true;
+      console.log('Édition de la séquence:', sequence);
     },
     
     async toggleSequenceStatus(sequenceId, currentStatus) {
