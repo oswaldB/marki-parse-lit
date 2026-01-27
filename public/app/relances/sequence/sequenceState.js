@@ -24,51 +24,61 @@ function sequenceState() {
       this.sequenceId = urlParams.get('id');
       
       this.fetchSequence();
-      
-      // Initialiser le glisser-déposer après un court délai pour s'assurer que le DOM est prêt
-      setTimeout(() => this.initSortable(), 100);
     },
     
-    initSortable() {
-      // Vérifier que le conteneur existe et que Sortable est disponible
-      if (!this.$refs.actionsContainer || !Sortable) {
-        console.log('Sortable non disponible ou conteneur non trouvé, réessai dans 500ms');
-        setTimeout(() => this.initSortable(), 500);
+    // Méthodes pour réorganiser les actions avec des boutons fléchés
+    async moveActionUp(index) {
+      if (!this.sequence || !this.sequence.actions || index <= 0) {
         return;
       }
       
-      // Initialiser Sortable sur le conteneur des actions
-      new Sortable(this.$refs.actionsContainer, {
-        animation: 150,
-        ghostClass: 'sortable-ghost',
-        handle: '.sortable-item',
-        onEnd: (evt) => {
-          this.onSortEnd(evt);
-        }
-      });
-      
-      console.log('Sortable initialisé avec succès');
+      try {
+        // Créer une copie du tableau des actions
+        const newActions = [...this.sequence.actions];
+        
+        // Échanger les éléments
+        const temp = newActions[index];
+        newActions[index] = newActions[index - 1];
+        newActions[index - 1] = temp;
+        
+        // Mettre à jour les actions
+        this.sequence.actions = newActions;
+        
+        // Sauvegarder les modifications
+        await this.updateSequenceActions(newActions);
+        
+        console.log('Action déplacée vers le haut:', index);
+      } catch (error) {
+        console.error('Erreur lors du déplacement de l\'action vers le haut:', error);
+        alert('Erreur lors de la sauvegarde des modifications.');
+      }
     },
     
-    onSortEnd(evt) {
-      if (!this.sequence || !this.sequence.actions) {
+    async moveActionDown(index) {
+      if (!this.sequence || !this.sequence.actions || index >= this.sequence.actions.length - 1) {
         return;
       }
       
-      // Créer une copie du tableau des actions
-      const newActions = [...this.sequence.actions];
-      
-      // Déplacer l'élément dans le tableau
-      const [movedItem] = newActions.splice(evt.oldIndex, 1);
-      newActions.splice(evt.newIndex, 0, movedItem);
-      
-      // Mettre à jour les actions
-      this.sequence.actions = newActions;
-      
-      // Sauvegarder les modifications
-      this.updateSequenceActions(newActions);
-      
-      console.log('Actions réorganisées:', newActions);
+      try {
+        // Créer une copie du tableau des actions
+        const newActions = [...this.sequence.actions];
+        
+        // Échanger les éléments
+        const temp = newActions[index];
+        newActions[index] = newActions[index + 1];
+        newActions[index + 1] = temp;
+        
+        // Mettre à jour les actions
+        this.sequence.actions = newActions;
+        
+        // Sauvegarder les modifications
+        await this.updateSequenceActions(newActions);
+        
+        console.log('Action déplacée vers le bas:', index);
+      } catch (error) {
+        console.error('Erreur lors du déplacement de l\'action vers le bas:', error);
+        alert('Erreur lors de la sauvegarde des modifications.');
+      }
     },
     
     async fetchSequence() {
