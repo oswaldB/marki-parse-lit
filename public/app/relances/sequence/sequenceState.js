@@ -570,11 +570,7 @@ ${exampleMessage}`;
     popupType: 'info', // info, success, warning, error, confirm
     
     // État pour les confirmations basées sur les promesses
-    confirmResolution: {
-      resolve: null,
-      reject: null,
-      action: null
-    },
+    pendingConfirmation: null,
     
     // État pour l'édition du nom de la séquence
     editingSequenceName: false,
@@ -703,12 +699,14 @@ ${exampleMessage}`;
       this.popupMessage = message;
       this.popupType = type;
       this.showPopup = true;
+      this.pendingConfirmation = null;
       
       console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
       
       // Retourner une promesse qui se résout lorsque le popup est fermé
       return new Promise((resolve) => {
-        this.confirmResolution.resolve = resolve;
+        // Stocker la fonction de résolution pour plus tard
+        this.pendingConfirmation = { resolve, isConfirm: false };
       });
     },
     
@@ -721,62 +719,67 @@ ${exampleMessage}`;
       console.log(`[CONFIRM] ${title}: ${message}`);
       
       // Retourner une promesse qui se résout avec true si confirmé, false si annulé
-      return new Promise((resolve, reject) => {
-        this.confirmResolution = {
-          resolve: resolve,
-          reject: reject,
-          action: null
-        };
+      return new Promise((resolve) => {
+        // Stocker la fonction de résolution avec un indicateur de confirmation
+        this.pendingConfirmation = { resolve, isConfirm: true };
       });
     },
     
     closePopup() {
       this.showPopup = false;
       
-      // Réinitialiser la résolution de confirmation
-      if (this.confirmResolution && this.confirmResolution.reject) {
-        this.confirmResolution.reject(false);
+      // Si c'est une confirmation en attente, la résoudre avec false (annulation)
+      if (this.pendingConfirmation && this.pendingConfirmation.isConfirm) {
+        this.pendingConfirmation.resolve(false);
       }
       
       // Réinitialiser l'état
-      this.confirmResolution = {
-        resolve: null,
-        reject: null,
-        action: null
-      };
+      this.pendingConfirmation = null;
       this.isExecutingAction = false;
     },
     
+    resolveConfirmation(result) {
+      if (this.pendingConfirmation) {
+        // Résoudre la promesse avec le résultat
+        this.pendingConfirmation.resolve(result);
+        
+        // Réinitialiser l'état
+        this.pendingConfirmation = null;
+        this.isExecutingAction = false;
+        
+        // Fermer le popup
+        this.closePopup();
+      }
+    },
+    
     async handleConfirm() {
-      if (this.isExecutingAction) {
+      if (this.isExecutingAction || !this.pendingConfirmation) {
         return;
       }
       
       this.isExecutingAction = true;
       
       try {
-        // Résoudre la promesse avec true (confirmé)
-        if (this.confirmResolution && this.confirmResolution.resolve) {
-          this.confirmResolution.resolve(true);
-        }
-        
         console.log('✅ Action confirmée par l\'utilisateur');
-        this.closePopup();
+        // Résoudre avec true (confirmé)
+        this.resolveConfirmation(true);
       } catch (error) {
         console.error('❌ Erreur lors de la confirmation:', error);
         this.isExecutingAction = false;
+        this.closePopup();
       }
     },
     
     async handleCancel() {
-      try {
-        // Résoudre la promesse avec false (annulé)
-        if (this.confirmResolution && this.confirmResolution.resolve) {
-          this.confirmResolution.resolve(false);
-        }
-        
-        console.log('ℹ️ Action annulée par l\'utilisateur');
+      if (!this.pendingConfirmation) {
         this.closePopup();
+        return;
+      }
+      
+      try {
+        console.log('ℹ️ Action annulée par l\'utilisateur');
+        // Résoudre avec false (annulé)
+        this.resolveConfirmation(false);
       } catch (error) {
         console.error('❌ Erreur lors de l\'annulation:', error);
         this.closePopup();
