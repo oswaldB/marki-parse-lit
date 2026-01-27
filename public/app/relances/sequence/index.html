@@ -177,7 +177,17 @@
                             <span class="text-sm text-gray-600" x-text="action.senderEmail"></span>
                           </div>
                         </template>
-                        <p class="text-gray-700" x-text="action.message"></p>
+                        <div class="text-gray-700">
+                          <template x-if="action.message.length <= 100">
+                            <span x-text="action.message"></span>
+                          </template>
+                          <template x-if="action.message.length > 100">
+                            <span x-text="action.message.substring(0, 100) + '...'"></span>
+                            <button @click="showFullMessage(action.message)" class="text-blue-500 hover:text-blue-700 text-sm ml-1 font-medium">
+                              Voir plus
+                            </button>
+                          </template>
+                        </div>
                       </div>
                     </template>
 

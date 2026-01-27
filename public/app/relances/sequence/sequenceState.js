@@ -563,6 +563,10 @@ ${exampleMessage}`;
       this.editingActionIndex = null;
     },
     
+    showFullMessage(message) {
+      alert(message);
+    },
+    
     async deleteAction(index) {
       if (!this.sequence || !this.sequence.actions || index < 0 || index >= this.sequence.actions.length) {
         return;
