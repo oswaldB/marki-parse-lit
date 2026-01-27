@@ -1,13 +1,6 @@
 // parse-config.js - Configuration pour Parse Server
 // Ce fichier définit les fonctions nécessaires pour interagir avec Parse Server
 
-// Configuration par défaut pour le développement
-window.parseConfig = window.parseConfig || {
-  appId: 'YOUR_APP_ID',
-  javascriptKey: 'YOUR_JS_KEY',
-  serverURL: 'http://localhost:1337/parse'
-};
-
 // Fonction pour initialiser Parse
 function initializeParse() {
   if (window.parseConfig) {
@@ -93,7 +86,7 @@ async function deleteRecordInParse(className, objectId) {
 }
 
 // Exporter les fonctions pour une utilisation globale
-window.parseConfig = {
+window.parseFunctions = {
   initializeParse,
   fetchDataFromParse,
   createRecordInParse,

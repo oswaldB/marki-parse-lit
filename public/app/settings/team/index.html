@@ -6,6 +6,7 @@
     <title>Équipe - Marki Parse</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
     <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
@@ -37,22 +38,22 @@
             <div class="flex items-center justify-between p-4 border-b">
                 <h1 class="text-xl font-bold text-gray-800">Marki Parse</h1>
                 <button @click="sidebarOpen = false" class="md:hidden">
-                    <i data-lucide="x" class="w-6 h-6"></i>
+                    <i data-feather="x" class="w-6 h-6"></i>
                 </button>
             </div>
             <nav class="p-4">
                 <a href="/dashboard" class="flex items-center p-2 text-gray-700 rounded hover:bg-gray-100">
-                    <i data-lucide="home" class="w-5 h-5 mr-3"></i>
+                    <i data-feather="home" class="w-5 h-5 mr-3"></i>
                     <span>Tableau de bord</span>
                 </a>
                 <a href="/app/relances" class="flex items-center p-2 text-gray-700 rounded hover:bg-gray-100 mt-2">
-                    <i data-lucide="mail" class="w-5 h-5 mr-3"></i>
+                    <i data-feather="mail" class="w-5 h-5 mr-3"></i>
                     <span>Relances</span>
                 </a>
                 <div x-show="currentUser.is_admin" class="mt-4">
                     <h3 class="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Administration</h3>
                     <a href="/app/settings/team" class="flex items-center p-2 text-blue-600 bg-blue-50 rounded mt-2">
-                        <i data-lucide="users" class="w-5 h-5 mr-3"></i>
+                        <i data-feather="users" class="w-5 h-5 mr-3"></i>
                         <span>Équipe</span>
                     </a>
                 </div>
@@ -65,14 +66,14 @@
             <header class="flex items-center justify-between p-4 border-b bg-white">
                 <div class="flex items-center">
                     <button @click="sidebarOpen = true" class="mr-4 md:hidden">
-                        <i data-lucide="menu" class="w-6 h-6"></i>
+                        <i data-feather="menu" class="w-6 h-6"></i>
                     </button>
                     <h2 class="text-lg font-semibold text-gray-800">Gestion de l'équipe</h2>
                 </div>
                 <div class="flex items-center">
                     <span class="text-sm text-gray-600 mr-4" x-text="currentUser.email"></span>
                     <button @click="logout" class="p-2 text-gray-500 hover:text-gray-700">
-                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                        <i data-feather="log-out" class="w-5 h-5"></i>
                     </button>
                 </div>
             </header>
@@ -84,7 +85,7 @@
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-2xl font-bold text-gray-800">Membres de l'équipe</h3>
                         <button @click="openUserDrawer(null)" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                            <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                            <i data-feather="plus" class="w-5 h-5 mr-2"></i>
                             <span>Ajouter un membre</span>
                         </button>
                     </div>
@@ -124,7 +125,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button @click="openUserDrawer(user)" class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                                <i data-lucide="edit" class="w-5 h-5"></i>
+                                                <i data-feather="edit" class="w-5 h-5"></i>
                                             </button>
                                         </td>
                                     </tr>
@@ -150,7 +151,7 @@
                             <div class="flex items-center justify-between p-6 border-b">
                                 <h3 class="text-lg font-medium text-gray-900" x-text="drawerTitle"></h3>
                                 <button @click="closeDrawer" class="text-gray-400 hover:text-gray-500">
-                                    <i data-lucide="x" class="w-6 h-6"></i>
+                                    <i data-feather="x" class="w-6 h-6"></i>
                                 </button>
                             </div>
 
@@ -215,12 +216,19 @@
             console.error('Configuration Parse non disponible');
         }
         
-        // Initialiser Lucide
+        // Initialiser Feather
         document.addEventListener('alpine:init', () => {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
+            if (typeof feather !== 'undefined') {
+                feather.replace();
             } else {
-                console.error('Lucide non disponible');
+                console.error('Feather non disponible');
+            }
+        });
+        
+        // Initialiser les icônes Feather après le chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof feather !== 'undefined') {
+                feather.replace();
             }
         });
         
@@ -340,11 +348,6 @@
                 }
             }
         }
-        
-        // Initialiser les icônes Lucide
-        document.addEventListener('alpine:init', () => {
-            lucide.createIcons();
-        });
     </script>
     <!-- Composant Toaster -->
     <toaster-component></toaster-component>

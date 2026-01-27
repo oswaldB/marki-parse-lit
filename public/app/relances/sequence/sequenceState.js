@@ -690,7 +690,6 @@ ${exampleMessage}`;
       this.popupMessage = message;
       this.popupType = type;
       this.showPopup = true;
-      this.showConfirmButton = false;
       
       console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
     },
@@ -700,7 +699,6 @@ ${exampleMessage}`;
       this.popupMessage = message;
       this.popupType = 'confirm';
       this.showPopup = true;
-      this.showConfirmButton = true;
       this.currentConfirmCallback = callback;
       
       console.log(`[CONFIRM] ${title}: ${message}`);
@@ -708,6 +706,8 @@ ${exampleMessage}`;
     
     closePopup() {
       this.showPopup = false;
+      this.currentConfirmCallback = null;
+      this.isExecutingAction = false;
     },
     
     confirmAction(title, message, callback) {
@@ -719,7 +719,7 @@ ${exampleMessage}`;
         try {
           this.isExecutingAction = true;
           
-          // Exécuter le callback et attendre sa résolution si c'est une promesse
+          // Exécuter le callback et attendre sa résolution
           const result = this.currentConfirmCallback();
           
           // Si le callback retourne une promesse, attendre sa résolution
@@ -728,18 +728,19 @@ ${exampleMessage}`;
           }
           
           console.log('✅ Callback de confirmation exécuté avec succès');
+          
+          // Fermer le popup uniquement après l'exécution réussie du callback
+          this.closePopup();
         } catch (error) {
           console.error('❌ Erreur lors de l\'exécution du callback de confirmation:', error);
-          // Ne pas fermer le popup en cas d'erreur pour permettre à l'utilisateur de réessayer
+          // Réinitialiser l'état en cas d'erreur
           this.isExecutingAction = false;
-          return;
+          // Ne pas fermer le popup en cas d'erreur pour permettre à l'utilisateur de réessayer
         }
+      } else {
+        // Fermer le popup si aucun callback n'est défini
+        this.closePopup();
       }
-      
-      // Fermer le popup uniquement après l'exécution réussie du callback
-      this.closePopup();
-      this.currentConfirmCallback = null;
-      this.isExecutingAction = false;
     },
     
     currentConfirmCallback: null,

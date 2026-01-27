@@ -204,17 +204,17 @@
                                             <button @click="openProfileDrawer(profile)" 
                                                     class="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors" 
                                                     title="Modifier le profil">
-                                                <i data-lucide="edit" class="w-4 h-4"></i>
+                                                <i data-feather="edit" class="w-4 h-4"></i>
                                             </button>
                                             <button @click="archiveProfile(profile.objectId)" 
                                                     class="p-2 text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors" 
                                                     title="Archiver le profil">
-                                                <i data-lucide="archive" class="w-4 h-4"></i>
+                                                <i data-feather="archive" class="w-4 h-4"></i>
                                             </button>
                                             <button @click="deleteProfile(profile.objectId)" 
                                                     class="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors" 
                                                     title="Supprimer le profil">
-                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                <i data-feather="trash-2" class="w-4 h-4"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -241,7 +241,7 @@
                         <div class="flex items-center justify-between p-6 border-b">
                             <h3 class="text-lg font-medium text-gray-900" x-text="drawerTitle"></h3>
                             <button @click="closeDrawer" class="text-gray-400 hover:text-gray-500">
-                                <i data-lucide="x" class="w-6 h-6"></i>
+                                <i data-feather="x" class="w-6 h-6"></i>
                             </button>
                         </div>
 
@@ -250,7 +250,7 @@
                             <form @submit.prevent="saveProfile" class="space-y-6">
                                 <div>
                                     <label for="profileName" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                                        <i data-lucide="tag" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                        <i data-feather="tag" class="w-4 h-4 mr-2 text-gray-500"></i>
                                         Nom du profil
                                     </label>
                                     <input type="text" id="profileName" x-model="profileForm.name" required 
@@ -259,7 +259,7 @@
 
                                 <div>
                                     <label for="profileHost" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                                        <i data-lucide="server" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                        <i data-feather="server" class="w-4 h-4 mr-2 text-gray-500"></i>
                                         Hôte SMTP
                                     </label>
                                     <input type="text" id="profileHost" x-model="profileForm.host" required 
@@ -268,7 +268,7 @@
 
                                 <div>
                                     <label for="profilePort" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                                        <i data-lucide="hash" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                        <i data-feather="hash" class="w-4 h-4 mr-2 text-gray-500"></i>
                                         Port SMTP
                                     </label>
                                     <input type="number" id="profilePort" x-model="profileForm.port" required 
@@ -277,7 +277,7 @@
 
                                 <div>
                                     <label for="profileUsername" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                                        <i data-lucide="user" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                        <i data-feather="user" class="w-4 h-4 mr-2 text-gray-500"></i>
                                         Nom d'utilisateur
                                     </label>
                                     <input type="text" id="profileUsername" x-model="profileForm.username" 
@@ -286,7 +286,7 @@
 
                                 <div>
                                     <label for="profilePassword" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                                        <i data-lucide="lock" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                        <i data-feather="lock" class="w-4 h-4 mr-2 text-gray-500"></i>
                                         Mot de passe
                                     </label>
                                     <input type="password" id="profilePassword" x-model="profileForm.password" 
@@ -296,7 +296,7 @@
 
                                 <div>
                                     <label for="profileEmail" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                                        <i data-lucide="mail" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                        <i data-feather="mail" class="w-4 h-4 mr-2 text-gray-500"></i>
                                         Email expéditeur
                                     </label>
                                     <input type="email" id="profileEmail" x-model="profileForm.email" required 
@@ -308,7 +308,7 @@
                                         <input type="checkbox" id="profileSSL" x-model="profileForm.useSSL" 
                                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                                         <label for="profileSSL" class="ml-2 block text-sm text-gray-700 flex items-center">
-                                            <i data-lucide="lock" class="w-4 h-4 mr-1 text-gray-500"></i>
+                                            <i data-feather="lock" class="w-4 h-4 mr-1 text-gray-500"></i>
                                             Utiliser SSL
                                         </label>
                                     </div>
@@ -317,7 +317,7 @@
                                         <input type="checkbox" id="profileTLS" x-model="profileForm.useTLS" 
                                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                                         <label for="profileTLS" class="ml-2 block text-sm text-gray-700 flex items-center">
-                                            <i data-lucide="shield" class="w-4 h-4 mr-1 text-gray-500"></i>
+                                            <i data-feather="shield" class="w-4 h-4 mr-1 text-gray-500"></i>
                                             Utiliser TLS
                                         </label>
                                     </div>
@@ -335,7 +335,7 @@
                                 <template x-if="currentProfile && showTestSection">
                                     <div class="border-t pt-6">
                                         <h4 class="text-sm font-medium text-gray-700 mb-4 flex items-center">
-                                            <i data-lucide="send" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                            <i data-feather="send" class="w-4 h-4 mr-2 text-gray-500"></i>
                                             Tester le profil SMTP
                                         </h4>
                                         
@@ -357,7 +357,7 @@
                                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                     </svg>
                                                 </template>
-                                                <i data-lucide="send" class="w-4 h-4 mr-2"></i>
+                                                <i data-feather="send" class="w-4 h-4 mr-2"></i>
                                                 <span x-text="isTesting ? 'Test en cours...' : 'Envoyer un email de test'"></span>
                                             </button>
                                             
@@ -366,7 +366,7 @@
                                                 <div class="p-4 rounded-md" :class="testResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'">
                                                     <template x-if="testResult.success">
                                                         <div class="flex items-center">
-                                                            <i data-lucide="check-circle" class="w-5 h-5 text-green-400 mr-2"></i>
+                                                            <i data-feather="check-circle" class="w-5 h-5 text-green-400 mr-2"></i>
                                                             <span class="text-green-700" x-text="testResult.message"></span>
                                                         </div>
                                                         <div class="text-xs text-green-600 mt-1">
@@ -375,7 +375,7 @@
                                                     </template>
                                                     <template x-if="!testResult.success">
                                                         <div class="flex items-center">
-                                                            <i data-lucide="alert-circle" class="w-5 h-5 text-red-400 mr-2"></i>
+                                                            <i data-feather="alert-circle" class="w-5 h-5 text-red-400 mr-2"></i>
                                                             <span class="text-red-700" x-text="testResult.message"></span>
                                                         </div>
                                                     </template>
@@ -390,7 +390,7 @@
                                     <div class="border-t pt-4">
                                         <button type="button" @click="toggleTestSection()" 
                                                 class="w-full flex items-center justify-center px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
-                                            <i data-lucide="send" class="w-4 h-4 mr-2"></i>
+                                            <i data-feather="send" class="w-4 h-4 mr-2"></i>
                                             <span x-text="showTestSection ? 'Masquer le test' : 'Tester ce profil'"></span>
                                         </button>
                                     </div>
@@ -410,7 +410,7 @@
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>
                                         </template>
-                                        <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                                        <i data-feather="save" class="w-4 h-4 mr-2"></i>
                                         <span x-text="isLoading ? 'Sauvegarde...' : 'Enregistrer'"></span>
                                     </button>
                                 </div>
@@ -423,10 +423,10 @@
     </div>
 
     <script>
-        // Initialiser les icônes Lucid
+        // Initialiser les icônes Feather
         document.addEventListener('DOMContentLoaded', function() {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
+            if (typeof feather !== 'undefined') {
+                feather.replace();
             }
         });
     </script>

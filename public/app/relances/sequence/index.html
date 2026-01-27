@@ -741,7 +741,7 @@
             <button @click="closePopup" class="btn-modern bg-gray-100 text-gray-700 px-4 py-2 hover:bg-gray-200 transition-modern border border-gray-200" :disabled="isExecutingAction">
               Annuler
             </button>
-            <button @click="executeConfirm" class="btn-modern bg-blue-600 text-white px-4 py-2 hover:bg-blue-700 transition-modern shadow-modern" :disabled="isExecutingAction">
+            <button @click="executeConfirm()" class="btn-modern bg-blue-600 text-white px-4 py-2 hover:bg-blue-700 transition-modern shadow-modern" :disabled="isExecutingAction">
               <template x-if="isExecutingAction">
                 <svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
