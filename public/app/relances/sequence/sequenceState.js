@@ -3,6 +3,7 @@ function sequenceState() {
   return {
     sequence: null,
     sequenceId: null,
+    editingDescription: false, // État pour l'édition de la description
     
     // Données du schéma des impayés
     impayesSchema: null,
