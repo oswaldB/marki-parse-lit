@@ -7,7 +7,11 @@ function sequencesState() {
     newSequence: {
       nom: '',
       description: '',
+      categorie: 'standard',
+      priorite: 'moyenne',
       isActif: true,
+      maxAttempts: 3,
+      intervalDays: 7,
       actions: []
     },
     newAction: {
@@ -59,7 +63,11 @@ function sequencesState() {
       this.newSequence = {
         nom: '',
         description: '',
+        categorie: 'standard',
+        priorite: 'moyenne',
         isActif: true,
+        maxAttempts: 3,
+        intervalDays: 7,
         actions: []
       };
       this.showCreateDrawer = true;
@@ -85,7 +93,11 @@ function sequencesState() {
         
         sequence.set('nom', this.newSequence.nom);
         sequence.set('description', this.newSequence.description);
+        sequence.set('categorie', this.newSequence.categorie);
+        sequence.set('priorite', this.newSequence.priorite);
         sequence.set('isActif', this.newSequence.isActif);
+        sequence.set('maxAttempts', this.newSequence.maxAttempts);
+        sequence.set('intervalDays', this.newSequence.intervalDays);
         sequence.set('actions', this.newSequence.actions);
         
         await sequence.save();
