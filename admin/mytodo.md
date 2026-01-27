@@ -1,6 +1,7 @@
 # page relance/sequence/#id
 ## todo
-+ les popup de confirmation ne permettent pas de confirmer. c'est un bug. corrige le.
++ on peut editer la description. la description est moins large.
++ les popup de confirmation ne permettent pas de confirmer. Supprime tout le code qui gère cela et met un simple prompt en javascript.
 + l'execution du tests consiste à prendre le premier impayés avec un restapayer >0 dans la base de données (Impayes) et appeler un script en cloudcode qui va envoyer tous les messages de la sequence sauf que le destinataire est la valeur dans le drawer.
 + + quand on appuie sur le bouton Tester, il faut ouvrir un drawer qui demande à qui on veut envoyer les emails - champ libre. 
 ## doing
@@ -14,13 +15,14 @@
 + + lors des confirlation, je veux que la bande supérieure soit bleu 007ACE et pas orange et il manque le bouton de confirmation de l'action.
 ---
 
-# page /app/relances/sequences
+# page @/public/app/relances/sequences
 ## todo
-+ mettre un bouton editer qui va sur la page sequence/#id
-+ mettre un bouton actif/inactif. - later
-
 ## done
++ le drawer creation nouvelle sequence, ne demande que le nom. supprime tout le reste.
++ mettre un bouton actif/inactif. - later
 + ne pas afficher les actions dans la card des sequence
+  + mettre un bouton editer qui va sur la page sequence/#id
+
 ---
 # page /app/settings/emails-smtp/
 ## todo
@@ -49,6 +51,8 @@
 
 # /app/settings/team
 ## todo
++ transforme cette page en un simple crud des users existants - pas besoin de check is_admin.
++ il faut utiliser component sidebar.js ici et pas mettre du code html dans la page.
 + une page qui permet d'ajouter des users. L'ajout de user passe par une fonction cloud code tout comme la modification. 
 + La suppression d'un user n'est pas possible
 + Seul les uses qui ont is_admin a true peuvent voir cet ecran.
@@ -95,3 +99,8 @@ export class RelanceSidebar extends LitElement {
     return html`
 ```
 + une fois codé met a jour toutes les pages qui peuvent utiliser des toasters.
+
+# global
+## todo
++ on va changer lucid par <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
++ met à jour toutes les icones du projet qui sont dans /public/

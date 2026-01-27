@@ -767,6 +767,37 @@ ${exampleMessage}`;
       this.originalSequenceName = '';
     },
     
+    // Méthode pour enregistrer la description
+    async saveDescription() {
+      if (!this.sequence || !this.sequence.description) {
+        this.editingDescription = false;
+        return;
+      }
+      
+      try {
+        const Sequences = Parse.Object.extend('sequences');
+        const sequence = new Sequences();
+        sequence.id = this.sequence.objectId;
+        
+        sequence.set('description', this.sequence.description.trim());
+        
+        await sequence.save();
+        
+        console.log('Description de la séquence mise à jour:', this.sequence.description);
+        this.editingDescription = false;
+        
+        // Utilisation de confirm au lieu des popups complexes
+        if (confirm('Description mise à jour avec succès!')) {
+          console.log('Utilisateur a confirmé la notification');
+        }
+        
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour de la description:', error);
+        alert('Erreur lors de la mise à jour de la description: ' + error.message);
+        this.editingDescription = false;
+      }
+    },
+    
     async deleteAction(index) {
       if (!this.sequence || !this.sequence.actions || index < 0 || index >= this.sequence.actions.length) {
         return;
@@ -805,10 +836,6 @@ ${exampleMessage}`;
         );
       }
     },
-    
-
-  };
-}    
     // Méthodes pour les popups (ancien système pour compatibilité)
     showPopupMessage(title, message, type = 'info') {
       this.popupTitle = title;
@@ -846,4 +873,6 @@ ${exampleMessage}`;
         this.confirmCallback();
       }
       this.closeConfirmPopup();
-};
+    }  
+  }
+}
