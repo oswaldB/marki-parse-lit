@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
     <script src="https://www.parsecdn.com/js/parse-latest.js"></script>
     <script src="/components/parse-credentials.js"></script>
+    <script src="/components/check-auth.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <style>
         body {
@@ -23,6 +24,7 @@
     </style>
 </head>
 <body class="bg-gray-50">
+    <check-auth></check-auth>
     <div x-data="appState()" class="flex h-screen">
         <!-- Sidebar -->
         <div class="w-64 bg-white shadow-md flex flex-col">
@@ -68,6 +70,32 @@
             </header>
 
             <main class="flex-1 overflow-y-auto p-6">
+                <!-- Notification -->
+                <div x-show="notification" x-transition class="mb-6">
+                    <div :class="{
+                        'bg-green-100 border-green-400 text-green-700': notification.type === 'success',
+                        'bg-red-100 border-red-400 text-red-700': notification.type === 'error'
+                    }" class="border-l-4 p-4 rounded-r-md shadow-sm">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i data-lucide="check-circle" class="w-5 h-5" x-show="notification.type === 'success'"></i>
+                                <i data-lucide="alert-circle" class="w-5 h-5" x-show="notification.type === 'error'"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm" x-text="notification.message"></p>
+                            </div>
+                            <div class="ml-auto pl-3">
+                                <div class="-mx-1.5 -my-1.5">
+                                    <button @click="notification = null" class="inline-flex bg-transparent p-1 rounded-md text-current hover:text-opacity-75 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                        <span class="sr-only">Fermer</span>
+                                        <i data-lucide="x" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- SMTP Profiles List -->
                 <div class="bg-white rounded-lg shadow-sm border">
                     <div class="p-4 border-b">
@@ -251,7 +279,6 @@
         // Vérifier que les variables Parse sont définies
         const PARSE_APPLICATION_ID = window.PARSE_APPLICATION_ID || 'your-parse-app-id';
         const PARSE_JAVASCRIPT_KEY = window.PARSE_JAVASCRIPT_KEY || 'your-parse-javascript-key';
-        const sessionToken = localStorage.getItem('sessionToken') || '';
 
         // Initialiser Lucide icons après le chargement du DOM
         document.addEventListener('DOMContentLoaded', () => {
@@ -265,6 +292,7 @@
                 showTestEmailDrawer: false,
                 testEmailRecipient: '',
                 editingProfileId: null,
+                notification: null,
                 currentProfile: {
                     name: '',
                     host: '',
@@ -277,29 +305,18 @@
                 },
 
                 init() {
-                    // Vérifier l'authentification d'abord
-                    if (!sessionToken) {
-                        window.location.href = '/login';
-                        return;
-                    }
-                    
                     // Initialiser Parse
                     Parse.initialize(PARSE_APPLICATION_ID, PARSE_JAVASCRIPT_KEY);
                     Parse.serverURL = window.PARSE_SERVER_URL || 'http://localhost:1337/parse';
                     Parse.User.enableUnsafeCurrentUser();
                     
-                    // Vérifier la session
-                    Parse.User.become(sessionToken).then(() => {
-                        this.loadSmtpProfiles();
-                    }, (error) => {
-                        console.error('Error becoming user:', error);
-                        window.location.href = '/login';
-                    });
+                    // Charger les profils SMTP
+                    this.loadSmtpProfiles();
                 },
 
                 async loadSmtpProfiles() {
                     try {
-                        const SmtpProfile = Parse.Object.extend('SmtpProfile');
+                        const SmtpProfile = Parse.Object.extend('SMTPProfiles');
                         const query = new Parse.Query(SmtpProfile);
                         const results = await query.find();
                         
@@ -345,7 +362,7 @@
 
                 async saveProfile() {
                     try {
-                        const SmtpProfile = Parse.Object.extend('SmtpProfile');
+                        const SmtpProfile = Parse.Object.extend('SMTPProfiles');
                         let profile;
                         
                         if (this.editingProfileId) {
@@ -367,21 +384,25 @@
                         await profile.save();
                         await this.loadSmtpProfiles();
                         this.closeProfileDrawer();
+                        this.showNotification(this.editingProfileId ? 'Profil SMTP mis à jour avec succès' : 'Profil SMTP créé avec succès');
                     } catch (error) {
                         console.error('Error saving profile:', error);
+                        this.showNotification('Erreur lors de l\'enregistrement du profil: ' + (error.message || 'Erreur inconnue'), 'error');
                     }
                 },
 
                 async deleteProfile(profileId) {
                     if (confirm('Êtes-vous sûr de vouloir supprimer ce profil ?')) {
                         try {
-                            const SmtpProfile = Parse.Object.extend('SmtpProfile');
+                            const SmtpProfile = Parse.Object.extend('SMTPProfiles');
                             const profile = new SmtpProfile();
                             profile.id = profileId;
                             await profile.destroy();
                             await this.loadSmtpProfiles();
+                            this.showNotification('Profil SMTP supprimé avec succès');
                         } catch (error) {
                             console.error('Error deleting profile:', error);
+                            this.showNotification('Erreur lors de la suppression du profil: ' + (error.message || 'Erreur inconnue'), 'error');
                         }
                     }
                 },
@@ -398,6 +419,13 @@
                     this.showTestEmailDrawer = false;
                     this.testEmailRecipient = '';
                 },
+                
+                showNotification(message, type = 'success') {
+                    this.notification = { message, type };
+                    setTimeout(() => {
+                        this.notification = null;
+                    }, 5000);
+                },
 
                 async sendTestEmail() {
                     try {
@@ -406,16 +434,17 @@
                             smtpProfile: this.currentProfile
                         });
                         
-                        alert('Email de test envoyé avec succès !');
+                        this.showNotification('Email de test envoyé avec succès !');
                         this.closeTestEmailDrawer();
                     } catch (error) {
                         console.error('Error sending test email:', error);
-                        alert('Erreur lors de l\'envoi de l\'email: ' + (error.message || error.error || 'Unknown error'));
+                        this.showNotification('Erreur lors de l\'envoi de l\'email: ' + (error.message || error.error || 'Erreur inconnue'), 'error');
                     }
                 },
 
                 logout() {
-                    localStorage.removeItem('sessionToken');
+                    localStorage.removeItem('parseSessionToken');
+                    sessionStorage.removeItem('parseSessionToken');
                     window.location.href = '/login';
                 }
             }
