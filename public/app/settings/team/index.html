@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Équipe - Marki Parse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
+    <script src="/assets/parse-config.js"></script>
+    <script src="/components/check-auth.js"></script>
+    <script src="/components/sidebar.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .drawer {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .drawer.open {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div x-data="app()" class="flex h-screen">
+        <!-- Sidebar -->
+        <div x-show="sidebarOpen" class="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden" @click="sidebarOpen = false"></div>
+        <div x-show="sidebarOpen" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg md:relative md:translate-x-0 transform transition-transform duration-200" :class="{ '-translate-x-full': !sidebarOpen }">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h1 class="text-xl font-bold text-gray-800">Marki Parse</h1>
+                <button @click="sidebarOpen = false" class="md:hidden">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <nav class="p-4">
+                <a href="/dashboard" class="flex items-center p-2 text-gray-700 rounded hover:bg-gray-100">
+                    <i data-lucide="home" class="w-5 h-5 mr-3"></i>
+                    <span>Tableau de bord</span>
+                </a>
+                <a href="/app/relances" class="flex items-center p-2 text-gray-700 rounded hover:bg-gray-100 mt-2">
+                    <i data-lucide="mail" class="w-5 h-5 mr-3"></i>
+                    <span>Relances</span>
+                </a>
+                <div x-show="currentUser.is_admin" class="mt-4">
+                    <h3 class="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Administration</h3>
+                    <a href="/app/settings/team" class="flex items-center p-2 text-blue-600 bg-blue-50 rounded mt-2">
+                        <i data-lucide="users" class="w-5 h-5 mr-3"></i>
+                        <span>Équipe</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="flex items-center justify-between p-4 border-b bg-white">
+                <div class="flex items-center">
+                    <button @click="sidebarOpen = true" class="mr-4 md:hidden">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <h2 class="text-lg font-semibold text-gray-800">Gestion de l'équipe</h2>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-sm text-gray-600 mr-4" x-text="currentUser.email"></span>
+                    <button @click="logout" class="p-2 text-gray-500 hover:text-gray-700">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Team Management Content -->
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <div class="max-w-6xl mx-auto">
+                    <!-- Header with Add Button -->
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800">Membres de l'équipe</h3>
+                        <button @click="openUserDrawer(null)" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                            <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                            <span>Ajouter un membre</span>
+                        </button>
+                    </div>
+
+                    <!-- Team Members Table -->
+                    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <template x-for="user in users" :key="user.objectId">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                                    <span class="text-blue-600 font-medium" x-text="user.firstName ? user.firstName.charAt(0) : 'U'"></span>
+                                                </div>
+                                                <div>
+                                                    <div class="text-sm font-medium text-gray-900" x-text="user.firstName + ' ' + user.lastName"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="user.email"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span x-show="user.is_admin" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                Administrateur
+                                            </span>
+                                            <span x-show="!user.is_admin" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                Membre
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button @click="openUserDrawer(user)" class="text-indigo-600 hover:text-indigo-900 mr-3">
+                                                <i data-lucide="edit" class="w-5 h-5"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- User Management Drawer -->
+        <div x-show="drawerOpen" class="fixed inset-0 z-50 overflow-hidden">
+            <div class="absolute inset-0 overflow-hidden">
+                <!-- Background overlay -->
+                <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity" @click="closeDrawer"></div>
+
+                <!-- Drawer panel -->
+                <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex" @click.away="closeDrawer">
+                    <div class="w-screen max-w-md bg-white shadow-xl drawer" :class="{ 'open': drawerOpen }">
+                        <div class="flex flex-col h-full">
+                            <!-- Drawer header -->
+                            <div class="flex items-center justify-between p-6 border-b">
+                                <h3 class="text-lg font-medium text-gray-900" x-text="drawerTitle"></h3>
+                                <button @click="closeDrawer" class="text-gray-400 hover:text-gray-500">
+                                    <i data-lucide="x" class="w-6 h-6"></i>
+                                </button>
+                            </div>
+
+                            <!-- Drawer content -->
+                            <div class="flex-1 overflow-y-auto p-6">
+                                <form @submit.prevent="saveUser" class="space-y-6">
+                                    <div>
+                                        <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+                                        <input type="text" id="firstName" x-model="currentUserData.firstName" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div>
+                                        <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                                        <input type="text" id="lastName" x-model="currentUserData.lastName" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div>
+                                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                        <input type="email" id="email" x-model="currentUserData.email" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div>
+                                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Mot de passe 
+                                            <span class="text-xs text-gray-500">(laisser vide pour ne pas changer)</span>
+                                        </label>
+                                        <input type="password" id="password" x-model="currentUserData.password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="isAdmin" x-model="currentUserData.is_admin" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                            <label for="isAdmin" class="ml-2 block text-sm text-gray-700">
+                                                Administrateur
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-end space-x-3">
+                                        <button type="button" @click="closeDrawer" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                            Annuler
+                                        </button>
+                                        <button type="submit" class="px-4 py-2 bg-blue-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                            Enregistrer
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function app() {
+            return {
+                sidebarOpen: false,
+                drawerOpen: false,
+                drawerTitle: 'Ajouter un membre',
+                currentUser: Parse.User.current(),
+                users: [],
+                currentUserData: {
+                    objectId: null,
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    password: '',
+                    is_admin: false
+                },
+
+                init() {
+                    this.checkAuth();
+                    this.loadUsers();
+                },
+
+                checkAuth() {
+                    if (!this.currentUser) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    
+                    // Vérifier si l'utilisateur est admin
+                    if (!this.currentUser.get('is_admin')) {
+                        window.location.href = '/dashboard';
+                        return;
+                    }
+                },
+
+                async loadUsers() {
+                    try {
+                        const query = new Parse.Query(Parse.User);
+                        const results = await query.find();
+                        this.users = results.map(user => ({
+                            objectId: user.id,
+                            firstName: user.get('firstName') || '',
+                            lastName: user.get('lastName') || '',
+                            email: user.get('email') || '',
+                            is_admin: user.get('is_admin') || false
+                        }));
+                    } catch (error) {
+                        console.error('Erreur lors du chargement des utilisateurs:', error);
+                        alert('Erreur lors du chargement des utilisateurs');
+                    }
+                },
+
+                openUserDrawer(user) {
+                    if (user) {
+                        this.drawerTitle = 'Modifier le membre';
+                        this.currentUserData = {
+                            objectId: user.objectId,
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            email: user.email,
+                            password: '',
+                            is_admin: user.is_admin
+                        };
+                    } else {
+                        this.drawerTitle = 'Ajouter un membre';
+                        this.currentUserData = {
+                            objectId: null,
+                            firstName: '',
+                            lastName: '',
+                            email: '',
+                            password: '',
+                            is_admin: false
+                        };
+                    }
+                    this.drawerOpen = true;
+                },
+
+                closeDrawer() {
+                    this.drawerOpen = false;
+                },
+
+                async saveUser() {
+                    try {
+                        const userData = { ...this.currentUserData };
+                        
+                        if (userData.objectId) {
+                            // Mise à jour d'un utilisateur existant
+                            await this.updateUser(userData);
+                        } else {
+                            // Création d'un nouvel utilisateur
+                            await this.createUser(userData);
+                        }
+                        
+                        this.closeDrawer();
+                        await this.loadUsers();
+                    } catch (error) {
+                        console.error('Erreur lors de l\'enregistrement de l\'utilisateur:', error);
+                        alert('Erreur lors de l\'enregistrement de l\'utilisateur: ' + error.message);
+                    }
+                },
+
+                async createUser(userData) {
+                    const response = await Parse.Cloud.run('createUser', userData, { useMasterKey: true });
+                    return response;
+                },
+
+                async updateUser(userData) {
+                    const response = await Parse.Cloud.run('updateUser', userData, { useMasterKey: true });
+                    return response;
+                },
+
+                async logout() {
+                    await Parse.User.logOut();
+                    window.location.href = '/login';
+                }
+            }
+        }
+        
+        // Initialiser les icônes Lucide
+        document.addEventListener('alpine:init', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

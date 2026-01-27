@@ -18,7 +18,7 @@ async function getSchema() {
         
         // Récupérer le schéma de la classe Impayes (avec majuscule)
         const schema = await Parse.Schema.all();
-        const impayesSchema = schema.find(cls => cls.className === 'Impayes');
+        const impayesSchema = schema.find(cls => cls.className === 'Impayes',{ useMasterKey: true });
 
         if (impayesSchema) {
             console.log('Schéma de la classe Impayes :');
