@@ -14,7 +14,10 @@
     <script type="module" src="/components/check-auth.js"></script>
     <script type="module" src="/components/sidebar.js"></script>
     <!-- État Alpine.js pour la gestion d'équipe -->
-    <script type="module" src="./teamState.js"></script>
+    <script type="module">
+        import { initTeamState } from './teamState.js';
+        initTeamState();
+    </script>
     <!-- Composant Toaster -->
     <script type="module" src="/components/toaster.js"></script>
     <script src="/components/toaster-store.js"></script>

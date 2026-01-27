@@ -1,8 +1,9 @@
 // État Alpine.js pour la gestion de l'équipe
 // Ce fichier contient toute la logique métier pour la page de gestion d'équipe
 
-document.addEventListener('alpine:init', () => {
-    Alpine.data('teamState', () => ({
+export function initTeamState() {
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('teamState', () => ({
         // État initial
         sidebarOpen: false,
         drawerOpen: false,

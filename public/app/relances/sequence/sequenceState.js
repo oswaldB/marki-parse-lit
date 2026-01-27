@@ -563,6 +563,12 @@ ${exampleMessage}`;
     showEditDrawer: false,
     showTestDrawer: false,
     
+    // État pour les popups (ancien système pour compatibilité)
+    showPopup: false,
+    popupTitle: '',
+    popupMessage: '',
+    popupType: 'info', // info, success, warning, error, confirm
+    
     // État pour les popups de confirmation simplifiés
     showConfirmPopup: false,
     confirmTitle: '',
@@ -802,4 +808,41 @@ ${exampleMessage}`;
     
 
   };
-}
+}    
+    // Méthodes pour les popups (ancien système pour compatibilité)
+    showPopupMessage(title, message, type = 'info') {
+      this.popupTitle = title;
+      this.popupMessage = message;
+      this.popupType = type;
+      this.showPopup = true;
+      console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
+    },
+    
+    closePopup() {
+      this.showPopup = false;
+    },
+    
+    // Méthodes pour les popups de confirmation simplifiés
+    showConfirm(title, message, callback) {
+      this.confirmTitle = title;
+      this.confirmMessage = message;
+      this.confirmCallback = callback;
+      this.showConfirmPopup = true;
+      console.log(`[CONFIRM] ${title}: ${message}`);
+    },
+    
+    confirmAction(title, message, callback) {
+      this.showConfirm(title, message, callback);
+    },
+    
+    closeConfirmPopup() {
+      this.showConfirmPopup = false;
+      this.confirmCallback = null;
+    },
+    
+    executeConfirm() {
+      if (this.confirmCallback && typeof this.confirmCallback === 'function') {
+        console.log('✅ Action confirmée par l\'utilisateur');
+        this.confirmCallback();
+      }
+      this.closeConfirmPopup();
