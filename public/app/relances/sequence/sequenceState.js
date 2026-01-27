@@ -241,21 +241,57 @@ function sequenceState() {
         return;
       }
       
-      try {
-        const Sequences = Parse.Object.extend('sequences');
-        const sequence = new Sequences();
-        sequence.id = this.sequence.objectId;
-        
-        sequence.set('isActif', !this.sequence.isActif);
-        
-        await sequence.save();
-        
-        this.sequence.isActif = !this.sequence.isActif;
-        
-        console.log('Statut de la séquence mis à jour');
-      } catch (error) {
-        console.error('Erreur lors de la mise à jour du statut:', error);
+      // Vérifier si des profils SMTP sont disponibles
+      if (this.smtpProfiles.length === 0) {
+        this.showPopupMessage(
+          'Configuration requise',
+          'Aucun profil SMTP configuré. Veuillez ajouter un profil SMTP avant de changer le statut.',
+          'error'
+        );
+        return;
       }
+      
+      // Demander confirmation
+      const newStatus = !this.sequence.isActif;
+      const action = newStatus ? 'activer' : 'désactiver';
+      
+      this.showConfirmation(
+        newStatus ? 'Activer la séquence' : 'Désactiver la séquence',
+        `Êtes-vous sûr de vouloir ${action} cette séquence ?`,
+        async () => {
+          try {
+            this.isTogglingStatus = true;
+            
+            const Sequences = Parse.Object.extend('sequences');
+            const sequence = new Sequences();
+            sequence.id = this.sequence.objectId;
+            
+            sequence.set('isActif', newStatus);
+            
+            await sequence.save();
+            
+            this.sequence.isActif = newStatus;
+            
+            console.log('Statut de la séquence mis à jour:', newStatus ? 'Actif' : 'Inactif');
+            
+            this.showPopupMessage(
+              'Statut mis à jour',
+              `La séquence a été ${action}ée avec succès.`,
+              'success'
+            );
+            
+          } catch (error) {
+            console.error('Erreur lors de la mise à jour du statut:', error);
+            this.showPopupMessage(
+              'Erreur de mise à jour',
+              'Une erreur est survenue lors de la mise à jour du statut.',
+              'error'
+            );
+          } finally {
+            this.isTogglingStatus = false;
+          }
+        }
+      );
     },
     
     testSequence() {
@@ -562,6 +598,9 @@ ${exampleMessage}`;
     testRecipient: '',
     testRecipients: [],
     availableTestEmails: [],
+    
+    // État pour le toggle de statut
+    isTogglingStatus: false,
     
     // Gestion des actions de la séquence
     async updateSequenceActions(newActions) {

@@ -168,15 +168,27 @@
                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                         </svg>
-                        Aucun profil SMTP configuré. Le bouton "Tester" est désactivé.
+                        Aucun profil SMTP configuré. Le bouton "Tester" et le toggle de statut sont désactivés.
                       </p>
                     </div>
                   </template>
+                  <!-- Toggle pour le statut actif/inactif -->
                   <button @click="toggleSequenceStatus()"
-                          class="px-3 py-1 rounded-md text-sm font-medium transition-colors"
-                          :class="sequence.isActif ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'">
-                    <span x-text="sequence.isActif ? 'Actif' : 'Inactif'"></span>
+                          :disabled="smtpProfiles.length === 0 || isTogglingStatus"
+                          class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          :class="{
+                            'bg-green-500': sequence.isActif,
+                            'bg-gray-300': !sequence.isActif,
+                            'opacity-50 cursor-not-allowed': smtpProfiles.length === 0 || isTogglingStatus
+                          }"
+                          title="Basculer le statut actif/inactif">
+                    <span class="sr-only">Basculer le statut</span>
+                    <span class="inline-block w-4 h-4 transform bg-white rounded-full shadow transition-transform"
+                          :class="{ 'translate-x-6': sequence.isActif, 'translate-x-1': !sequence.isActif }"></span>
                   </button>
+                  <span class="ml-2 text-sm font-medium"
+                        :class="sequence.isActif ? 'text-green-800' : 'text-gray-600'"
+                        x-text="sequence.isActif ? 'Actif' : 'Inactif'"></span>
                   <button @click="testSequence()"
                           :disabled="smtpProfiles.length === 0"
                           class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm font-medium hover:bg-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
