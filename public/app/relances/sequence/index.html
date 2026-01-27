@@ -160,47 +160,69 @@
                     <span x-text="sequence.actions.length + ' action(s)'"></span>
                   </p>
                 </div>
-                <div class="flex flex-col space-y-2 items-end">
+                <div class="flex flex-col space-y-3 items-end">
                   <!-- Callout d'avertissement si aucun profil SMTP -->
                   <template x-if="smtpProfiles.length === 0">
-                    <div class="callout callout-warning mb-4 mr-4 w-full">
-                      <p class="text-sm font-medium">
-                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <div class="callout callout-warning mb-3 mr-2">
+                      <p class="text-sm font-medium flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                         </svg>
-                        Aucun profil SMTP configuré. Le bouton "Tester" et le toggle de statut sont désactivés.
+                        Aucun profil SMTP configuré
                       </p>
                     </div>
                   </template>
-                  <!-- Toggle pour le statut actif/inactif -->
-                  <div class="flex items-center w-full justify-end">
-                    <button @click="toggleSequenceStatus()"
-                            :disabled="smtpProfiles.length === 0 || isTogglingStatus"
-                            class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                            :class="{
-                              'bg-green-500': sequence.isActif,
-                              'bg-gray-300': !sequence.isActif,
-                              'opacity-50 cursor-not-allowed': smtpProfiles.length === 0 || isTogglingStatus
-                            }"
-                            title="Basculer le statut actif/inactif">
-                      <span class="sr-only">Basculer le statut</span>
-                      <span class="inline-block w-4 h-4 transform bg-white rounded-full shadow transition-transform"
-                            :class="{ 'translate-x-6': sequence.isActif, 'translate-x-1': !sequence.isActif }"></span>
+                  
+                  <!-- Conteneur moderne pour les boutons d'action -->
+                  <div class="bg-white rounded-lg shadow-sm p-3 border border-gray-100 space-y-3">
+                    <!-- Toggle pour le statut actif/inactif - version moderne -->
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700">Statut</span>
+                      </div>
+                      <div class="flex items-center">
+                        <button @click="toggleSequenceStatus()"
+                                :disabled="smtpProfiles.length === 0 || isTogglingStatus"
+                                class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                :class="{
+                                  'bg-green-500': sequence.isActif,
+                                  'bg-gray-300': !sequence.isActif,
+                                  'opacity-50 cursor-not-allowed': smtpProfiles.length === 0 || isTogglingStatus
+                                }"
+                                title="Basculer le statut actif/inactif">
+                          <span class="sr-only">Basculer le statut</span>
+                          <span class="inline-block w-4 h-4 transform bg-white rounded-full shadow transition-transform"
+                                :class="{ 'translate-x-6': sequence.isActif, 'translate-x-1': !sequence.isActif }"></span>
+                        </button>
+                        <span class="ml-2 text-sm font-medium"
+                              :class="sequence.isActif ? 'text-green-600' : 'text-gray-500'"
+                              x-text="sequence.isActif ? 'Actif' : 'Inactif'"></span>
+                      </div>
+                    </div>
+                    
+                    <!-- Bouton Tester - version moderne -->
+                    <button @click="testSequence()"
+                            :disabled="smtpProfiles.length === 0"
+                            class="w-full flex items-center justify-center px-4 py-2 bg-green-50 text-green-700 rounded-md text-sm font-medium hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-green-200"
+                            title="Aucun profil SMTP configuré">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                      </svg>
+                      Tester la séquence
                     </button>
-                    <span class="ml-2 text-sm font-medium"
-                          :class="sequence.isActif ? 'text-green-800' : 'text-gray-600'"
-                          x-text="sequence.isActif ? 'Actif' : 'Inactif'"></span>
+                    
+                    <!-- Bouton Supprimer - version moderne -->
+                    <button @click="deleteSequence()"
+                            class="w-full flex items-center justify-center px-4 py-2 bg-red-50 text-red-700 rounded-md text-sm font-medium hover:bg-red-100 transition-colors border border-red-200">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                      Supprimer la séquence
+                    </button>
                   </div>
-                  <button @click="testSequence()"
-                          :disabled="smtpProfiles.length === 0"
-                          class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm font-medium hover:bg-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full"
-                          title="Aucun profil SMTP configuré">
-                    Tester
-                  </button>
-                  <button @click="deleteSequence()"
-                          class="px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm font-medium hover:bg-red-200 transition-colors w-full">
-                    Supprimer
-                  </button>
                 </div>
               </div>
               
@@ -442,16 +464,21 @@
         </div>
         <p class="text-gray-700 mb-6" x-text="popupMessage"></p>
         <div class="flex justify-end gap-3">
-          <template x-if="popupType === 'warning' || popupType === 'confirm'">
-            <button @click="closePopup" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+          <template x-if="popupType === 'confirm'">
+            <button @click="closePopup" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors border border-gray-200">
               Annuler
             </button>
-            <button @click="executeConfirm" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+            <button @click="executeConfirm" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
               Confirmer
             </button>
           </template>
+          <template x-if="popupType === 'warning'">
+            <button @click="closePopup" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+              OK
+            </button>
+          </template>
           <template x-if="popupType !== 'warning' && popupType !== 'confirm'">
-            <button @click="closePopup" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+            <button @click="closePopup" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
               OK
             </button>
           </template>

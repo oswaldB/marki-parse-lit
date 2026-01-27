@@ -30,11 +30,11 @@ Parse.Cloud.define('sendTestEmail', async (request) => {
   
   // Envoyer l'email de test
   const info = await transporter.sendMail({
-    from: `"Marki Parse Test" <${smtpProfile.email}>`,
+    from: `"Marki Test" <${smtpProfile.email}>`,
     to: recipient,
-    subject: 'Test d\'email depuis Marki Parse',
-    text: 'Ceci est un email de test envoyé depuis Marki Parse.',
-    html: '<p>Ceci est un email de test envoyé depuis <strong>Marki Parse</strong>.</p>'
+    subject: 'Test d\'email depuis Marki ',
+    text: 'Ceci est un email de test envoyé depuis Marki .',
+    html: '<p>Ceci est un email de test envoyé depuis <strong>Marki </strong>.</p>'
   });
   
   return {
