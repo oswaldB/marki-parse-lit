@@ -12,8 +12,12 @@
     import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
     window.lit = { LitElement, html };
   </script>
+  <!-- Composant check-auth pour l'authentification -->
+  <script type="module" src="/components/check-auth.js"></script>
 </head>
 <body class="bg-gray-100">
+  <!-- Composant check-auth pour vérifier l'authentification -->
+  <check-auth></check-auth>
   <!-- Formes originales en arrière-plan -->
   <galet-component></galet-component>
   <galet-component-dark></galet-component-dark>

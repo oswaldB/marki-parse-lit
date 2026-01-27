@@ -158,11 +158,16 @@ async function authenticateWithParse(page) {
     
     // Naviguer vers la page de login
     await page.goto(config.parseConfig.loginUrl, {
-      waitUntil: 'networkidle2',
+      waitUntil: 'networkidle',
       timeout: config.timeout
     });
     
     console.log('📝 Remplissage du formulaire de connexion...');
+    
+    // Attendre que les éléments soient disponibles
+    await page.waitForSelector('#username', { timeout: 10000 });
+    await page.waitForSelector('#password', { timeout: 10000 });
+    await page.waitForSelector('#remember', { timeout: 10000 });
     
     // Remplir le formulaire de connexion
     await page.type('#username', config.parseConfig.testUsername);
@@ -175,7 +180,7 @@ async function authenticateWithParse(page) {
     
     // Soumettre le formulaire
     await Promise.all([
-      page.waitForNavigation({ waitUntil: 'networkidle2' }),
+      page.waitForNavigation({ waitUntil: 'networkidle' }),
       page.click('button[type="submit"]')
     ]);
     

@@ -1,12 +1,21 @@
 // Script pour récupérer le schéma de la classe impayes
 const Parse = require('parse/node');
+require('dotenv').config();
 
-// Initialisation de Parse avec les informations de configuration
-Parse.initialize("YOUR_APP_ID", "YOUR_JS_KEY");
-Parse.serverURL = "http://localhost:1337/parse";
+// Initialisation de Parse avec les variables d'environnement ou les valeurs par défaut
+const appId = process.env.PARSE_APPLICATION_ID || 'marki';
+const jsKey = process.env.PARSE_JAVASCRIPT_KEY || 'Careless7-Gore4-Guileless0-Jogger5-Clubbed9';
+const masterKey = process.env.PARSE_MASTER_KEY || 'YOUR_MASTER_KEY'; // À remplacer par la vraie master key
+const serverURL = process.env.PARSE_SERVER_URL || 'https://dev.parse.markidiags.com';
+
+Parse.initialize(appId, jsKey, masterKey);
+Parse.serverURL = serverURL;
 
 async function getSchema() {
     try {
+        // Utiliser la master key pour les requêtes
+        Parse.Cloud.useMasterKey();
+        
         // Récupérer le schéma de la classe impayes
         const schema = await Parse.Schema.all();
         const impayesSchema = schema.find(cls => cls.className === 'impayes');
@@ -25,9 +34,10 @@ async function getSchema() {
     }
 }
 
-// Exécuter la fonction
-getSchema().then(result => {
-    if (result) {
-        console.log('Colonnes disponibles :', Object.keys(result));
-    }
+// Définir une fonction cloud pour récupérer le schéma
+Parse.Cloud.define('getImpayesSchema', async (request) => {
+  return await getSchema();
 });
+
+// Exporter la fonction pour qu'elle soit utilisée par main.js
+module.exports = { getSchema };

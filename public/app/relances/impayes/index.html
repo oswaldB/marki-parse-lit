@@ -23,7 +23,9 @@
     import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
     window.lit = { LitElement, html };
   </script>
-    <script src="/app/relances/impayes/impayesState.js"></script>
+  <!-- Composant check-auth pour l'authentification -->
+  <script type="module" src="/components/check-auth.js"></script>
+  <script src="/app/relances/impayes/impayesState.js"></script>
   <!-- Heroicons - Version spécifique pour éviter les problèmes de cache -->
   <script src="https://cdn.jsdelivr.net/npm/heroicons@2.0.18/dist/heroicons.min.js"></script>
   <style>
@@ -43,6 +45,8 @@
   </style>
 </head>
 <body class="bg-gray-100" x-data="impayesState()" x-init="init()">
+  <!-- Composant check-auth pour vérifier l'authentification -->
+  <check-auth></check-auth>
   <!-- Formes originales en arrière-plan -->
   <galet-component></galet-component>
   <galet-component-dark></galet-component-dark>

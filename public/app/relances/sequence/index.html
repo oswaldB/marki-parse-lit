@@ -16,6 +16,7 @@
   </script>
   
   <!-- Load Lit components before they are used -->
+  <script type="module" src="/components/check-auth.js"></script>
   <script type="module" src="/components/relance-sidebar.js"></script>
   <script type="module" src="/components/galet-component.js"></script>
   <script type="module" src="/components/galet-component-dark.js"></script>
@@ -23,6 +24,8 @@
 
 </head>
 <body class="bg-gray-100" x-data="sequenceState()" x-init="init()">
+  <!-- Composant check-auth pour vérifier l'authentification -->
+  <check-auth></check-auth>
   <!-- Formes originales en arrière-plan -->
   <galet-component></galet-component>
   <galet-component-dark></galet-component-dark>
