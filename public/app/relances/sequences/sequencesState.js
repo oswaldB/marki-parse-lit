@@ -5,13 +5,7 @@ function sequencesState() {
     searchQuery: '',
     showCreateDrawer: false,
     newSequence: {
-      nom: '',
-      actions: []
-    },
-    newAction: {
-      type: 'email',
-      message: '',
-      delay: 0
+      nom: ''
     },
     
     init() {
@@ -55,8 +49,7 @@ function sequencesState() {
     
     openCreateDrawer() {
       this.newSequence = {
-        nom: '',
-        actions: []
+        nom: ''
       };
       this.showCreateDrawer = true;
     },
@@ -65,22 +58,12 @@ function sequencesState() {
       this.showCreateDrawer = false;
     },
     
-    addAction() {
-      this.newSequence.actions.push({...this.newAction});
-      this.newAction = {type: 'email', message: '', delay: 0};
-    },
-    
-    removeAction(index) {
-      this.newSequence.actions.splice(index, 1);
-    },
-    
     async createSequence() {
       try {
         const Sequences = Parse.Object.extend('sequences');
         const sequence = new Sequences();
         
         sequence.set('nom', this.newSequence.nom);
-        sequence.set('actions', this.newSequence.actions);
         
         await sequence.save();
         
