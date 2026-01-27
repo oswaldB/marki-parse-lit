@@ -8,6 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
     <!-- Configuration Parse -->
     <script src="../../../components/parse-credentials.js"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <!-- Composants Lit -->
     <script src="../../../components/check-auth.js"></script>
     <script src="../../../components/sidebar.js"></script>
@@ -15,12 +17,13 @@
         import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
         window.lit = { LitElement, html };
     </script>
-    <script src="../../../assets/parse-config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/parse@3.3.0/dist/parse.min.js"></script>
+    <!-- État Alpine.js pour la page SMTP -->
+    <script src="./smtpState.js"></script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100" x-data="smtpState()" x-init="init()">
     <check-auth></check-auth>
-    <div x-data="appState()" class="flex h-screen">
+    <div class="flex h-screen">
         <!-- Sidebar -->
         <sidebar-component></sidebar-component>
 
@@ -40,13 +43,27 @@
                     <h2 class="text-lg font-semibold mb-4">Paramètres SMTP</h2>
                     <p class="text-gray-600 mb-6">Configurez les paramètres SMTP pour l'envoi des emails.</p>
 
-                    <form id="smtpForm" class="space-y-4">
+                    <form @submit.prevent="saveSMTPConfig()" class="space-y-4">
+                        <!-- Messages d'état -->
+                        <template x-if="successMessage">
+                            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                                <span class="block sm:inline" x-text="successMessage"></span>
+                            </div>
+                        </template>
+                        
+                        <template x-if="errorMessage">
+                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                                <span class="block sm:inline" x-text="errorMessage"></span>
+                            </div>
+                        </template>
+                        
                         <div>
                             <label for="smtpHost" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
                                 <i data-lucide="server" class="w-4 h-4 mr-2 text-gray-500"></i>
                                 Hôte SMTP
                             </label>
-                            <input type="text" id="smtpHost" name="smtpHost" 
+                            <input type="text" id="smtpHost" 
+                                   x-model="smtpConfig.host"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
 
@@ -55,7 +72,8 @@
                                 <i data-lucide="hash" class="w-4 h-4 mr-2 text-gray-500"></i>
                                 Port SMTP
                             </label>
-                            <input type="number" id="smtpPort" name="smtpPort" 
+                            <input type="number" id="smtpPort" 
+                                   x-model="smtpConfig.port"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
 
@@ -64,7 +82,8 @@
                                 <i data-lucide="user" class="w-4 h-4 mr-2 text-gray-500"></i>
                                 Nom d'utilisateur
                             </label>
-                            <input type="text" id="smtpUsername" name="smtpUsername" 
+                            <input type="text" id="smtpUsername" 
+                                   x-model="smtpConfig.username"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
 
@@ -73,7 +92,8 @@
                                 <i data-lucide="lock" class="w-4 h-4 mr-2 text-gray-500"></i>
                                 Mot de passe
                             </label>
-                            <input type="password" id="smtpPassword" name="smtpPassword" 
+                            <input type="password" id="smtpPassword" 
+                                   x-model="smtpConfig.password"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
 
@@ -82,12 +102,14 @@
                                 <i data-lucide="mail" class="w-4 h-4 mr-2 text-gray-500"></i>
                                 Email expéditeur
                             </label>
-                            <input type="email" id="smtpFrom" name="smtpFrom" 
+                            <input type="email" id="smtpFrom" 
+                                   x-model="smtpConfig.from"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
 
                         <div class="flex items-center">
-                            <input type="checkbox" id="smtpSSL" name="smtpSSL" 
+                            <input type="checkbox" id="smtpSSL" 
+                                   x-model="smtpConfig.ssl"
                                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                             <label for="smtpSSL" class="ml-2 block text-sm text-gray-700 flex items-center">
                                 <i data-lucide="lock" class="w-4 h-4 mr-1 text-gray-500"></i>
@@ -96,7 +118,8 @@
                         </div>
 
                         <div class="flex items-center">
-                            <input type="checkbox" id="smtpTLS" name="smtpTLS" 
+                            <input type="checkbox" id="smtpTLS" 
+                                   x-model="smtpConfig.tls"
                                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                             <label for="smtpTLS" class="ml-2 block text-sm text-gray-700 flex items-center">
                                 <i data-lucide="shield" class="w-4 h-4 mr-1 text-gray-500"></i>
@@ -104,11 +127,24 @@
                             </label>
                         </div>
 
-                        <div class="pt-4">
+                        <div class="pt-4 flex space-x-2">
                             <button type="submit" 
-                                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center">
+                                    :disabled="isLoading"
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                                <template x-if="isLoading">
+                                    <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </template>
                                 <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-                                Sauvegarder
+                                <span x-text="isLoading ? 'Sauvegarde...' : 'Sauvegarder'"></span>
+                            </button>
+                            <button type="button" 
+                                    @click="resetForm()"
+                                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+                                Réinitialiser
                             </button>
                         </div>
                     </form>
@@ -117,61 +153,7 @@
         </div>
     </div>
 
-    <script>
-        // Initialisation de Parse avec la configuration propre
-        window.parseConfig = {
-            appId: 'marki',
-            javascriptKey: 'Careless7-Gore4-Guileless0-Jogger5-Clubbed9',
-            serverURL: 'https://dev.parse.markidiags.com'
-        };
-        
-        Parse.initialize(window.parseConfig.appId, window.parseConfig.javascriptKey);
-        Parse.serverURL = window.parseConfig.serverURL;
 
-        // Chargement des configurations existantes
-        async function loadSMTPConfig() {
-            try {
-                const config = await Parse.Cloud.run('getSMTPConfig');
-                if (config) {
-                    document.getElementById('smtpHost').value = config.host || '';
-                    document.getElementById('smtpPort').value = config.port || '';
-                    document.getElementById('smtpUsername').value = config.username || '';
-                    document.getElementById('smtpPassword').value = config.password || '';
-                    document.getElementById('smtpFrom').value = config.from || '';
-                    document.getElementById('smtpSSL').checked = config.ssl || false;
-                    document.getElementById('smtpTLS').checked = config.tls || false;
-                }
-            } catch (error) {
-                console.error('Erreur lors du chargement de la configuration SMTP:', error);
-            }
-        }
-
-        // Sauvegarde des configurations
-        document.getElementById('smtpForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const config = {
-                host: document.getElementById('smtpHost').value,
-                port: document.getElementById('smtpPort').value,
-                username: document.getElementById('smtpUsername').value,
-                password: document.getElementById('smtpPassword').value,
-                from: document.getElementById('smtpFrom').value,
-                ssl: document.getElementById('smtpSSL').checked,
-                tls: document.getElementById('smtpTLS').checked
-            };
-
-            try {
-                await Parse.Cloud.run('saveSMTPConfig', config);
-                alert('Configuration SMTP sauvegardée avec succès!');
-            } catch (error) {
-                console.error('Erreur lors de la sauvegarde de la configuration SMTP:', error);
-                alert('Erreur lors de la sauvegarde: ' + error.message);
-            }
-        });
-
-        // Charger la configuration au démarrage
-        loadSMTPConfig();
-    </script>
     
     <script>
         // Initialiser les icônes Lucid
