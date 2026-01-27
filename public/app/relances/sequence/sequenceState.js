@@ -563,14 +563,11 @@ ${exampleMessage}`;
     showEditDrawer: false,
     showTestDrawer: false,
     
-    // État pour les popups
-    showPopup: false,
-    popupTitle: '',
-    popupMessage: '',
-    popupType: 'info', // info, success, warning, error, confirm
-    
-    // État pour les confirmations basées sur les promesses
-    pendingConfirmation: null,
+    // État pour les popups de confirmation simplifiés
+    showConfirmPopup: false,
+    confirmTitle: '',
+    confirmMessage: '',
+    confirmCallback: null,
     
     // État pour l'édition du nom de la séquence
     editingSequenceName: false,
@@ -686,104 +683,31 @@ ${exampleMessage}`;
       this.editingActionIndex = null;
     },
     
-    showFullMessage(message) {
-      this.showPopup = true;
-      this.popupTitle = 'Message complet';
-      this.popupMessage = message;
-      this.popupType = 'info';
-    },
-    
-    // Méthodes pour les popups basées sur les promesses
-    showPopupMessage(title, message, type = 'info') {
-      this.popupTitle = title;
-      this.popupMessage = message;
-      this.popupType = type;
-      this.showPopup = true;
-      this.pendingConfirmation = null;
-      
-      console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
-      
-      // Retourner une promesse qui se résout lorsque le popup est fermé
-      return new Promise((resolve) => {
-        // Stocker la fonction de résolution pour plus tard
-        this.pendingConfirmation = { resolve, isConfirm: false };
-      });
-    },
-    
-    confirm(title, message) {
-      this.popupTitle = title;
-      this.popupMessage = message;
-      this.popupType = 'confirm';
-      this.showPopup = true;
+    // Méthode simple pour les popups de confirmation
+    showConfirm(title, message, callback) {
+      this.confirmTitle = title;
+      this.confirmMessage = message;
+      this.confirmCallback = callback;
+      this.showConfirmPopup = true;
       
       console.log(`[CONFIRM] ${title}: ${message}`);
-      
-      // Retourner une promesse qui se résout avec true si confirmé, false si annulé
-      return new Promise((resolve) => {
-        // Stocker la fonction de résolution avec un indicateur de confirmation
-        this.pendingConfirmation = { resolve, isConfirm: true };
-      });
     },
     
-    closePopup() {
-      this.showPopup = false;
-      
-      // Si c'est une confirmation en attente, la résoudre avec false (annulation)
-      if (this.pendingConfirmation && this.pendingConfirmation.isConfirm) {
-        this.pendingConfirmation.resolve(false);
-      }
-      
-      // Réinitialiser l'état
-      this.pendingConfirmation = null;
-      this.isExecutingAction = false;
+    confirmAction(title, message, callback) {
+      this.showConfirm(title, message, callback);
     },
     
-    resolveConfirmation(result) {
-      if (this.pendingConfirmation) {
-        // Résoudre la promesse avec le résultat
-        this.pendingConfirmation.resolve(result);
-        
-        // Réinitialiser l'état
-        this.pendingConfirmation = null;
-        this.isExecutingAction = false;
-        
-        // Fermer le popup
-        this.closePopup();
-      }
+    closeConfirmPopup() {
+      this.showConfirmPopup = false;
+      this.confirmCallback = null;
     },
     
-    async handleConfirm() {
-      if (this.isExecutingAction || !this.pendingConfirmation) {
-        return;
-      }
-      
-      this.isExecutingAction = true;
-      
-      try {
+    executeConfirm() {
+      if (this.confirmCallback && typeof this.confirmCallback === 'function') {
         console.log('✅ Action confirmée par l\'utilisateur');
-        // Résoudre avec true (confirmé)
-        this.resolveConfirmation(true);
-      } catch (error) {
-        console.error('❌ Erreur lors de la confirmation:', error);
-        this.isExecutingAction = false;
-        this.closePopup();
+        this.confirmCallback();
       }
-    },
-    
-    async handleCancel() {
-      if (!this.pendingConfirmation) {
-        this.closePopup();
-        return;
-      }
-      
-      try {
-        console.log('ℹ️ Action annulée par l\'utilisateur');
-        // Résoudre avec false (annulé)
-        this.resolveConfirmation(false);
-      } catch (error) {
-        console.error('❌ Erreur lors de l\'annulation:', error);
-        this.closePopup();
-      }
+      this.closeConfirmPopup();
     },
     
     // Méthodes pour l'édition du nom de la séquence
