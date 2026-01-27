@@ -1,5 +1,5 @@
-import { LitElement, html } from 'lit';
-import './check-auth.js';
+// Utilisation du CDN de Lit pour éviter les problèmes d'importation
+const { LitElement, html } = lit;
 
 export class Sidebar extends LitElement {
   createRenderRoot() {
@@ -9,8 +9,6 @@ export class Sidebar extends LitElement {
   render() {
     return html`
       <div class="sidebar">
-        <!-- Composant auth-check pour vérifier l'authentification -->
-        <check-auth></check-auth>
         <!-- Contenu de la sidebar -->
         <h2>Menu</h2>
         <ul>
@@ -24,4 +22,4 @@ export class Sidebar extends LitElement {
   }
 }
 
-customElements.define('app-sidebar', Sidebar);
+customElements.define('sidebar-component', Sidebar);
