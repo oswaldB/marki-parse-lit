@@ -16,10 +16,9 @@
     </script>
     <!-- Composants Lit -->
     <script type="module" src="../../../components/check-auth.js"></script>
-    <script type="module" src="../../../components/sidebar.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/parse@3.3.0/dist/parse.min.js"></script>
     <!-- État Alpine.js pour la gestion des profils SMTP -->
     <script src="./smtpProfilesState.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/parse@3.3.0/dist/parse.min.js"></script>
     
     <style>
         .drawer {
@@ -63,7 +62,45 @@
     <check-auth></check-auth>
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <sidebar-component></sidebar-component>
+        <div class="w-64 bg-white shadow-lg flex-shrink-0">
+            <div class="flex items-center justify-between p-4 border-b">
+                <h1 class="text-xl font-bold text-gray-800">Marki Parse</h1>
+            </div>
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="/dashboard" class="flex items-center px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
+                            <i data-lucide="home" class="w-5 h-5 mr-3"></i>
+                            Tableau de bord
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/app/relances/sequences" class="flex items-center px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
+                            <i data-lucide="clock" class="w-5 h-5 mr-3"></i>
+                            Séquences de relance
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/app/settings/emails-smtp" class="flex items-center px-3 py-2 bg-blue-50 text-blue-600 rounded-md font-medium">
+                            <i data-lucide="mail" class="w-5 h-5 mr-3"></i>
+                            Profils SMTP
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/app/settings/team" class="flex items-center px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
+                            <i data-lucide="users" class="w-5 h-5 mr-3"></i>
+                            Équipe
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/logout" class="flex items-center px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
+                            <i data-lucide="log-out" class="w-5 h-5 mr-3"></i>
+                            Déconnexion
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
 
         <!-- Main Content -->
         <div class="flex-1 overflow-auto">
