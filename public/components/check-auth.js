@@ -15,11 +15,15 @@ export class CheckAuth extends LitElement {
   }
 
   checkAuthentication() {
+    console.log('🔐 CheckAuth: Vérification de l\'authentification...');
+    
     // Vérifier la présence du token dans sessionStorage ou localStorage
     const sessionToken = sessionStorage.getItem('parseSessionToken') || localStorage.getItem('parseSessionToken');
+    console.log('🔐 CheckAuth: Token trouvé:', sessionToken);
     
     // Si aucun token n'est trouvé, rediriger vers la page de login
     if (!sessionToken) {
+      console.log('🔐 CheckAuth: Aucun token trouvé, redirection vers login...');
       // Récupérer l'URL actuelle pour la redirection
       const currentPath = window.location.pathname;
       const redirectUrl = encodeURIComponent(currentPath);
@@ -30,7 +34,7 @@ export class CheckAuth extends LitElement {
     }
 
     // Si le token existe, le composant ne fait rien (l'utilisateur est authentifié)
-    console.log('Utilisateur authentifié avec token:', sessionToken);
+    console.log('🔐 CheckAuth: Utilisateur authentifié avec token:', sessionToken);
   }
 
   render() {

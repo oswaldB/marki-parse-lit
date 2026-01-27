@@ -18,6 +18,33 @@
   <!-- Load Lit components before they are used -->
   <script type="module" src="/components/check-auth.js"></script>
   <script type="module" src="/components/relance-sidebar.js"></script>
+  
+  <!-- Style pour le défilement des variables -->
+  <style>
+    .variables-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: #bfdbfe #f1f5f9;
+    }
+    
+    .variables-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    .variables-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 3px;
+    }
+    
+    .variables-scroll::-webkit-scrollbar-thumb {
+      background: #bfdbfe;
+      border-radius: 3px;
+    }
+    
+    .variables-scroll::-webkit-scrollbar-thumb:hover {
+      background: #93c5fd;
+    }
+  </style>
   <script type="module" src="/components/galet-component.js"></script>
   <script type="module" src="/components/galet-component-dark.js"></script>
   <script type="module" src="/components/galet-component-wide.js"></script>
@@ -86,7 +113,7 @@
                   
                   <!-- Affichage des actions existantes -->
                   <div class="space-y-4">
-                    <template x-for="action in sequence.actions" :key="action.delay">
+                    <template x-for="action in sequence.actions">
                       <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                         <div class="flex justify-between items-center mb-2">
                           <div class="flex items-center gap-2">
@@ -151,7 +178,7 @@
                                 class="w-full p-2 border border-gray-300 rounded-md text-sm" 
                                 :disabled="smtpProfiles.length === 0">
                           <option value="">Sélectionnez un profil SMTP</option>
-                          <template x-for="profile in smtpProfiles" :key="profile.id">
+                          <template x-for="profile in smtpProfiles">
                             <option :value="profile.email" x-text="profile.name + ' (' + profile.email + ')'"></option>
                           </template>
                         </select>
@@ -179,40 +206,63 @@
                 
                 <!-- Colonne de droite : Paramètres des messages -->
                 <div class="space-y-6">
-                    <!-- Variables disponibles -->
+                    <!-- Variables disponibles (dynamique avec filtre et copie) -->
                     <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
                       <h4 class="font-semibold text-gray-700 mb-3">Variables disponibles</h4>
                       <p class="text-xs text-gray-600 mb-3">Utilisez ces variables dans vos messages :</p>
-                      <div class="flex flex-wrap gap-2">
-                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{nom}}</span>
-                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{prenom}}</span>
-                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{montant}}</span>
-                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{dateEcheance}}</span>
-                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{lienPaiement}}</span>
+                      
+                      <!-- Barre de recherche -->
+                      <div class="mb-4">
+                        <div class="relative">
+                          <input type="text" 
+                                 x-model="variableSearch" 
+                                 placeholder="Rechercher une variable..." 
+                                 class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                          <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                          </svg>
+                        </div>
                       </div>
+                      
+                      <template x-if="impayesColumns.length > 0">
+                        <div>
+                        <!-- Message de résultats filtrés -->
+                        <div class="mb-3 text-xs text-gray-500">
+                          <span x-text="filteredVariables.length"></span> variable(s) 
+                          <template x-if="variableSearch">
+                            correspondant à "<span x-text="variableSearch"></span>"
+                          </template>
+                          <template x-if="!variableSearch">
+                            disponibles
+                          </template>
+                        </div>
+                        
+                        <!-- Liste des variables avec icônes de copie et hauteur limitée -->
+                        <div class="flex flex-wrap gap-2 variables-scroll min-h-[120px] max-h-[200px] overflow-y-auto" >
+                          <template x-for="column in filteredVariables">
+                            <div class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full flex items-center gap-1 hover:bg-blue-200 transition-colors">
+                              <span class="font-mono" x-text="column"></span>
+                              <button @click="copyVariable(column)"
+                                      class="text-blue-600 hover:text-blue-800 focus:outline-none">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"></path>
+                                  <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"></path>
+                                </svg>
+                              </button>
+                            </div>
+                          </template>
+                        </div>
+                      </div></template>
+                      <template x-if="impayesColumns.length === 0">
+                        <p class="text-sm text-gray-500">Aucune variable disponible.</p>
+                      </template>
                     </div>
 
-                    <!-- Prompt à copier -->
+                    <!-- Prompt à copier (dynamique) -->
                     <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
                       <h4 class="font-semibold text-gray-700 mb-3">Prompt pour rédiger des emails</h4>
                       <div class="bg-white p-3 rounded-md border border-gray-200">
-                        <textarea class="w-full p-2 border border-gray-300 rounded-md text-sm resize-none" rows="6" readonly>
-Rédigez un email de relance pour un impayé. Utilisez les variables suivantes :
-- Nom du client : {{nom}}
-- Prénom du client : {{prenom}}
-- Montant dû : {{montant}}
-- Date d'échéance : {{dateEcheance}}
-- Lien de paiement : {{lienPaiement}}
-
-Exemple de message :
-Bonjour {{prenom}} {{nom}},
-
-Nous vous rappelons que votre paiement de {{montant}} € est dû depuis le {{dateEcheance}}.
-Veuillez régulariser votre situation en cliquant sur le lien suivant : {{lienPaiement}}.
-
-Cordialement,
-L'équipe de relance.
-                        </textarea>
+                        <textarea class="w-full p-2 border border-gray-300 rounded-md text-sm resize-none" rows="6" readonly x-text="generatePromptText()"></textarea>
                         <button @click="copyPrompt()" class="mt-3 w-full bg-gray-200 text-gray-700 py-2 rounded text-sm hover:bg-gray-300">
                           Copier le prompt
                         </button>

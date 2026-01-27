@@ -1,4 +1,4 @@
-# Rapport Console Web - 2026-01-27T14:26:08.312Z
+# Rapport Console Web - 2026-01-27T14:46:23.350Z
 
 URL testée: http://localhost:8080/app/relances/sequence/?id=2pDnIvlk5m
 
@@ -12,13 +12,13 @@ URL testée: http://localhost:8080/app/relances/sequence/?id=2pDnIvlk5m
 ## ❌ Erreurs (2)
 
 ```
-1. [AUTHENTICATION] 2026-01-27T14:26:08.305Z: Authentication failed: page.type: Timeout 30000ms exceeded.
+1. [AUTHENTICATION] 2026-01-27T14:46:23.322Z: Authentication failed: page.waitForSelector: Target page, context or browser has been closed
 Call log:
-[2m  - waiting for locator('#username')[22m
+[2m  - waiting for locator('#username') to be visible[22m
 
-2. [TESTERROR] 2026-01-27T14:26:08.311Z: TimeoutError: page.type: Timeout 30000ms exceeded.
+2. [TESTERROR] 2026-01-27T14:46:23.350Z: Error: page.waitForSelector: Target page, context or browser has been closed
 Call log:
-[2m  - waiting for locator('#username')[22m
+[2m  - waiting for locator('#username') to be visible[22m
 
 ```
 
