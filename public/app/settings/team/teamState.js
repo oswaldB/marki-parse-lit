@@ -46,36 +46,23 @@ document.addEventListener('alpine:init', () => {
                     }
                 }
                 
-                // Une fois Parse initialisé, vérifier l'authentification
+                // Une fois Parse initialisé, vérifier l'authentification et charger les utilisateurs
                 this.currentUser = Parse.User.current();
                 this.checkAuth();
                 this.loadUsers();
-                
-                // Mettre à jour le composant sidebar avec l'utilisateur courant
-                this.$nextTick(() => {
-                    const sidebar = document.getElementById('settingsSidebar');
-                    if (sidebar) {
-                        sidebar.updateCurrentUser(this.currentUser);
-                    }
-                });
             } catch (error) {
                 console.error('Erreur lors de l\'initialisation de Parse:', error);
                 window.location.href = '/login';
             }
         },
 
-        // Vérification de l'authentification et des permissions
+        // Vérification de l'authentification (sans vérification is_admin)
         checkAuth() {
             if (!this.currentUser) {
                 window.location.href = '/login';
                 return;
             }
-            
-            // Vérifier si l'utilisateur est admin
-            if (!this.currentUser.get('is_admin')) {
-                window.location.href = '/dashboard';
-                return;
-            }
+            // Plus de vérification is_admin - tous les utilisateurs authentifiés peuvent accéder
         },
 
         // Chargement des utilisateurs
