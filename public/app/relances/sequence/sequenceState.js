@@ -834,26 +834,34 @@ ${exampleMessage}`;
         if (success) {
           console.log('Action supprimée avec succès');
           
-          // Utiliser un toaster au lieu de showPopupMessage
-          window.toasterStore.addToast({
-            id: 'action-delete-' + Date.now(),
-            type: 'success',
-            title: 'Succès',
-            message: 'L\'action a été supprimée avec succès.',
-            autoDismiss: true
-          });
+          // Utiliser un toaster si disponible, sinon utiliser alert
+          if (window.toasterStore) {
+            window.toasterStore.addToast({
+              id: 'action-delete-' + Date.now(),
+              type: 'success',
+              title: 'Succès',
+              message: 'L\'action a été supprimée avec succès.',
+              autoDismiss: true
+            });
+          } else {
+            alert('Action supprimée avec succès !');
+          }
         }
       } catch (error) {
         console.error('Erreur lors de la suppression de l\'action:', error);
         
-        // Utiliser un toaster au lieu de showPopupMessage
-        window.toasterStore.addToast({
-          id: 'action-delete-error-' + Date.now(),
-          type: 'error',
-          title: 'Erreur',
-          message: 'Une erreur est survenue lors de la suppression de l\'action.',
-          autoDismiss: true
-        });
+        // Utiliser un toaster si disponible, sinon utiliser alert
+        if (window.toasterStore) {
+          window.toasterStore.addToast({
+            id: 'action-delete-error-' + Date.now(),
+            type: 'error',
+            title: 'Erreur',
+            message: 'Une erreur est survenue lors de la suppression de l\'action.',
+            autoDismiss: true
+          });
+        } else {
+          alert('Erreur lors de la suppression de l\'action: ' + error.message);
+        }
       }
     },
 
