@@ -1,0 +1,48 @@
+/* Styles pour la sidebar fine */
+.thin-sidebar {
+  width: 40px;
+  transition: all 0.3s ease;
+}
+
+.thin-sidebar:hover {
+  width: 200px;
+}
+
+.thin-sidebar:hover .sidebar-icon {
+  margin-right: 10px;
+}
+
+.thin-sidebar:hover .sidebar-text {
+  display: inline;
+}
+
+.sidebar-icon {
+  transition: all 0.3s ease;
+}
+
+.sidebar-text {
+  display: none;
+  transition: all 0.3s ease;
+}
+
+/* Styles pour la sidebar relance */
+.relance-sidebar-thin {
+  left: 40px;
+  width: 200px;
+  transition: all 0.3s ease;
+}
+
+/* Animation pour le contenu principal */
+.main-content {
+  transition: margin-left 0.3s ease;
+}
+
+/* Styles pour les icônes */
+.feather-icon {
+  stroke-width: 1.5;
+  transition: all 0.2s ease;
+}
+
+.feather-icon:hover {
+  stroke-width: 2;
+}

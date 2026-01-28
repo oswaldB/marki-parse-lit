@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Sidebar Thin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <script type="module">
+    import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
+    window.lit = { LitElement, html };
+  </script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .test-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .test-result {
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    
+    .test-result.success {
+      background-color: #D1FAE5;
+      color: #059669;
+    }
+    
+    .test-result.error {
+      background-color: #FEE2E2;
+      color: #DC2626;
+    }
+    
+    .test-result.warning {
+      background-color: #FEF3C7;
+      color: #D97706;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 p-8">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Test des Composants Sidebar Thin</h1>
+    
+    <div class="test-section">
+      <h2 class="text-xl font-semibold text-gray-700 mb-4">1. Test du composant thin-sidebar</h2>
+      <p class="text-gray-600 mb-4">Ce test vérifie que le composant thin-sidebar se charge et fonctionne correctement.</p>
+      
+      <div class="flex items-center space-x-4 mb-4">
+        <button id="testThinSidebar" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          Tester thin-sidebar
+        </button>
+        <div id="thinSidebarResult" class="test-result" style="display: none;"></div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2 class="text-xl font-semibold text-gray-700 mb-4">2. Test du composant relance-sidebar-thin</h2>
+      <p class="text-gray-600 mb-4">Ce test vérifie que le composant relance-sidebar-thin se charge et détecte correctement l'URL.</p>
+      
+      <div class="flex items-center space-x-4 mb-4">
+        <button id="testRelanceSidebar" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          Tester relance-sidebar-thin
+        </button>
+        <div id="relanceSidebarResult" class="test-result" style="display: none;"></div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2 class="text-xl font-semibold text-gray-700 mb-4">3. Test d'intégration complet</h2>
+      <p class="text-gray-600 mb-4">Ce test vérifie l'intégration des deux composants ensemble.</p>
+      
+      <div class="flex items-center space-x-4 mb-4">
+        <button id="testIntegration" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          Tester l'intégration
+        </button>
+        <div id="integrationResult" class="test-result" style="display: none;"></div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2 class="text-xl font-semibold text-gray-700 mb-4">4. Aperçu visuel</h2>
+      <p class="text-gray-600 mb-4">Voici un aperçu visuel des composants en action.</p>
+      
+      <div class="bg-white p-6 rounded-lg border relative" style="height: 400px; overflow: hidden;">
+        <!-- Conteneur de test pour l'aperçu -->
+        <div id="previewContainer" class="h-full relative">
+          <p class="text-gray-500 text-center py-8">L'aperçu s'affichera ici après avoir cliqué sur "Charger l'aperçu".</p>
+        </div>
+        
+        <button id="loadPreview" class="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+          Charger l'aperçu
+        </button>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2 class="text-xl font-semibold text-gray-700 mb-4">5. Test de personnalisation</h2>
+      <p class="text-gray-600 mb-4">Test de la personnalisation des éléments de la sidebar.</p>
+      
+      <div class="flex items-center space-x-4 mb-4">
+        <button id="testCustomization" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+          Tester la personnalisation
+        </button>
+        <div id="customizationResult" class="test-result" style="display: none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import des composants à tester -->
+  <script type="module" src="/components/sidebar-thin.js"></script>
+  <script type="module" src="/components/sidebar-relance-thin.js"></script>
+
+  <script>
+    // Fonction pour afficher les résultats des tests
+    function showTestResult(elementId, success, message) {
+      const resultElement = document.getElementById(elementId);
+      resultElement.style.display = 'block';
+      resultElement.textContent = message;
+      
+      if (success) {
+        resultElement.className = 'test-result success';
+      } else {
+        resultElement.className = 'test-result error';
+      }
+    }
+
+    // Fonction pour afficher les avertissements
+    function showWarning(elementId, message) {
+      const resultElement = document.getElementById(elementId);
+      resultElement.style.display = 'block';
+      resultElement.textContent = message;
+      resultElement.className = 'test-result warning';
+    }
+
+    // Test 1: thin-sidebar
+    document.getElementById('testThinSidebar').addEventListener('click', function() {
+      try {
+        const thinSidebar = document.createElement('thin-sidebar');
+        document.body.appendChild(thinSidebar);
+        
+        // Vérifier que le composant est défini
+        if (customElements.get('thin-sidebar')) {
+          showTestResult('thinSidebarResult', true, '✓ thin-sidebar est correctement défini et chargé');
+          
+          // Vérifier que les propriétés par défaut existent
+          if (thinSidebar.items && thinSidebar.items.length > 0) {
+            console.log('Items par défaut:', thinSidebar.items);
+          }
+          
+          // Nettoyer
+          document.body.removeChild(thinSidebar);
+        } else {
+          showTestResult('thinSidebarResult', false, '✗ thin-sidebar n\'est pas défini');
+        }
+      } catch (error) {
+        showTestResult('thinSidebarResult', false, '✗ Erreur: ' + error.message);
+        console.error('Erreur lors du test thin-sidebar:', error);
+      }
+    });
+
+    // Test 2: relance-sidebar-thin
+    document.getElementById('testRelanceSidebar').addEventListener('click', function() {
+      try {
+        const relanceSidebar = document.createElement('relance-sidebar-thin');
+        document.body.appendChild(relanceSidebar);
+        
+        // Vérifier que le composant est défini
+        if (customElements.get('relance-sidebar-thin')) {
+          showTestResult('relanceSidebarResult', true, '✓ relance-sidebar-thin est correctement défini');
+          
+          // Vérifier la propriété isVisible
+          console.log('isVisible:', relanceSidebar.isVisible);
+          console.log('URL actuelle:', window.location.pathname);
+          console.log('Contient /relances/:', window.location.pathname.includes('/relances/'));
+          
+          // Nettoyer
+          document.body.removeChild(relanceSidebar);
+        } else {
+          showTestResult('relanceSidebarResult', false, '✗ relance-sidebar-thin n\'est pas défini');
+        }
+      } catch (error) {
+        showTestResult('relanceSidebarResult', false, '✗ Erreur: ' + error.message);
+        console.error('Erreur lors du test relance-sidebar-thin:', error);
+      }
+    });
+
+    // Test 3: Intégration
+    document.getElementById('testIntegration').addEventListener('click', function() {
+      try {
+        // Créer les deux composants
+        const thinSidebar = document.createElement('thin-sidebar');
+        const relanceSidebar = document.createElement('relance-sidebar-thin');
+        
+        document.body.appendChild(thinSidebar);
+        document.body.appendChild(relanceSidebar);
+        
+        // Vérifier que les deux composants sont chargés
+        if (customElements.get('thin-sidebar') && customElements.get('relance-sidebar-thin')) {
+          showTestResult('integrationResult', true, '✓ Les deux composants sont chargés et fonctionnent ensemble');
+          
+          // Vérifier le positionnement
+          const thinSidebarStyle = window.getComputedStyle(thinSidebar);
+          const relanceSidebarStyle = window.getComputedStyle(relanceSidebar);
+          
+          console.log('thin-sidebar position:', thinSidebarStyle.position);
+          console.log('relance-sidebar-thin position:', relanceSidebarStyle.position);
+        } else {
+          showTestResult('integrationResult', false, '✗ Un ou plusieurs composants ne sont pas chargés');
+        }
+        
+        // Nettoyer
+        document.body.removeChild(thinSidebar);
+        document.body.removeChild(relanceSidebar);
+        
+      } catch (error) {
+        showTestResult('integrationResult', false, '✗ Erreur: ' + error.message);
+        console.error('Erreur lors du test d\'intégration:', error);
+      }
+    });
+
+    // Test 4: Aperçu visuel
+    document.getElementById('loadPreview').addEventListener('click', function() {
+      const previewContainer = document.getElementById('previewContainer');
+      previewContainer.innerHTML = '';
+      
+      // Ajouter les composants à l'aperçu
+      const thinSidebar = document.createElement('thin-sidebar');
+      const relanceSidebar = document.createElement('relance-sidebar-thin');
+      
+      previewContainer.appendChild(thinSidebar);
+      previewContainer.appendChild(relanceSidebar);
+      
+      // Ajouter un peu de contenu pour montrer le positionnement
+      const content = document.createElement('div');
+      content.className = 'ml-[40px] md:ml-[240px] p-4 bg-gray-50 rounded-lg';
+      content.innerHTML = `
+        <h3 class="font-semibold text-gray-700 mb-2">Contenu principal</h3>
+        <p class="text-gray-600 text-sm">Ce contenu est positionné correctement avec une marge pour éviter le chevauchement avec les sidebars.</p>
+        <p class="text-gray-500 text-xs mt-2">Passez votre souris sur la sidebar de gauche pour voir l'effet de survol.</p>
+      `;
+      
+      previewContainer.appendChild(content);
+      
+      // Initialiser Feather Icons pour l'aperçu
+      if (typeof feather !== 'undefined') {
+        setTimeout(() => {
+          feather.replace();
+        }, 100);
+      }
+    });
+
+    // Test 5: Personnalisation
+    document.getElementById('testCustomization').addEventListener('click', function() {
+      try {
+        const thinSidebar = document.createElement('thin-sidebar');
+        document.body.appendChild(thinSidebar);
+        
+        // Personnaliser les items
+        const customItems = [
+          {
+            name: 'Accueil',
+            icon: 'home',
+            url: '/'
+          },
+          {
+            name: 'Profil',
+            icon: 'user',
+            url: '/profile'
+          },
+          {
+            name: 'Messages',
+            icon: 'mail',
+            url: '/messages'
+          }
+        ];
+        
+        thinSidebar.items = customItems;
+        
+        // Vérifier que la personnalisation a fonctionné
+        if (thinSidebar.items.length === 3 && 
+            thinSidebar.items[1].name === 'Profil' &&
+            thinSidebar.items[2].icon === 'mail') {
+          showTestResult('customizationResult', true, '✓ La personnalisation des items fonctionne correctement');
+          console.log('Items personnalisés:', thinSidebar.items);
+        } else {
+          showTestResult('customizationResult', false, '✗ La personnalisation n\'a pas fonctionné');
+        }
+        
+        // Nettoyer
+        document.body.removeChild(thinSidebar);
+        
+      } catch (error) {
+        showTestResult('customizationResult', false, '✗ Erreur: ' + error.message);
+        console.error('Erreur lors du test de personnalisation:', error);
+      }
+    });
+
+    // Initialiser Feather Icons pour la page de test
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof feather !== 'undefined') {
+        feather.replace();
+      }
+    });
+  </script>
+</body>
+</html>
