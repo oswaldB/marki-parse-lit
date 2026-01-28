@@ -817,10 +817,8 @@ ${exampleMessage}`;
         return;
       }
       
-      const confirmed = await this.confirm(
-        'Supprimer l\'action',
-        'Êtes-vous sûr de vouloir supprimer cette action ? Cette action est irréversible.'
-      );
+      // Utiliser confirm() natif au lieu de this.confirm()
+      const confirmed = confirm('Êtes-vous sûr de vouloir supprimer cette action ? Cette action est irréversible.');
       
       if (!confirmed) {
         return;
@@ -835,19 +833,27 @@ ${exampleMessage}`;
         
         if (success) {
           console.log('Action supprimée avec succès');
-          await this.showPopupMessage(
-            'Action supprimée',
-            'L\'action a été supprimée avec succès.',
-            'success'
-          );
+          
+          // Utiliser un toaster au lieu de showPopupMessage
+          window.toasterStore.addToast({
+            id: 'action-delete-' + Date.now(),
+            type: 'success',
+            title: 'Succès',
+            message: 'L\'action a été supprimée avec succès.',
+            autoDismiss: true
+          });
         }
       } catch (error) {
         console.error('Erreur lors de la suppression de l\'action:', error);
-        await this.showPopupMessage(
-          'Erreur de suppression',
-          'Une erreur est survenue lors de la suppression de l\'action.',
-          'error'
-        );
+        
+        // Utiliser un toaster au lieu de showPopupMessage
+        window.toasterStore.addToast({
+          id: 'action-delete-error-' + Date.now(),
+          type: 'error',
+          title: 'Erreur',
+          message: 'Une erreur est survenue lors de la suppression de l\'action.',
+          autoDismiss: true
+        });
       }
     },
 
