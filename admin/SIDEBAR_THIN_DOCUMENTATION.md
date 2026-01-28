@@ -112,14 +112,34 @@ Un composant Lit qui s'affiche uniquement lorsque l'URL contient `/relances/`. C
 </html>
 ```
 
-## Styles CSS
+## Styles Tailwind CSS
 
-Les composants incluent des styles intégrés pour :
+Les composants utilisent uniquement des classes Tailwind CSS pour le styling :
 
-- **Effet de survol** : La sidebar s'élargit de 40px à 200px au survol
-- **Transitions fluides** : Animations CSS pour les changements de taille
-- **Effets d'icônes** : Les icônes s'épaississent légèrement au survol
-- **Responsive** : Adaptation automatique à la taille de l'écran
+- **Effet de survol** : `hover:w-[200px]` pour l'élargissement au survol
+- **Transitions fluides** : `transition-all duration-300 ease-in-out` pour les animations
+- **Effets d'icônes** : `group-hover:text-gray-900` pour les changements de couleur
+- **Texte conditionnel** : `opacity-0 group-hover:opacity-100` pour afficher le texte au survol
+- **Responsive** : Classes Tailwind natives pour l'adaptation automatique
+
+### Classes Tailwind utilisées
+
+```html
+<!-- Container principal -->
+<div class="fixed top-0 left-0 z-40 w-[40px] h-screen bg-white border-r border-gray-200 
+            flex flex-col items-start py-4 overflow-hidden 
+            hover:w-[200px] transition-all duration-300 ease-in-out">
+
+<!-- Liens de navigation -->
+<a class="flex items-center p-2 rounded-lg hover:bg-gray-100 
+      transition-all duration-200 w-full group">
+  <i class="w-6 h-6 text-gray-600 group-hover:text-gray-900 transition-all duration-200"></i>
+  <span class="text-sm text-gray-600 whitespace-nowrap ml-2 
+              opacity-0 group-hover:opacity-100 transition-all duration-200">
+    ${item.name}
+  </span>
+</a>
+```
 
 ## Personnalisation
 

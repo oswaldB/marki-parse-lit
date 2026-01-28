@@ -82,47 +82,7 @@ export class ThinSidebar extends LitElement {
 
   render() {
     return html`
-      <style>
-        /* Styles pour la sidebar fine */
-        .thin-sidebar-container {
-          width: 40px;
-          transition: all 0.3s ease;
-          height: 100vh;
-        }
-        
-        .thin-sidebar-container:hover {
-          width: 200px;
-        }
-        
-        .sidebar-icon {
-          transition: all 0.3s ease;
-        }
-        
-        .sidebar-text {
-          display: none;
-          transition: all 0.3s ease;
-          margin-left: 8px;
-        }
-        
-        .thin-sidebar-container:hover .sidebar-text {
-          display: inline;
-        }
-        
-        .thin-sidebar-container:hover .sidebar-icon {
-          margin-right: 8px;
-        }
-        
-        .feather-icon {
-          stroke-width: 1.5;
-          transition: all 0.2s ease;
-        }
-        
-        .feather-icon:hover {
-          stroke-width: 2;
-        }
-      </style>
-      
-      <div class="fixed top-0 left-0 z-40 thin-sidebar-container bg-white border-r border-gray-200 flex flex-col items-start py-4 overflow-hidden">
+      <div class="fixed top-0 left-0 z-40 w-[40px] h-screen bg-white border-r border-gray-200 flex flex-col items-start py-4 overflow-hidden hover:w-[200px] transition-all duration-300 ease-in-out">
         <!-- Logo -->
         <div class="mb-8 w-full flex justify-center">
           <img src="/assets/marki-logo.png" alt="Marki Logo" class="w-8 h-8">
@@ -133,11 +93,11 @@ export class ThinSidebar extends LitElement {
           ${this.items.map(item => html`
             <a 
               href="${item.url}" 
-              class="flex items-center p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 w-full" 
+              class="flex items-center p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 w-full group" 
               title="${item.name}"
             >
-              <i data-feather="${item.icon}" class="w-6 h-6 text-gray-600 feather-icon sidebar-icon"></i>
-              <span class="sidebar-text text-sm text-gray-600 whitespace-nowrap">${item.name}</span>
+              <i data-feather="${item.icon}" class="w-6 h-6 text-gray-600 group-hover:text-gray-900 transition-all duration-200"></i>
+              <span class="text-sm text-gray-600 whitespace-nowrap ml-2 opacity-0 group-hover:opacity-100 transition-all duration-200">${item.name}</span>
             </a>
           `)}
         </nav>

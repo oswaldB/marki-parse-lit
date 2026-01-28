@@ -70,11 +70,12 @@ Le composant vérifie automatiquement l'URL actuelle et :
 
 ## Styles
 
-Le composant inclut des styles intégrés pour :
-- Positionnement fixe
-- Transitions fluides
-- Effets de survol sur les liens
-- Responsive design
+Le composant utilise uniquement des classes Tailwind CSS pour le styling :
+- `fixed top-0 left-[40px]` pour le positionnement
+- `transition-all duration-300 ease-in-out` pour les animations
+- `hover:bg-gray-100 hover:text-gray-900` pour les effets de survol
+- `h-screen` pour la hauteur complète
+- Classes responsive natives de Tailwind
 
 ## Événements écoutés
 

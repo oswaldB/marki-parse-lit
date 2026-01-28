@@ -68,11 +68,12 @@ sidebar.items = [
 
 ## Styles
 
-Le composant inclut des styles intégrés pour :
-- Transitions fluides
-- Effets de survol
-- Animations d'icônes
-- Responsive design
+Le composant utilise uniquement des classes Tailwind CSS pour le styling :
+- `hover:w-[200px]` pour l'effet de survol
+- `transition-all duration-300 ease-in-out` pour les animations fluides
+- `group-hover:text-gray-900` pour les effets d'icônes
+- `opacity-0 group-hover:opacity-100` pour afficher le texte au survol
+- Classes responsive natives de Tailwind
 
 ## Événements
 
