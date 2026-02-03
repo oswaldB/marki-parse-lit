@@ -58,7 +58,7 @@ services:
     ports:
       - "4040:4040"
     environment:
-      PARSE_DASHBOARD_SERVER_URL: "http://localhost:1337/"
+      PARSE_DASHBOARD_SERVER_URL: "https://dev.parse.markidiags.com"
       PARSE_DASHBOARD_APP_ID: "marki"
       PARSE_DASHBOARD_MASTER_KEY: "Shaky4-Exception6"
       PARSE_DASHBOARD_USER_ID: "admin"

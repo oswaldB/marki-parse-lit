@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Parse initialization component -->
     <script type="module" src="/components/parse-init-component.js"></script>
+    <!-- Simple Pebbles background component -->
+    <script type="module" src="/components/pebbles/marki-pebbles-simple.js"></script>
     <!-- Alpine.js CDN -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
@@ -30,7 +32,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-50" x-data="loginPage()" x-init="
+<body class="bg-white" x-data="loginPage()" x-init="
     // Wait for Parse to be initialized
     document.addEventListener('parse-initialized', function(e) {
         if (e.detail.success) {
@@ -45,8 +47,11 @@
     <!-- Parse initialization component (hidden) -->
     <parse-init ></parse-init>
     
+    <!-- Simple Pebbles background -->
+    <marki-pebbles-simple></marki-pebbles-simple>
+    
     <!-- Main layout -->
-    <div class="min-h-screen flex flex-col">
+    <div class="min-h-screen flex flex-col relative">
         <!-- Main content -->
         <main class="flex-1 flex flex-col items-center justify-center py-8 px-4 sm:px-6 lg:px-8 w-full">
             <div class="max-w-md mx-auto p-8 bg-white rounded-xl shadow-sm w-full">
@@ -113,10 +118,7 @@
                         :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
                         :disabled="isLoading"
                     >
-                        <span x-show="isLoading" class="inline-flex items-center justify-center">
-                            <span class="loading-spinner mr-2"></span>
-                            Connexion en cours...
-                        </span>
+                       
                         <span x-show="!isLoading">Se connecter</span>
                     </button>
                 </form>
@@ -130,6 +132,7 @@
                     <a href="/terms" class="hover:underline hover:text-[#007ACE] transition-colors">Conditions générales</a>
                     <a href="/privacy" class="hover:underline hover:text-[#007ACE] transition-colors">Politique de confidentialité</a>
                     <a href="/contact" class="hover:underline hover:text-[#007ACE] transition-colors">Contact</a>
+                    <a href="/superadmin" class="hover:underline hover:text-[#007ACE] transition-colors">Super Admin</a>
                     <span class="text-gray-400">|</span>
                     <span>© <span x-text="new Date().getFullYear()"></span> Marki. Tous droits réservés.</span>
                 </div>
@@ -189,7 +192,7 @@
                             sessionStorage.setItem('parseSessionToken', user.getSessionToken());
                         }
                         
-                        // Redirect to dashboard or home page
+                        // Redirect to dashboard
                         window.location.href = '/dashboard';
                         
                     } catch (error) {

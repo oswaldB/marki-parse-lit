@@ -11,12 +11,19 @@ This specification describes the requirements and design for the Impayés (Unpai
 
 ## Page Structure
 
-### 1. Header Section
+### 1. App Layout Integration
+The Impayés page uses the **app-layout** component for consistent navigation and structure across the application. This provides:
+- **Navigation sidebar** with access to all application sections
+- **Top navigation bar** with user profile and notifications
+- **Breadcrumb navigation** showing current location
+- **Responsive design** that adapts to different screen sizes
+
+### 2. Header Section
 - **Title**: "Impayés" (Unpaid Invoices)
 - **Description**: "Gérez vos impayés ici." (Manage your unpaid invoices here)
 - **Search Bar**: Full-width search input for filtering invoices
 
-### 2. View Mode Toggle
+### 3. View Mode Toggle
 Five view modes available:
 - **Groupé par payeur** (Grouped by payer) - Default view
 - **Vue Factures** (Invoice view) - List view
@@ -24,9 +31,9 @@ Five view modes available:
 - **Vue Séquence** (Sequence view) - Kanban-style view grouped by sequence
 - **Vue par Acteur** (By Actor view) - Shows two lists per actor: invoices to pay and brought-in invoices
 
-### 3. Main Content Area
+### 4. Main Content Area
 
-#### 3.1 Grouped by Payer View (Default)
+#### 4.1 Grouped by Payer View (Default)
 - **Grouping**: Invoices are grouped by payer name
 - **Group Header**: Shows:
   - Payer icon and name
@@ -46,7 +53,7 @@ Five view modes available:
     - Property information
     - View button
 
-#### 3.2 Invoice List View
+#### 4.2 Invoice List View
 - **Layout**: Grid of invoice cards
 - **Each Card Shows**:
   - Invoice number and reference
@@ -58,7 +65,7 @@ Five view modes available:
   - Stakeholders (Payer, Owner, Provider)
   - Action buttons (View details, Change list)
 
-#### 3.3 To Fix View
+#### 4.3 To Fix View
 - **Purpose**: Shows invoices that are missing email addresses or have provider issues
 - **Filter**: Displays invoices where:
   - `payeur_email` is null or empty, OR
@@ -70,7 +77,7 @@ Five view modes available:
   - Vérifier button that calls cloud function to force PostgreSQL sync and run syncImpayes
   - Export option for missing email list (CSV format)
 
-#### 3.4 Sequence View (Kanban)
+#### 4.4 Sequence View (Kanban)
 - **Layout**: Horizontal kanban board
 - **Columns**: Each column represents a sequence:
   - "Sans séquence" column first (for unassigned invoices)
@@ -87,7 +94,7 @@ Five view modes available:
   - Quick sequence creation from column header menu
   - Dropdown in cards to see individual invoices (le dropdown permet de voir les factures en question)
 
-#### 3.5 By Actor View
+#### 4.5 By Actor View
 - **Layout**: Vertical actor-based organization
 - **Structure**: For each actor, display two separate lists:
   - **Factures à régler**: Invoices where the actor is the payer (`payeur_nom`)
@@ -109,7 +116,7 @@ Five view modes available:
   - Filtering by actor type or name
   - Bulk actions per list type
 
-### 4. Pagination
+### 5. Pagination
 - **Controls**: Previous/Next buttons
 - **Display**: Current page and total pages
 - **Items per page**: 1000 (configurable)
@@ -188,6 +195,22 @@ Five view modes available:
 
 **State Architecture**: We use Alpine.js state to manage all data and UI state directly on the page. Each component can have its own local state for component-specific interactions.
 
+### Unified Invoice Information Component
+**ImpayeInfoDisplay.astro** - A reusable component for displaying invoice information consistently across all views
+
+**Location**: `src/components/pages/impayes/ImpayeInfoDisplay.astro`
+**State**: `/public/js/components/pages/impayes/ImpayeInfoDisplayState.js`
+
+**Features**:
+- Standardized display of invoice data
+- Consistent formatting for dates, amounts, and status
+- Responsive layout that adapts to different view contexts
+- Support for all invoice fields (number, date, amounts, stakeholders, etc.)
+- Conditional display based on available data
+- Integration with the style guide for consistent styling
+
+**Usage**: This component will be used in all view modes to ensure consistent presentation of invoice information.
+
 #### Alpine.js State Implementation
 ```javascript
 {
@@ -219,35 +242,57 @@ Five view modes available:
 
 Based on the page structure, functionality, and ASCII screens, here are the updated components:
 **Suggestion**: Move ASCII screens into their respective component documentation sections.
-1. **ImpayeCardList.astro** (`src/components/pages/impayes/ImpayeCardList.astro`)
-   - **Store Variables**: `filteredImpayes`, `viewMode`, `searchQuery`
-   - **Methods**: `viewImpaye()`, `formatDate()`
-   - **State**: `ImpayeCardListState.js` - handles local card interactions
-   - Displays complete invoice details for list view
 
-2. **ImpayeCardByPayeur.astro** (`src/components/pages/impayes/ImpayeCardByPayeur.astro`)
+### View-Specific Components
+
+#### 1. Grouped by Payer View
+**ImpayeCardByPayeur.astro** (`src/components/pages/impayes/ImpayeCardByPayeur.astro`)
    - **Store Variables**: `sortedImpayesByPayeur`, `viewMode`
    - **Methods**: `calculateDaysOverdue()`, `viewImpaye()`
    - **State**: `ImpayeCardByPayeurState.js` - manages expand/collapse
+   - Uses `ImpayeInfoDisplay` for consistent invoice presentation
    - Compact display for grouped by payer view
 
-3. **ImpayeCardSequence.astro** (`src/components/pages/impayes/ImpayeCardSequence.astro`)
+#### 2. Invoice List View
+**ImpayeCardList.astro** (`src/components/pages/impayes/ImpayeCardList.astro`)
+   - **Store Variables**: `filteredImpayes`, `viewMode`, `searchQuery`
+   - **Methods**: `viewImpaye()`, `formatDate()`
+   - **State**: `ImpayeCardListState.js` - handles local card interactions
+   - Uses `ImpayeInfoDisplay` for consistent invoice presentation
+   - Displays complete invoice details for list view
+
+#### 3. To Fix View
+**ToFixCard.astro** (`src/components/pages/impayes/ToFixCard.astro`)
+   - **Store Variables**: `impayesToFix`, `viewMode`
+   - **Methods**: `verifyEmail()` - calls cloud function
+   - **State**: `ToFixCardState.js` - handles verification state
+   - Uses `ImpayeInfoDisplay` with special highlighting for missing fields
+   - Highlights missing email fields with yellow background
+   - Callout message: "Allez sur ADN, corrigez l'email du contact et cliquez sur le bouton Vérifier"
+
+#### 4. Sequence View (Kanban)
+**ImpayeCardSequence.astro** (`src/components/pages/impayes/ImpayeCardSequence.astro`)
    - **Store Variables**: `impayesBySequence`, `draggedImpaye`
    - **Methods**: `startDrag()`, `onDrop()`, `allowDrop()`
    - **State**: `ImpayeCardSequenceState.js` - handles drag and drop state
    - Draggable card for kanban board with payer information
+   - Uses `ImpayeInfoDisplay` for invoice details in dropdown
 
-4. **SequenceColumn.astro** (`src/components/pages/impayes/SequenceColumn.astro`)
+**SequenceColumn.astro** (`src/components/pages/impayes/SequenceColumn.astro`)
    - **Store Variables**: `impayesBySequence`, `viewMode`
    - **Methods**: `onDrop()`, `allowDrop()`
    - **State**: `SequenceColumnState.js` - manages column state
    - Header with sequence info and statistics, drop zone for payers
 
-5. **ToFixCard.astro** (`src/components/pages/impayes/ToFixCard.astro`)
-   - **Store Variables**: `impayesToFix`, `viewMode`
-   - **Methods**: `verifyEmail()` - calls cloud function
-   - **State**: `ToFixCardState.js` - handles verification state
-   - Highlights missing email fields with callout message
+#### 5. By Actor View
+**ActorCard.astro** (`src/components/pages/impayes/ActorCard.astro`)
+   - **Store Variables**: `impayesByActor`, `viewMode`
+   - **Methods**: `calculateActorTotals()`
+   - **State**: `ActorCardState.js` - manages expand/collapse
+   - Actor information with two invoice lists (à régler/apportées)
+   - Uses `ImpayeInfoDisplay` for consistent invoice presentation in both lists
+
+### Shared Components
 
 6. **SequenceDrawer.astro** (`src/components/pages/impayes/SequenceDrawer.astro`)
    - **Store Variables**: `impayes`, `showSequenceDrawer`
@@ -267,19 +312,7 @@ Based on the page structure, functionality, and ASCII screens, here are the upda
    - **State**: `ViewModeToggleState.js` - manages active state
    - Toggle buttons for different views with active indicators
 
-9. **ActorCard.astro** (`src/components/pages/impayes/ActorCard.astro`)
-   - **Store Variables**: `impayesByActor`, `viewMode`
-   - **Methods**: `calculateActorTotals()`
-   - **State**: `ActorCardState.js` - manages expand/collapse
-   - Actor information with two invoice lists (à régler/apportées)
-
-10. **InvoiceListCompact.astro** (`src/components/pages/impayes/InvoiceListCompact.astro`)
-    - **Store Variables**: `filteredImpayes`
-    - **Methods**: `formatCompactDate()`
-    - **State**: `InvoiceListCompactState.js` - local list state
-    - Compact invoice display for actor view and other dense layouts
-
-11. **PdfViewerDrawer.astro** (`src/components/pages/impayes/PdfViewerDrawer.astro`)
+9. **PdfViewerDrawer.astro** (`src/components/pages/impayes/PdfViewerDrawer.astro`)
     - **Store Variables**: `showPdfDrawer`, `currentInvoiceId`
     - **Methods**: `fetchPdf()`, `downloadPdf()`, `printPdf()`
     - **State**: `PdfViewerDrawerState.js` - manages PDF viewer state

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marki - Super Admin</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Parse initialization component -->
+    <script type="module" src="/components/parse-init-component.js"></script>
+    <!-- Simple Pebbles background component -->
+    <script type="module" src="/components/pebbles/marki-pebbles-simple.js"></script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .loading-spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 2px solid white;
+            width: 1rem;
+            height: 1rem;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .code-block {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+        .function-card {
+            transition: all 0.2s ease;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        .function-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="superAdminPage()" x-init="
+    // Wait for Parse to be initialized
+    document.addEventListener('parse-initialized', function(e) {
+        if (e.detail.success) {
+            parseInitialized = true;
+            checkAdminStatus();
+            console.log('Parse SDK initialized successfully');
+        } else {
+            errorMessage = 'Erreur d\'initialisation: ' + (e.detail.error || 'Inconnu');
+            console.error('Parse initialization failed:', e.detail.error);
+        }
+    });
+">
+    <!-- Parse initialization component (hidden) -->
+    <parse-init ></parse-init>
+    
+    <!-- Simple Pebbles background -->
+    <marki-pebbles-simple></marki-pebbles-simple>
+    
+    <!-- Main layout -->
+    <div class="min-h-screen flex flex-col relative">
+        <!-- Header -->
+        <header class="bg-white shadow-sm z-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <img src="/assets/marki-logo.png" alt="Marki Logo" class="w-12 h-12 object-contain mr-3">
+                        <h1 class="text-xl font-bold text-gray-800">Super Admin Dashboard</h1>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm text-gray-600">
+                            <span x-text="currentUser ? currentUser.get('username') : 'Non connecté'"></span>
+                        </span>
+                        <button 
+                            @click="logout"
+                            class="px-4 py-2 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 transition-colors"
+                        >
+                            Déconnexion
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main content -->
+        <main class="flex-1 py-8 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto">
+                <!-- Error message -->
+                <div x-show="errorMessage" x-transition 
+                     class="bg-red-50 text-red-600 p-3 rounded-md mb-6 text-center">
+                    <span x-text="errorMessage"></span>
+                </div>
+                
+                <!-- Success message -->
+                <div x-show="successMessage" x-transition 
+                     class="bg-green-50 text-green-600 p-3 rounded-md mb-6 text-center">
+                    <span x-text="successMessage"></span>
+                </div>
+                
+                <!-- Loading indicator -->
+                <div x-show="isLoading" class="text-center py-8">
+                    <div class="loading-spinner mx-auto mb-4" style="width: 2rem; height: 2rem; border-width: 3px;"></div>
+                    <p class="text-gray-600">Chargement en cours...</p>
+                </div>
+                
+                <!-- Admin check warning -->
+                <div x-show="!isAdmin && parseInitialized" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                    <div class="flex">
+                        <div class="ml-3">
+                            <p class="text-yellow-700">Vous n'avez pas les droits d'administration. Certaines fonctions peuvent être limitées.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cloud Functions Dashboard -->
+                <div x-show="parseInitialized" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Hello Function -->
+                    <div class="function-card bg-white p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Test Function</h3>
+                        <p class="text-sm text-gray-600 mb-4">Appelle la fonction cloud "hello" pour tester la connexion.</p>
+                        <button 
+                            @click="callHelloFunction"
+                            class="w-full py-2 px-4 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
+                            :disabled="isLoading"
+                        >
+                            Appeler Hello
+                        </button>
+                    </div>
+                    
+                    <!-- Send Test Email -->
+                    <div class="function-card bg-white p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Envoyer Email Test</h3>
+                        <p class="text-sm text-gray-600 mb-4">Envoyer un email de test via SMTP.</p>
+                        <div class="space-y-3 mb-4">
+                            <input type="email" x-model="emailParams.recipient" 
+                                   placeholder="Destinataire email" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" x-model="emailParams.smtpHost" 
+                                   placeholder="Hôte SMTP" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="number" x-model="emailParams.smtpPort" 
+                                   placeholder="Port SMTP" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button 
+                            @click="callSendTestEmail"
+                            class="w-full py-2 px-4 bg-green-500 text-white rounded-md text-sm font-medium hover:bg-green-600 transition-colors"
+                            :disabled="isLoading"
+                        >
+                            Envoyer Email
+                        </button>
+                    </div>
+                    
+                    <!-- Create User -->
+                    <div class="function-card bg-white p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Créer Utilisateur</h3>
+                        <p class="text-sm text-gray-600 mb-4">Créer un nouvel utilisateur.</p>
+                        <div class="space-y-3 mb-4">
+                            <input type="text" x-model="userParams.firstName" 
+                                   placeholder="Prénom" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" x-model="userParams.lastName" 
+                                   placeholder="Nom" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="email" x-model="userParams.email" 
+                                   placeholder="Email" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="password" x-model="userParams.password" 
+                                   placeholder="Mot de passe" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="flex items-center">
+                                <input type="checkbox" x-model="userParams.is_admin" 
+                                       class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                <span class="ml-2 text-sm text-gray-600">Admin</span>
+                            </label>
+                        </div>
+                        <button 
+                            @click="callCreateUser"
+                            class="w-full py-2 px-4 bg-purple-500 text-white rounded-md text-sm font-medium hover:bg-purple-600 transition-colors"
+                            :disabled="isLoading"
+                        >
+                            Créer Utilisateur
+                        </button>
+                    </div>
+                    
+                    <!-- Update User -->
+                    <div class="function-card bg-white p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Mettre à jour Utilisateur</h3>
+                        <p class="text-sm text-gray-600 mb-4">Mettre à jour un utilisateur existant.</p>
+                        <div class="space-y-3 mb-4">
+                            <input type="text" x-model="updateUserParams.objectId" 
+                                   placeholder="Object ID" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" x-model="updateUserParams.firstName" 
+                                   placeholder="Prénom" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" x-model="updateUserParams.lastName" 
+                                   placeholder="Nom" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="email" x-model="updateUserParams.email" 
+                                   placeholder="Email" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="password" x-model="updateUserParams.password" 
+                                   placeholder="Nouveau mot de passe (optionnel)" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="flex items-center">
+                                <input type="checkbox" x-model="updateUserParams.is_admin" 
+                                       class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                <span class="ml-2 text-sm text-gray-600">Admin</span>
+                            </label>
+                        </div>
+                        <button 
+                            @click="callUpdateUser"
+                            class="w-full py-2 px-4 bg-indigo-500 text-white rounded-md text-sm font-medium hover:bg-indigo-600 transition-colors"
+                            :disabled="isLoading"
+                        >
+                            Mettre à jour Utilisateur
+                        </button>
+                    </div>
+                    
+                    <!-- Sync Impayes -->
+                    <div class="function-card bg-white p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Synchroniser Impayés</h3>
+                        <p class="text-sm text-gray-600 mb-4">Lancer la synchronisation des impayés depuis la base de données.</p>
+                        <button 
+                            @click="callSyncImpayes"
+                            class="w-full py-2 px-4 bg-orange-500 text-white rounded-md text-sm font-medium hover:bg-orange-600 transition-colors"
+                            :disabled="isLoading"
+                        >
+                            Synchroniser Impayés
+                        </button>
+                    </div>
+                    
+                    <!-- Init Collections -->
+                    <div class="function-card bg-white p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Initialiser Collections</h3>
+                        <p class="text-sm text-gray-600 mb-4">Initialiser les collections nécessaires dans Parse Server.</p>
+                        <button 
+                            @click="callInitCollections"
+                            class="w-full py-2 px-4 bg-yellow-600 text-white rounded-md text-sm font-medium hover:bg-yellow-700 transition-colors"
+                            :disabled="isLoading"
+                        >
+                            Initialiser Collections
+                        </button>
+                    </div>
+                    
+                    <!-- Get Schema -->
+                    <div class="function-card bg-white p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Récupérer Schéma</h3>
+                        <p class="text-sm text-gray-600 mb-4">Récupérer le schéma de la classe Impayés.</p>
+                        <button 
+                            @click="callGetSchema"
+                            class="w-full py-2 px-4 bg-teal-500 text-white rounded-md text-sm font-medium hover:bg-teal-600 transition-colors"
+                            :disabled="isLoading"
+                        >
+                            Récupérer Schéma
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Results section -->
+                <div x-show="results.length > 0" class="mt-8 bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Résultats des appels</h3>
+                    <div class="space-y-4">
+                        <template x-for="result in results" :key="result.id">
+                            <div class="border border-gray-200 rounded-md p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-medium text-gray-800" x-text="result.functionName"></h4>
+                                    <span class="text-xs text-gray-500" x-text="result.timestamp"></span>
+                                </div>
+                                <div class="code-block">
+                                    <pre x-text="JSON.stringify(result.data, null, 2)"></pre>
+                                </div>
+                                <div x-show="result.error" class="mt-2 text-red-600 text-sm">
+                                    <span x-text="result.error"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <button 
+                        @click="clearResults"
+                        class="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors"
+                    >
+                        Effacer les résultats
+                    </button>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 mt-auto">
+            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 text-sm">
+                    <a href="/terms" class="hover:underline hover:text-blue-600 transition-colors">Conditions générales</a>
+                    <a href="/privacy" class="hover:underline hover:text-blue-600 transition-colors">Politique de confidentialité</a>
+                    <a href="/contact" class="hover:underline hover:text-blue-600 transition-colors">Contact</a>
+                    <span class="text-gray-400">|</span>
+                    <span>© <span x-text="new Date().getFullYear()"></span> Marki. Tous droits réservés.</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+        function superAdminPage() {
+            return {
+                // State
+                parseInitialized: false,
+                isAdmin: false,
+                currentUser: null,
+                isLoading: false,
+                errorMessage: '',
+                successMessage: '',
+                
+                // Form data
+                emailParams: {
+                    recipient: '',
+                    smtpHost: '',
+                    smtpPort: ''
+                },
+                userParams: {
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    password: '',
+                    is_admin: false
+                },
+                updateUserParams: {
+                    objectId: '',
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    password: '',
+                    is_admin: false
+                },
+                
+                // Results storage
+                results: [],
+                resultCounter: 0,
+                
+                // Initialize
+                async checkAdminStatus() {
+                    try {
+                        this.currentUser = await Parse.User.current();
+                        if (this.currentUser) {
+                            this.isAdmin = this.currentUser.get('is_admin') || false;
+                            console.log('User admin status:', this.isAdmin);
+                        }
+                    } catch (error) {
+                        console.error('Error checking admin status:', error);
+                    }
+                },
+                
+                // Cloud function calls
+                async callHelloFunction() {
+                    this.clearMessages();
+                    this.isLoading = true;
+                    
+                    try {
+                        const result = await Parse.Cloud.run('hello');
+                        this.addResult('hello', result);
+                        this.successMessage = 'Fonction hello appelée avec succès!';
+                    } catch (error) {
+                        this.handleError(error, 'hello');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                
+                async callSendTestEmail() {
+                    this.clearMessages();
+                    this.isLoading = true;
+                    
+                    try {
+                        // Create a basic SMTP profile from the provided data
+                        const smtpProfile = {
+                            host: this.emailParams.smtpHost,
+                            port: parseInt(this.emailParams.smtpPort) || 587,
+                            useSSL: false, // Default to STARTTLS
+                            username: 'test@example.com', // Default values
+                            password: 'password',
+                            email: 'test@example.com'
+                        };
+                        
+                        const result = await Parse.Cloud.run('sendTestEmail', {
+                            recipient: this.emailParams.recipient,
+                            smtpProfile: smtpProfile
+                        });
+                        
+                        this.addResult('sendTestEmail', result);
+                        this.successMessage = 'Email de test envoyé avec succès!';
+                    } catch (error) {
+                        this.handleError(error, 'sendTestEmail');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                
+                async callCreateUser() {
+                    this.clearMessages();
+                    this.isLoading = true;
+                    
+                    try {
+                        const result = await Parse.Cloud.run('createUser', {
+                            firstName: this.userParams.firstName,
+                            lastName: this.userParams.lastName,
+                            email: this.userParams.email,
+                            password: this.userParams.password,
+                            is_admin: this.userParams.is_admin
+                        });
+                        
+                        this.addResult('createUser', result);
+                        this.successMessage = 'Utilisateur créé avec succès!';
+                        
+                        // Reset form
+                        this.userParams = {
+                            firstName: '',
+                            lastName: '',
+                            email: '',
+                            password: '',
+                            is_admin: false
+                        };
+                    } catch (error) {
+                        this.handleError(error, 'createUser');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                
+                async callUpdateUser() {
+                    this.clearMessages();
+                    this.isLoading = true;
+                    
+                    try {
+                        const result = await Parse.Cloud.run('updateUser', {
+                            objectId: this.updateUserParams.objectId,
+                            firstName: this.updateUserParams.firstName,
+                            lastName: this.updateUserParams.lastName,
+                            email: this.updateUserParams.email,
+                            password: this.updateUserParams.password || '',
+                            is_admin: this.updateUserParams.is_admin
+                        });
+                        
+                        this.addResult('updateUser', result);
+                        this.successMessage = 'Utilisateur mis à jour avec succès!';
+                        
+                        // Reset form (keep objectId for potential re-use)
+                        this.updateUserParams = {
+                            objectId: this.updateUserParams.objectId,
+                            firstName: '',
+                            lastName: '',
+                            email: '',
+                            password: '',
+                            is_admin: false
+                        };
+                    } catch (error) {
+                        this.handleError(error, 'updateUser');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                
+                async callSyncImpayes() {
+                    this.clearMessages();
+                    this.isLoading = true;
+                    
+                    try {
+                        const result = await Parse.Cloud.run('syncImpayes');
+                        this.addResult('syncImpayes', result);
+                        this.successMessage = 'Synchronisation des impayés lancée avec succès!';
+                    } catch (error) {
+                        this.handleError(error, 'syncImpayes');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                
+                async callInitCollections() {
+                    this.clearMessages();
+                    this.isLoading = true;
+                    
+                    try {
+                        const result = await Parse.Cloud.run('initCollections');
+                        this.addResult('initCollections', result);
+                        this.successMessage = 'Collections initialisées avec succès!';
+                    } catch (error) {
+                        this.handleError(error, 'initCollections');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                
+                async callGetSchema() {
+                    this.clearMessages();
+                    this.isLoading = true;
+                    
+                    try {
+                        const result = await Parse.Cloud.run('getImpayesSchema');
+                        this.addResult('getImpayesSchema', result);
+                        this.successMessage = 'Schéma récupéré avec succès!';
+                    } catch (error) {
+                        this.handleError(error, 'getImpayesSchema');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+                
+                // Helper methods
+                addResult(functionName, data) {
+                    this.resultCounter++;
+                    this.results.unshift({
+                        id: this.resultCounter,
+                        functionName: functionName,
+                        data: data,
+                        timestamp: new Date().toLocaleString(),
+                        error: null
+                    });
+                    
+                    // Limit to 10 results
+                    if (this.results.length > 10) {
+                        this.results.pop();
+                    }
+                },
+                
+                handleError(error, functionName) {
+                    console.error(`Error calling ${functionName}:`, error);
+                    this.resultCounter++;
+                    this.results.unshift({
+                        id: this.resultCounter,
+                        functionName: functionName,
+                        data: null,
+                        timestamp: new Date().toLocaleString(),
+                        error: error.message || 'Unknown error'
+                    });
+                    
+                    this.errorMessage = `Erreur lors de l'appel de ${functionName}: ${error.message || 'Unknown error'}`;
+                    
+                    // Limit to 10 results
+                    if (this.results.length > 10) {
+                        this.results.pop();
+                    }
+                },
+                
+                clearMessages() {
+                    this.errorMessage = '';
+                    this.successMessage = '';
+                },
+                
+                clearResults() {
+                    this.results = [];
+                    this.resultCounter = 0;
+                },
+                
+                async logout() {
+                    try {
+                        await Parse.User.logOut();
+                        // Clear session tokens
+                        localStorage.removeItem('parseSessionToken');
+                        sessionStorage.removeItem('parseSessionToken');
+                        window.location.href = '/login';
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                        this.errorMessage = 'Erreur lors de la déconnexion';
+                    }
+                }
+            };
+        }
+    </script>
+</body>
+</html>

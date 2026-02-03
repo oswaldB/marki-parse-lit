@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marki - Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Parse initialization component -->
+    <script type="module" src="/components/parse-init-component.js"></script>
+  <!-- Simple Pebbles background component -->
+    <script type="module" src="/components/pebbles/marki-pebbles-simple.js"></script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .loading-spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 2px solid white;
+            width: 1rem;
+            height: 1rem;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="dashboardPage()" x-init="
+    // Wait for Parse to be initialized
+    document.addEventListener('parse-initialized', function(e) {
+        if (e.detail.success) {
+            parseInitialized = true;
+            checkUserAndRedirect();
+            console.log('Parse SDK initialized successfully');
+        } else {
+            errorMessage = 'Erreur d\'initialisation: ' + (e.detail.error || 'Inconnu');
+            console.error('Parse initialization failed:', e.detail.error);
+        }
+    });
+">
+    <!-- Parse initialization component (hidden) -->
+    <parse-init ></parse-init>
+    
+    <!-- Simple Pebbles background -->
+    <marki-pebbles-simple></marki-pebbles-simple>
+    
+    <!-- Main layout -->
+    <div class="min-h-screen flex flex-col relative">
+        <!-- Main content -->
+        <main class="flex-1 flex flex-col items-center justify-center py-8 px-4 sm:px-6 lg:px-8 w-full">
+            <div class="max-w-md mx-auto p-8 bg-white rounded-xl shadow-sm w-full text-center">
+                <!-- Logo -->
+                <div class="flex justify-center mb-6">
+                    <img src="/assets/marki-logo.png" alt="Marki Logo" class="w-20 h-20 object-contain">
+                </div>
+                
+                <h2 class="text-center text-2xl font-bold mb-6 text-gray-800">Tableau de bord</h2>
+                 
+                <!-- Loading indicator -->
+                <div x-show="isLoading" class="text-center py-8">
+                    <div class="loading-spinner mx-auto mb-4" style="width: 2rem; height: 2rem; border-width: 3px;"></div>
+                    <p class="text-gray-600">Chargement en cours...</p>
+                </div>
+                
+                <!-- Error message -->
+                <div x-show="errorMessage" x-transition 
+                     class="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-center">
+                    <span x-text="errorMessage"></span>
+                </div>
+                
+                <!-- Welcome message -->
+                <div x-show="!isLoading && parseInitialized && currentUser" class="text-center">
+                    <p class="text-gray-600 mb-4">
+                        Bienvenue, <span x-text="currentUser.get('username')" class="font-semibold"></span>!
+                    </p>
+                    <p class="text-gray-500 mb-6">
+                        Vous êtes connecté en tant qu'utilisateur <span x-text="isAdmin ? 'administrateur' : 'standard'"></span>.
+                    </p>
+                    
+                    <!-- Admin redirect button -->
+                    <div x-show="isAdmin" class="mb-4">
+                        <button 
+                            @click="redirectToSuperAdmin"
+                            class="w-full py-2 px-4 bg-[#007ACE] text-white rounded-md text-sm font-medium hover:bg-[#006BD1] transition-colors"
+                        >
+                            Accéder au tableau de bord Super Admin
+                        </button>
+                    </div>
+                    
+                    <!-- Regular user message -->
+                    <div x-show="!isAdmin" class="mb-4">
+                        <p class="text-gray-600">
+                            Vous n'avez pas les droits d'administration pour accéder au tableau de bord Super Admin.
+                        </p>
+                    </div>
+                    
+                    <!-- Logout button -->
+                    <button 
+                        @click="logout"
+                        class="w-full py-2 px-4 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 transition-colors"
+                    >
+                        Déconnexion
+                    </button>
+                </div>
+                
+                <!-- Not logged in message -->
+                <div x-show="!isLoading && parseInitialized && !currentUser" class="text-center">
+                    <p class="text-gray-600 mb-4">
+                        Vous n'êtes pas connecté.
+                    </p>
+                    <button 
+                        @click="redirectToLogin"
+                        class="w-full py-2 px-4 bg-[#007ACE] text-white rounded-md text-sm font-medium hover:bg-[#006BD1] transition-colors"
+                    >
+                        Se connecter
+                    </button>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 mt-auto">
+            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 text-sm">
+                    <a href="/terms" class="hover:underline hover:text-[#007ACE] transition-colors">Conditions générales</a>
+                    <a href="/privacy" class="hover:underline hover:text-[#007ACE] transition-colors">Politique de confidentialité</a>
+                    <a href="/contact" class="hover:underline hover:text-[#007ACE] transition-colors">Contact</a>
+                    <span class="text-gray-400">|</span>
+                    <span>© <span x-text="new Date().getFullYear()"></span> Marki. Tous droits réservés.</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+        function dashboardPage() {
+            return {
+                // State
+                parseInitialized: false,
+                isAdmin: false,
+                currentUser: null,
+                isLoading: false,
+                errorMessage: '',
+                
+                // Initialize
+                async checkUserAndRedirect() {
+                    try {
+                        this.currentUser = await Parse.User.current();
+                        
+                        if (this.currentUser) {
+                            this.isAdmin = this.currentUser.get('is_admin') || false;
+                            console.log('User admin status:', this.isAdmin);
+                            
+                            // Auto-redirect admins to superadmin
+                            if (this.isAdmin) {
+                                setTimeout(() => {
+                                    this.redirectToSuperAdmin();
+                                }, 2000); // Small delay to show welcome message
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error checking user status:', error);
+                        this.errorMessage = 'Erreur lors de la vérification de l\'utilisateur';
+                    }
+                },
+                
+                redirectToSuperAdmin() {
+                    window.location.href = '/superadmin';
+                },
+                
+                redirectToLogin() {
+                    window.location.href = '/login';
+                },
+                
+                async logout() {
+                    try {
+                        await Parse.User.logOut();
+                        // Clear session tokens
+                        localStorage.removeItem('parseSessionToken');
+                        sessionStorage.removeItem('parseSessionToken');
+                        window.location.href = '/login';
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                        this.errorMessage = 'Erreur lors de la déconnexion';
+                    }
+                }
+            };
+        }
+    </script>
+</body>
+</html>
