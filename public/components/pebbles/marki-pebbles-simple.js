@@ -6,7 +6,7 @@ class MarkiPebblesSimple extends LitElement {
   static styles = css`
     :host {
       display: block;
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       right: 0;
@@ -17,13 +17,13 @@ class MarkiPebblesSimple extends LitElement {
     }
 
     .pebble-container {
-      position: absolute;
+      position: fixed;
       width: 100%;
       height: 100%;
     }
 
     .pebble {
-      position: absolute;
+      position: fixed;
       pointer-events: none;
     }
 

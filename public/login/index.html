@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marki - Connexion</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- WebAwesome Icons -->
+    <script src="https://kit.webawesome.com/0bd7b69c33bd45ff.js" crossorigin="anonymous"></script>
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Parse initialization component -->
@@ -14,10 +14,9 @@
     <script type="module" src="/components/pebbles/marki-pebbles-simple.js"></script>
     <!-- Alpine.js CDN -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
         .loading-spinner {
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
@@ -30,9 +29,48 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Toggle switch styles */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        
+        /* Toggle track */
+        .block {
+            background-color: #e5e7eb;
+            transition: background-color 0.2s ease;
+        }
+        
+        /* Toggle dot */
+        .dot {
+            background-color: white;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        
+        /* Checked state */
+        input:checked ~ .block {
+            background-color: #e0f2fe;
+        }
+        
+        input:checked ~ .dot {
+            transform: translateX(100%);
+            background-color: #007ACE;
+        }
+        
+        /* Focus state */
+        input:focus ~ .block {
+            box-shadow: 0 0 0 2px rgba(0, 122, 174, 0.5);
+        }
     </style>
 </head>
-<body class="bg-white" x-data="loginPage()" x-init="
+<body class="font-['Inter']" x-data="loginPage()" x-init="
     // Wait for Parse to be initialized
     document.addEventListener('parse-initialized', function(e) {
         if (e.detail.success) {
@@ -53,8 +91,8 @@
     <!-- Main layout -->
     <div class="min-h-screen flex flex-col relative">
         <!-- Main content -->
-        <main class="flex-1 flex flex-col items-center justify-center py-8 px-4 sm:px-6 lg:px-8 w-full">
-            <div class="max-w-md mx-auto p-8 bg-white rounded-xl shadow-sm w-full">
+        <main class="flex-1 flex flex-col items-center justify-center py-8 px-4 w-full">
+            <div class="max-w-md w-full mx-auto p-8 bg-white rounded-xl shadow-sm">
                 <!-- Logo -->
                 <div class="flex justify-center mb-6">
                     <img src="/assets/marki-logo.png" alt="Marki Logo" class="w-20 h-20 object-contain">
@@ -69,7 +107,7 @@
                 </div>
                 
                 <!-- Login form -->
-                <form @submit.prevent="handleLogin" class="space-y-4">
+                <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
                     <div>
                         <label for="username" class="block text-sm font-medium text-gray-600 mb-1">Identifiant</label>
                         <input 
@@ -78,10 +116,10 @@
                             x-model="username" 
                             placeholder="Votre identifiant" 
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#007ACE] focus:border-transparent"
-                            :class="{ 'border-red-500': !username && submitted }"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            :class="!username && submitted ? 'border-red-500' : 'border-gray-300'"
                         >
-                        <p x-show="!username && submitted" class="text-xs text-red-600 mt-1">
+                        <p x-show="!username && submitted" class="text-xs text-red-500 mt-1">
                             Veuillez entrer un identifiant valide
                         </p>
                     </div>
@@ -94,32 +132,39 @@
                             x-model="password" 
                             placeholder="••••••••" 
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#007ACE] focus:border-transparent"
-                            :class="{ 'border-red-500': !password && submitted }"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            :class="!password && submitted ? 'border-red-500' : 'border-gray-300'"
                         >
-                        <p x-show="!password && submitted" class="text-xs text-red-600 mt-1">
+                        <p x-show="!password && submitted" class="text-xs text-red-500 mt-1">
                             Veuillez entrer votre mot de passe
                         </p>
                     </div>
                     
                     <div class="flex items-center mb-4">
-                        <input 
-                            type="checkbox" 
-                            id="rememberMe" 
-                            x-model="rememberMe" 
-                            class="w-4 h-4 mr-2 text-[#007ACE] rounded focus:ring-[#007ACE]"
-                        >
-                        <label for="rememberMe" class="text-sm text-gray-600">Se souvenir de moi</label>
+                        <label for="rememberMe" class="flex items-center cursor-pointer">
+                            <div class="relative">
+                                <input 
+                                    type="checkbox" 
+                                    id="rememberMe" 
+                                    x-model="rememberMe"
+                                    class="sr-only"
+                                >
+                                <div class="block bg-gray-200 w-10 h-6 rounded-full"></div>
+                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
+                            </div>
+                            <span class="ml-3 text-sm text-gray-600">Se souvenir de moi</span>
+                        </label>
                     </div>
                     
                     <button 
                         type="submit" 
-                        class="w-full py-2 px-4 bg-[#007ACE] text-white rounded-md text-sm font-medium hover:bg-[#006BD1] transition-colors duration-200"
-                        :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                        class="w-full px-4 py-2 bg-[#007ACE] text-white rounded-md text-sm font-medium hover:bg-[#005fa3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         :disabled="isLoading"
                     >
-                       
                         <span x-show="!isLoading">Se connecter</span>
+                        <span x-show="isLoading" class="flex items-center justify-center">
+                            <div class="loading-spinner"></div>
+                        </span>
                     </button>
                 </form>
             </div>
@@ -127,14 +172,15 @@
         
         <!-- Footer -->
         <footer class="bg-white border-t border-gray-200 mt-auto">
-            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 text-sm">
-                    <a href="/terms" class="hover:underline hover:text-[#007ACE] transition-colors">Conditions générales</a>
-                    <a href="/privacy" class="hover:underline hover:text-[#007ACE] transition-colors">Politique de confidentialité</a>
-                    <a href="/contact" class="hover:underline hover:text-[#007ACE] transition-colors">Contact</a>
-                    <a href="/superadmin" class="hover:underline hover:text-[#007ACE] transition-colors">Super Admin</a>
-                    <span class="text-gray-400">|</span>
-                    <span>© <span x-text="new Date().getFullYear()"></span> Marki. Tous droits réservés.</span>
+            <div class="max-w-5xl mx-auto px-4 py-4">
+                <div class="flex flex-col justify-center items-center gap-4 text-sm">
+                    <div class="flex gap-8 flex-wrap justify-center">
+                        <a href="/terms" class="text-gray-600 no-underline hover:text-blue-600 transition-colors">Conditions générales</a>
+                        <a href="/privacy" class="text-gray-600 no-underline hover:text-blue-600 transition-colors">Politique de confidentialité</a>
+                        <a href="/contact" class="text-gray-600 no-underline hover:text-blue-600 transition-colors">Contact</a>
+                        <a href="/superadmin" class="text-gray-600 no-underline hover:text-blue-600 transition-colors">Super Admin</a>
+                    </div>
+                    <span class="text-gray-400">© <span x-text="new Date().getFullYear()"></span> Marki. Tous droits réservés.</span>
                 </div>
             </div>
         </footer>
@@ -145,7 +191,6 @@
         x-show="isLoading" 
         x-transition
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        style="display: none;"
     >
         <div class="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-4">
             <div class="loading-spinner" style="width: 2rem; height: 2rem; border-width: 3px;"></div>
@@ -215,6 +260,12 @@
                 }
             };
         }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
     </script>
 </body>
 </html>

@@ -1,15 +1,955 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impayés</title>
-    <script type="module" src="../components/admin-layout/admin-layout.js"></script>
+    <title>Impayés - Marki</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script type="module" src="/components/admin-layout/admin-layout.js"></script>
+    <script type="module">
+        import '/components/pebbles/marki-pebbles-simple.js';
+    </script>
+    <script type="module" src="/components/impayes/impayes-grouped-view.js"></script>
+    <script type="module" src="/components/impayes/impaye-card.js"></script>
+    <script type="module" src="/components/impayes/impaye-details-drawer.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .delay-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .delay-high {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .delay-medium {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .delay-low {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+    </style>
 </head>
 <body>
-    <admin-layout pageTitle="Impayés">
-        <!-- Contenu spécifique aux impayés ira ici -->
-        <p>Contenu de la page Impayés</p>
+    <admin-layout>
+        <div class="p-6 ml-[260px]" x-data="impayesPage()" x-init="init()">
+            <!-- Header Section -->
+            <div class="mb-6">
+                <h1 class="text-3xl font-bold text-gray-800">Impayés</h1>
+                <p class="text-gray-600">Gérez vos impayés ici.</p>
+                <div class="mt-4">
+                    <input 
+                        type="text" 
+                        placeholder="Rechercher une facture..." 
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        x-model="searchQuery"
+                        @input.debounce.500ms="filterImpayes()"
+                    >
+                </div>
+            </div>
+
+            <!-- View Mode Toggle -->
+            <div class="mb-6 flex flex-wrap gap-2">
+                <button 
+                    @click="setViewMode('byPayeur')"
+                    :class="{
+                        'bg-blue-500 text-white': viewMode === 'byPayeur',
+                        'bg-gray-200 text-gray-700': viewMode !== 'byPayeur'
+                    }"
+                    class="px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                    Groupé par payeur
+                </button>
+                <button 
+                    @click="setViewMode('invoiceList')"
+                    :class="{
+                        'bg-blue-500 text-white': viewMode === 'invoiceList',
+                        'bg-gray-200 text-gray-700': viewMode !== 'invoiceList'
+                    }"
+                    class="px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                    Vue Factures
+                </button>
+                <button 
+                    @click="setViewMode('toFix')"
+                    :class="{
+                        'bg-blue-500 text-white': viewMode === 'toFix',
+                        'bg-gray-200 text-gray-700': viewMode !== 'toFix'
+                    }"
+                    class="px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                    À réparer
+                </button>
+                <button 
+                    @click="setViewMode('sequence')"
+                    :class="{
+                        'bg-blue-500 text-white': viewMode === 'sequence',
+                        'bg-gray-200 text-gray-700': viewMode !== 'sequence'
+                    }"
+                    class="px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                    Vue Séquence
+                </button>
+                <button 
+                    @click="setViewMode('byActor')"
+                    :class="{
+                        'bg-blue-500 text-white': viewMode === 'byActor',
+                        'bg-gray-200 text-gray-700': viewMode !== 'byActor'
+                    }"
+                    class="px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                    Vue par Acteur
+                </button>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <!-- Loading State -->
+                <div x-show="isLoading" class="flex justify-center items-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                    <span class="ml-3 text-gray-600">Chargement des impayés...</span>
+                </div>
+
+                <!-- Error State -->
+                <div x-show="error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-red-700">Erreur lors du chargement des impayés. Veuillez réessayer.</p>
+                            <button @click="init()" class="mt-2 text-red-700 hover:text-red-900 font-medium">Réessayer</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div x-show="!isLoading && filteredImpayes.length === 0 && !error" class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun impayé trouvé</h3>
+                    <p class="mt-1 text-sm text-gray-500">Aucun impayé ne correspond à votre recherche.</p>
+                </div>
+
+                <!-- View Content -->
+                <div x-show="!isLoading && filteredImpayes.length > 0">
+                    <!-- Grouped by Payer View -->
+                    <div x-show="viewMode === 'byPayeur' && !isLoading && filteredImpayes.length > 0">
+                        <button @click="logDebugInfo()" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded">Debug Info</button>
+                        <template x-for="(group, index) in sortedImpayesByPayeur" :key="index">
+                            <impayes-grouped-view 
+                                :group="group" 
+                                :index="index" 
+                                :selectedImpaye="selectedImpaye" 
+                                @toggle="toggleGroup(index)" 
+                                @view-details="viewImpaye($event.detail.facture)"
+                                @close="selectedImpaye = null"
+                            ></impayes-grouped-view>
+                        </template>
+                    </div>
+
+                    <!-- Invoice List View -->
+                    <div x-show="viewMode === 'invoiceList'">
+                        <impayes-invoice-list 
+                            :impayes="filteredImpayes" 
+                            @view-impaye="viewImpaye($event.detail)">
+                        </impayes-invoice-list>
+                    </div>
+
+                    <!-- To Fix View -->
+                    <div x-show="viewMode === 'toFix'">
+                        <impayes-to-fix-view 
+                            :impayes="impayesToFix" 
+                            @verify-email="verifyEmail($event.detail)" 
+                            @view-impaye="viewImpaye($event.detail)">
+                        </impayes-to-fix-view>
+                    </div>
+
+                    <!-- Sequence View -->
+                    <div x-show="viewMode === 'sequence'">
+                        <impayes-sequence-view 
+                            :impayes="impayesBySequence" 
+                            @view-payeur="viewPayeurDetails($event.detail)">
+                        </impayes-sequence-view>
+                    </div>
+
+                    <!-- By Actor View -->
+                    <div x-show="viewMode === 'byActor'">
+                        <impayes-by-actor-view 
+                            :impayes="impayesByActor" 
+                            @view-impaye="viewImpaye($event.detail)">
+                        </impayes-by-actor-view>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-6 flex justify-between items-center">
+                <div class="text-sm text-gray-600">
+                    Page <span x-text="currentPage"></span> sur <span x-text="totalPages"></span>
+                </div>
+                <div class="flex space-x-2">
+                    <button 
+                        @click="previousPage()"
+                        :disabled="currentPage === 1"
+                        :class="{ 'opacity-50 cursor-not-allowed': currentPage === 1 }"
+                        class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                    >
+                        Précédent
+                    </button>
+                    <button 
+                        @click="nextPage()"
+                        :disabled="currentPage === totalPages"
+                        :class="{ 'opacity-50 cursor-not-allowed': currentPage === totalPages }"
+                        class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                    >
+                        Suivant
+                    </button>
+                </div>
+            </div>
+
+            <!-- Impaye Details Drawer -->
+            <div 
+                x-show="showDetailsDrawer"
+                x-transition:enter="transition ease-in-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in-out duration-300"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-black bg-opacity-50 z-40"
+                @click="showDetailsDrawer = false"
+            ></div>
+
+            <div 
+                x-show="showDetailsDrawer"
+                x-transition:enter="transition ease-in-out duration-300"
+                x-transition:enter-start="transform translate-x-full"
+                x-transition:enter-end="transform translate-x-0"
+                x-transition:leave="transition ease-in-out duration-300"
+                x-transition:leave-start="transform translate-x-0"
+                x-transition:leave-end="transform translate-x-full"
+                class="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-xl z-50 overflow-y-auto"
+            >
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-900">Détails de la facture</h2>
+                        <button @click="showDetailsDrawer = false" class="text-gray-400 hover:text-gray-600">
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div x-show="selectedImpaye">
+                        <div class="space-y-4">
+                            <div>
+                                <h3 class="font-medium text-gray-900" x-text="selectedImpaye ? 'Facture #' + selectedImpaye.nfacture : ''"></h3>
+                                <p class="text-sm text-gray-500" x-text="selectedImpaye ? selectedImpaye.reference : ''"></p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="font-medium">Date:</span> 
+                                        <span x-text="selectedImpaye ? formatDate(selectedImpaye.datepiece) : ''"></span>
+                                    </p>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="font-medium">Adresse:</span> 
+                                        <span x-text="selectedImpaye ? (selectedImpaye.adresse + ', ' + selectedImpaye.codepostal + ' ' + selectedImpaye.ville) : ''"></span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="font-medium">HT:</span> 
+                                        <span x-text="selectedImpaye ? formatCurrency(selectedImpaye.totalhtnet) : ''"></span>
+                                    </p>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="font-medium">TTC:</span> 
+                                        <span x-text="selectedImpaye ? formatCurrency(selectedImpaye.totalttcnet) : ''"></span>
+                                    </p>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="font-medium">Reste:</span> 
+                                        <span x-text="selectedImpaye ? formatCurrency(selectedImpaye.resteapayer) : ''"></span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-2">Parties prenantes</h4>
+                                <div class="space-y-2">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700">Payeur</p>
+                                        <p class="text-sm text-gray-600" x-text="selectedImpaye ? selectedImpaye.payeur_nom : ''"></p>
+                                        <p class="text-sm text-gray-600" x-text="selectedImpaye ? selectedImpaye.payeur_email : ''"></p>
+                                        <p class="text-sm text-gray-600" x-text="selectedImpaye ? selectedImpaye.payeur_telephone : ''"></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700">Propriétaire</p>
+                                        <p class="text-sm text-gray-600" x-text="selectedImpaye ? selectedImpaye.proprietaire_nom : ''"></p>
+                                        <p class="text-sm text-gray-600" x-text="selectedImpaye ? selectedImpaye.proprietaire_email : ''"></p>
+                                        <p class="text-sm text-gray-600" x-text="selectedImpaye ? selectedImpaye.proprietaire_telephone : ''"></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700">Fournisseur</p>
+                                        <p class="text-sm text-gray-600" x-text="selectedImpaye ? selectedImpaye.apporteur_nom : ''"></p>
+                                        <p class="text-sm text-gray-600" x-text="selectedImpaye ? selectedImpaye.apporteur_email : ''"></p>
+                                        <p class="text-sm text-gray-600" x-text="selectedImpaye ? selectedImpaye.apporteur_telephone : ''"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex space-x-2">
+                                <button 
+                                    @click="viewPdf(selectedImpaye)" 
+                                    class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                                >
+                                    Voir PDF
+                                </button>
+                                <button 
+                                    @click="changeSequence(selectedImpaye)" 
+                                    class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                                >
+                                    Modifier séquence
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sequence Selection Drawer -->
+            <div 
+                x-show="showSequenceDrawer"
+                x-transition:enter="transition ease-in-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in-out duration-300"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-black bg-opacity-50 z-40"
+                @click="showSequenceDrawer = false"
+            ></div>
+
+            <div 
+                x-show="showSequenceDrawer"
+                x-transition:enter="transition ease-in-out duration-300"
+                x-transition:enter-start="transform translate-x-full"
+                x-transition:enter-end="transform translate-x-0"
+                x-transition:leave="transition ease-in-out duration-300"
+                x-transition:leave-start="transform translate-x-0"
+                x-transition:leave-end="transform translate-x-full"
+                class="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-xl z-50 overflow-y-auto"
+            >
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-900">Sélectionner une séquence</h2>
+                        <button @click="showSequenceDrawer = false" class="text-gray-400 hover:text-gray-600">
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="mb-4">
+                        <input 
+                            type="text" 
+                            placeholder="Rechercher une séquence..." 
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            x-model="sequenceSearch"
+                        >
+                    </div>
+
+                    <div class="mb-4">
+                        <button 
+                            @click="createSequence()"
+                            class="w-full flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                        >
+                            <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Créer une nouvelle séquence
+                        </button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <template x-for="sequence in filteredSequences" :key="sequence.id">
+                            <button 
+                                @click="selectSequence(sequence)"
+                                class="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-medium text-gray-900" x-text="sequence.name"></p>
+                                        <p class="text-sm text-gray-500">
+                                            <span x-text="sequence.invoices_count + ' facture' + (sequence.invoices_count > 1 ? 's' : '')"></span>
+                                        </p>
+                                    </div>
+                                    <svg 
+                                        x-show="sequence.is_automatic"
+                                        class="h-5 w-5 text-purple-500"
+                                        xmlns="http://www.w3.org/2000/svg" 
+                                        fill="none" 
+                                        viewBox="0 0 24 24" 
+                                        stroke="currentColor"
+                                    >
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PDF Viewer Drawer -->
+            <div 
+                x-show="showPdfDrawer"
+                x-transition:enter="transition ease-in-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in-out duration-300"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-black bg-opacity-50 z-40"
+                @click="showPdfDrawer = false"
+            ></div>
+
+            <div 
+                x-show="showPdfDrawer"
+                x-transition:enter="transition ease-in-out duration-300"
+                x-transition:enter-start="transform translate-x-full"
+                x-transition:enter-end="transform translate-x-0"
+                x-transition:leave="transition ease-in-out duration-300"
+                x-transition:leave-start="transform translate-x-0"
+                x-transition:leave-end="transform translate-x-full"
+                class="fixed inset-y-0 right-0 w-full max-w-2xl bg-white shadow-xl z-50 overflow-y-auto"
+            >
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-900">Visualisateur PDF</h2>
+                        <button @click="showPdfDrawer = false" class="text-gray-400 hover:text-gray-600">
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="mb-4 flex justify-center space-x-2">
+                        <button 
+                            @click="zoomIn()"
+                            class="p-2 bg-gray-100 rounded-md hover:bg-gray-200"
+                        >
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6" />
+                            </svg>
+                        </button>
+                        <button 
+                            @click="zoomOut()"
+                            class="p-2 bg-gray-100 rounded-md hover:bg-gray-200"
+                        >
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6" />
+                            </svg>
+                        </button>
+                        <button 
+                            @click="downloadPdf()"
+                            class="p-2 bg-gray-100 rounded-md hover:bg-gray-200"
+                        >
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </button>
+                        <button 
+                            @click="printPdf()"
+                            class="p-2 bg-gray-100 rounded-md hover:bg-gray-200"
+                        >
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="bg-gray-100 rounded-lg overflow-hidden" style="height: 70vh;">
+                        <iframe 
+                            x-show="pdfUrl"
+                            :src="pdfUrl"
+                            class="w-full h-full border-none"
+                            frameborder="0"
+                        ></iframe>
+                        <div x-show="!pdfUrl" class="flex justify-center items-center h-full">
+                            <div class="text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun PDF disponible</h3>
+                                <p class="mt-1 text-sm text-gray-500">Le PDF de cette facture n'est pas disponible.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </admin-layout>
+
+    <script>
+        function impayesPage() {
+            return {
+                // State
+                impayes: [],
+                searchQuery: '',
+                viewMode: 'byPayeur',
+                currentPage: 1,
+                itemsPerPage: 1000,
+                isLoading: true,
+                error: null,
+                showDetailsDrawer: false,
+                showSequenceDrawer: false,
+                showPdfDrawer: false,
+                selectedImpaye: null,
+                pdfUrl: null,
+                sequences: [],
+                sequenceSearch: '',
+
+                // Computed properties
+                get filteredImpayes() {
+                    if (this.searchQuery === '') return this.impayes;
+                    return this.impayes.filter(impaye => 
+                        impaye.nfacture.toString().includes(this.searchQuery) ||
+                        impaye.reference.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                        impaye.payeur_nom.toLowerCase().includes(this.searchQuery.toLowerCase())
+                    );
+                },
+
+                get impayesToFix() {
+                    return this.impayes.filter(impaye => 
+                        !impaye.payeur_email || impaye.payeur_email === ''
+                    );
+                },
+
+                get impayesBySequence() {
+                    const sequences = {};
+                    this.impayes.forEach(impaye => {
+                        const sequenceName = impaye.sequence_name || 'Sans séquence';
+                        if (!sequences[sequenceName]) {
+                            sequences[sequenceName] = {
+                                is_automatic: impaye.sequence_is_automatic || false,
+                                payeurs: {},
+                                total: 0
+                            };
+                        }
+
+                        if (!sequences[sequenceName].payeurs[impaye.payeur_nom]) {
+                            sequences[sequenceName].payeurs[impaye.payeur_nom] = {
+                                payeur_nom: impaye.payeur_nom,
+                                payeur_email: impaye.payeur_email,
+                                payeur_telephone: impaye.payeur_telephone,
+                                factures: [],
+                                total: 0
+                            };
+                        }
+
+                        sequences[sequenceName].payeurs[impaye.payeur_nom].factures.push(impaye);
+                        sequences[sequenceName].payeurs[impaye.payeur_nom].total += impaye.resteapayer;
+                        sequences[sequenceName].total += impaye.resteapayer;
+                    });
+
+                    // Convert payeurs object to array
+                    for (const sequenceName in sequences) {
+                        sequences[sequenceName].payeurs = Object.values(sequences[sequenceName].payeurs);
+                    }
+
+                    return sequences;
+                },
+
+                get impayesByActor() {
+                    const actors = {};
+                    this.impayes.forEach(impaye => {
+                        // Factures à régler (where actor is payer)
+                        if (impaye.payeur_nom) {
+                            if (!actors[impaye.payeur_nom]) {
+                                actors[impaye.payeur_nom] = {
+                                    acteur_nom: impaye.payeur_nom,
+                                    acteur_email: impaye.payeur_email,
+                                    acteur_telephone: impaye.payeur_telephone,
+                                    factures_a_regler: [],
+                                    factures_apportees: [],
+                                    total_a_regler: 0
+                                };
+                            }
+                            actors[impaye.payeur_nom].factures_a_regler.push(impaye);
+                            actors[impaye.payeur_nom].total_a_regler += impaye.resteapayer;
+                        }
+
+                        // Factures apportées (where actor is provider)
+                        if (impaye.apporteur_nom) {
+                            if (!actors[impaye.apporteur_nom]) {
+                                actors[impaye.apporteur_nom] = {
+                                    acteur_nom: impaye.apporteur_nom,
+                                    acteur_email: impaye.apporteur_email,
+                                    acteur_telephone: impaye.apporteur_telephone,
+                                    factures_a_regler: [],
+                                    factures_apportees: [],
+                                    total_a_regler: 0
+                                };
+                            }
+                            actors[impaye.apporteur_nom].factures_apportees.push(impaye);
+                        }
+                    });
+
+                    return actors;
+                },
+
+                get totalPages() {
+                    return Math.ceil(this.filteredImpayes.length / this.itemsPerPage);
+                },
+
+                get filteredSequences() {
+                    if (this.sequenceSearch === '') return this.sequences;
+                    return this.sequences.filter(sequence => 
+                        sequence.name.toLowerCase().includes(this.sequenceSearch.toLowerCase())
+                    );
+                },
+
+                get sortedImpayesByPayeur() {
+                    console.log('Calculating sortedImpayesByPayeur with:', this.filteredImpayes);
+                    
+                    if (!this.filteredImpayes || this.filteredImpayes.length === 0) {
+                        console.warn('No filtered impayes available');
+                        return [];
+                    }
+
+                    const groups = {};
+                    this.filteredImpayes.forEach(impaye => {
+                        if (!groups[impaye.payeur_nom]) {
+                            groups[impaye.payeur_nom] = {
+                                payeur_nom: impaye.payeur_nom,
+                                payeur_email: impaye.payeur_email,
+                                payeur_telephone: impaye.payeur_telephone,
+                                factures: [],
+                                total: 0,
+                                maxDelay: 0,
+                                expanded: false
+                            };
+                        }
+                        groups[impaye.payeur_nom].factures.push(impaye);
+                        groups[impaye.payeur_nom].total += impaye.resteapayer;
+                        const delay = this.calculateDaysOverdue(impaye);
+                        if (delay > groups[impaye.payeur_nom].maxDelay) {
+                            groups[impaye.payeur_nom].maxDelay = delay;
+                        }
+                    });
+
+                    // Convert to array and sort by total descending
+                    const result = Object.values(groups).sort((a, b) => b.total - a.total);
+                    console.log('sortedImpayesByPayeur result:', result);
+                    return result;
+                },
+
+                // Methods
+                init() {
+                    this.isLoading = true;
+                    this.error = null;
+
+                    // Check if Parse is ready
+                    if (window.parseReady) {
+                        // Fetch impayes directly from Parse
+                        this.fetchImpayes();
+                        this.fetchSequences();
+                    } else {
+                        // Wait for Parse to be ready
+                        const checkParseReady = setInterval(() => {
+                            if (window.parseReady) {
+                                clearInterval(checkParseReady);
+                                this.fetchImpayes();
+                                this.fetchSequences();
+                            }
+                        }, 100);
+                    }
+                },
+
+                logDebugInfo() {
+                    console.log('Debug Info:');
+                    console.log('filteredImpayes:', this.filteredImpayes);
+                    console.log('sortedImpayesByPayeur:', this.sortedImpayesByPayeur);
+                    console.log('viewMode:', this.viewMode);
+                    console.log('isLoading:', this.isLoading);
+                },
+
+                fetchImpayes() {
+                    const Impayes = Parse.Object.extend('Impayes');
+                    const query = new Parse.Query(Impayes);
+                    
+                    // Filter for unpaid invoices
+                    query.equalTo('facturesoldee', false);
+                    query.notEqualTo('resteapayer', 0);
+                    query.limit(99999);
+
+                    query.find()
+                        .then(impayes => {
+                            // Convert Parse Objects to plain JavaScript objects
+                            this.impayes = impayes.map(impaye => {
+                                return {
+                                    objectId: impaye.id,
+                                    nfacture: impaye.get('nfacture'),
+                                    reference: impaye.get('reference'),
+                                    datepiece: impaye.get('datepiece'),
+                                    adresse: impaye.get('adresse'),
+                                    codepostal: impaye.get('codepostal'),
+                                    ville: impaye.get('ville'),
+                                    totalhtnet: impaye.get('totalhtnet'),
+                                    totalttcnet: impaye.get('totalttcnet'),
+                                    resteapayer: impaye.get('resteapayer'),
+                                    facturesoldee: impaye.get('facturesoldee'),
+                                    statut_intitule: impaye.get('statut_intitule'),
+                                    liste: impaye.get('liste'),
+                                    sequence: impaye.get('sequence'),
+                                    sequence_is_automatic: impaye.get('sequence_is_automatic'),
+                                    sequence_name: impaye.get('sequence_name'),
+                                    numero: impaye.get('numero'),
+                                    payeur_nom: impaye.get('payeur_nom'),
+                                    payeur_email: impaye.get('payeur_email'),
+                                    payeur_telephone: impaye.get('payeur_telephone'),
+                                    proprietaire_nom: impaye.get('proprietaire_nom'),
+                                    proprietaire_email: impaye.get('proprietaire_email'),
+                                    proprietaire_telephone: impaye.get('proprietaire_telephone'),
+                                    apporteur_nom: impaye.get('apporteur_nom'),
+                                    apporteur_email: impaye.get('apporteur_email'),
+                                    apporteur_telephone: impaye.get('apporteur_telephone')
+                                };
+                            });
+                            this.isLoading = false;
+                        })
+                        .catch(error => {
+                            console.error('Error fetching impayes:', error);
+                            this.error = error.message || 'Erreur lors du chargement des impayés';
+                            this.isLoading = false;
+                        });
+                },
+
+                fetchSequences() {
+                    const Sequence = Parse.Object.extend('Sequence');
+                    const query = new Parse.Query(Sequence);
+
+                    query.find()
+                        .then(sequences => {
+                            // Convert Parse Objects to plain JavaScript objects
+                            this.sequences = sequences.map(sequence => {
+                                return {
+                                    id: sequence.id,
+                                    name: sequence.get('name'),
+                                    is_automatic: sequence.get('is_automatic') || false,
+                                    invoices_count: sequence.get('invoices_count') || 0
+                                };
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error fetching sequences:', error);
+                        });
+                },
+
+                setViewMode(mode) {
+                    this.viewMode = mode;
+                },
+
+                filterImpayes() {
+                    // This is handled by the computed property
+                },
+
+                viewImpaye(facture) {
+                    this.selectedImpaye = facture;
+                    this.showDetailsDrawer = true;
+                },
+
+                viewPayeurDetails(payeur) {
+                    // Find first facture for this payeur
+                    const firstFacture = this.impayes.find(i => i.payeur_nom === payeur.payeur_nom);
+                    if (firstFacture) {
+                        this.viewImpaye(firstFacture);
+                    }
+                },
+
+                calculateDaysOverdue(facture) {
+                    const today = new Date();
+                    const dueDate = new Date(facture.datepiece);
+                    const diffTime = Math.abs(today - dueDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return diffDays;
+                },
+
+                formatDate(dateString) {
+                    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                    return new Date(dateString).toLocaleDateString('fr-FR', options);
+                },
+
+                formatCurrency(amount) {
+                    return new Intl.NumberFormat('fr-FR', { 
+                        style: 'currency', 
+                        currency: 'EUR' 
+                    }).format(amount);
+                },
+
+                previousPage() {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                    }
+                },
+
+                nextPage() {
+                    if (this.currentPage < this.totalPages) {
+                        this.currentPage++;
+                    }
+                },
+
+                viewPdf(facture) {
+                    // In a real implementation, this would fetch the PDF from the server
+                    // For now, we'll just show a placeholder
+                    this.pdfUrl = null; // Set to actual PDF URL in real implementation
+                    this.showPdfDrawer = true;
+                },
+
+                zoomIn() {
+                    // Zoom in logic
+                },
+
+                zoomOut() {
+                    // Zoom out logic
+                },
+
+                downloadPdf() {
+                    // Download PDF logic
+                },
+
+                printPdf() {
+                    // Print PDF logic
+                },
+
+                changeSequence(facture) {
+                    this.selectedImpaye = facture;
+                    this.showSequenceDrawer = true;
+                },
+
+                createSequence() {
+                    const sequenceName = prompt('Nom de la nouvelle séquence:');
+                    if (sequenceName) {
+                        const Sequence = Parse.Object.extend('Sequence');
+                        const newSequence = new Sequence();
+                        
+                        newSequence.set('name', sequenceName);
+                        newSequence.set('is_automatic', false);
+                        newSequence.set('invoices_count', 0);
+
+                        newSequence.save()
+                            .then(sequence => {
+                                const sequenceObj = {
+                                    id: sequence.id,
+                                    name: sequence.get('name'),
+                                    is_automatic: sequence.get('is_automatic'),
+                                    invoices_count: sequence.get('invoices_count')
+                                };
+                                this.sequences.push(sequenceObj);
+                                this.selectSequence(sequenceObj);
+                            })
+                            .catch(error => {
+                                console.error('Error creating sequence:', error);
+                                alert('Erreur lors de la création de la séquence');
+                            });
+                    }
+                },
+
+                selectSequence(sequence) {
+                    if (this.selectedImpaye) {
+                        const Impayes = Parse.Object.extend('Impayes');
+                        const query = new Parse.Query(Impayes);
+
+                        query.get(this.selectedImpaye.objectId)
+                            .then(impaye => {
+                                // Set the sequence pointer
+                                const Sequence = Parse.Object.extend('Sequence');
+                                const sequencePtr = Sequence.createWithoutData(sequence.id);
+                                
+                                impaye.set('sequence', sequencePtr);
+                                impaye.set('sequence_name', sequence.name);
+                                impaye.set('sequence_is_automatic', sequence.is_automatic);
+
+                                return impaye.save();
+                            })
+                            .then(() => {
+                                this.selectedImpaye.sequence = sequence;
+                                this.selectedImpaye.sequence_name = sequence.name;
+                                this.selectedImpaye.sequence_is_automatic = sequence.is_automatic;
+                                this.showSequenceDrawer = false;
+                                alert('Séquence mise à jour avec succès');
+                            })
+                            .catch(error => {
+                                console.error('Error assigning sequence:', error);
+                                alert('Erreur lors de la mise à jour de la séquence');
+                            });
+                    }
+                },
+
+                verifyEmail(facture) {
+                    // In a real implementation, this would trigger a sync process
+                    // For now, we'll just show a message
+                    alert('Vérification de l\'email lancée. Les données seront synchronisées.');
+                    
+                    // You could also update the facture directly if needed
+                    // const Impaye = Parse.Object.extend('Impaye');
+                    // const query = new Parse.Query(Impaye);
+                    // query.get(facture.objectId)
+                    //     .then(impaye => {
+                    //         // Update email verification status
+                    //         impaye.set('email_verified', true);
+                    //         return impaye.save();
+                    //     })
+                    //     .then(() => {
+                    //         alert('Email vérifié avec succès');
+                    //     })
+                    //     .catch(error => {
+                    //         console.error('Error verifying email:', error);
+                    //         alert('Erreur lors de la vérification de l\'email');
+                    //     });
+                }
+            };
+        }
+    </script>
 </body>
 </html>
+
+<script type="module" src="/components/parse-init-component.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<parse-init id="parseInit" style="display: none;"></parse-init>
+
+<script>
+    // Global flag to indicate if Parse is ready
+    window.parseReady = false;
+    
+    // Wait for Parse to be initialized
+    document.addEventListener('DOMContentLoaded', function() {
+        const parseInit = document.getElementById('parseInit');
+        
+        if (parseInit) {
+            parseInit.addEventListener('parse-initialized', function(e) {
+                if (e.detail.success) {
+                    console.log('Parse SDK initialized successfully');
+                    window.parseReady = true;
+                    // Parse is now ready to use
+                    lucide.createIcons();
+                } else {
+                    console.error('Parse SDK initialization failed:', e.detail.error);
+                }
+            });
+        }
+    });
+</script>

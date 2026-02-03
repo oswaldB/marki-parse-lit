@@ -4,7 +4,7 @@ zVoici un document structuré avec **le style guide complet**, **la configuratio
 
 # **Documentation Style Guide – Steroids Studio**
 
-*Version 2.0 – Design Moderne avec Tailwind CSS (CDN)*
+*Version 3.0 – Design Moderne avec UnoCSS (CDN)*
 
 ---
 
@@ -111,7 +111,7 @@ Background Card,Blanc,#ffffff,rgb(255, 255, 255),Cartes et conteneurs,bg-white
 
 ---
 
-## **📌 2. Configuration Tailwind (`tailwind.config.js`) - Version Marki**
+## **📌 2. Configuration UnoCSS (`unocss-config.js`) - Version Marki**
 
 ```json
 json
