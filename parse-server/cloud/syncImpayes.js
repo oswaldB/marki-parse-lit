@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config(); // Charger les variables d'environnement depuis .env
+// Les variables d'environnement sont déjà disponibles via process.env (configurées dans docker-compose.yml)
 
 // Configuration Parse Server
 const PARSE_COLLECTION = 'Impayes'; // Nom de la classe dans Parse Server

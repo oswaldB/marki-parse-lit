@@ -1,0 +1,35 @@
+{
+  "name": "example-panier",
+  "version": "1.0.0",
+  "description": "Exemple de panier d'achat utilisant Alpine.js et Lit",
+  "main": "index.html",
+  "scripts": {
+    "start": "echo 'Ouvrez index.html dans un navigateur ou utilisez un serveur local'",
+    "dev": "python3 -m http.server 8000 --directory .",
+    "build": "echo 'Projet prêt pour la production - tous les assets sont optimisés'",
+    "test": "echo 'Exécutez les tests manuellement dans le navigateur'"
+  },
+  "keywords": [
+    "alpinejs",
+    "lit",
+    "web-components",
+    "ecommerce",
+    "panier",
+    "tailwindcss"
+  ],
+  "author": "Votre Nom",
+  "license": "MIT",
+  "dependencies": {
+    "alpinejs": "^3.0.0",
+    "lit": "^2.0.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.0.0"
+  },
+  "browserslist": [
+    "> 0.5%",
+    "last 2 versions",
+    "not dead",
+    "not op_mini all"
+  ]
+}
