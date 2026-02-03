@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Connexion</title>
+    <script src="https://cdn.jsdelivr.net/npm/parse@3.3.0/dist/parse.min.js"></script>
+    <script>
+        // Initialisation de Parse
+        Parse.initialize('marki', 'Careless7-Gore4-Guileless0-Jogger5-Clubbed9');
+        Parse.serverURL = 'https://dev.parse.markidiags.com';
+        
+        console.log('Parse initialisé:', typeof Parse !== 'undefined');
+        
+        async function testConnexion() {
+            try {
+                console.log('Test de connexion...');
+                // Test avec des credentials factices pour voir l'erreur
+                const user = await Parse.User.logIn('test', 'test');
+                console.log('Connexion réussie:', user);
+            } catch (error) {
+                console.log('Erreur de connexion (attendu):', error.message);
+            }
+        }
+        
+        // Attendre que la page soit chargée
+        window.addEventListener('load', function() {
+            console.log('Page chargée, Parse disponible:', typeof Parse !== 'undefined');
+            testConnexion();
+        });
+    </script>
+</head>
+<body>
+    <h1>Test de connexion Parse</h1>
+    <p>Ouvrez la console pour voir les résultats.</p>
+</body>
+</html>

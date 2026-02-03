@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Simple Auth Layout</title>
+    <!-- Import Lit pour le développement -->
+    <script type="module">
+        import { LitElement, html, css } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
+        window.LitElement = LitElement;
+        window.html = html;
+        window.css = css;
+    </script>
+    <!-- Import des composants nécessaires -->
+    <script type="module" src="/components/check-auth.js"></script>
+    <script type="module" src="/app2/components/utils/parse-init-component.js"></script>
+    <script type="module" src="/app2/components/layout/auth-app-layout.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <auth-app-layout page-title="Test Simple">
+        <div class="test-content">
+            <h2>Test Réussi !</h2>
+            <p>Le layout d'authentification est correctement chargé.</p>
+            <p>Vous devriez voir une double sidebar et ce contenu dans la zone principale.</p>
+        </div>
+    </auth-app-layout>
+</body>
+</html>

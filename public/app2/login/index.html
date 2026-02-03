@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Marki-parse App2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script type="module">
+        import { LitElement, html, css } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
+        window.LitElement = LitElement;
+        window.html = html;
+        window.css = css;
+    </script>
+    <!-- Import Parse initialization component -->
+    <script type="module" src="/app2/components/utils/parse-init-component.js"></script>
+    
+    <!-- Import Marki Pebbles -->
+    <script type="module" src="/app2/components/pebbles/marki-pebble-blue.js"></script>
+    <script type="module" src="/app2/components/pebbles/marki-pebble-dark.js"></script>
+    <script type="module" src="/app2/components/pebbles/marki-pebble-gray.js"></script>
+    
+    <!-- Import Toast Component -->
+    <script type="module" src="/app2/components/toast/ss-toast.js"></script>
+    
+    <!-- Import Console Monitor -->
+    <script type="module" src="/app2/components/console/ss-console-monitor.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Marki Blue Color - Fallback if CSS variable not available */
+        .bg-marki-blue {
+            background-color: #007ace;
+        }
+        
+        .bg-marki-blue-dark {
+            background-color: #005a9e;
+        }
+        
+        .hover\:bg-marki-blue-dark:hover {
+            background-color: #005a9e;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <!-- Import du layout -->
+    <script type="module" src="/app2/components/layout/ss-app-layout.js"></script>
+    
+    <ss-app-layout pageTitle="Connexion">
+        <!-- Parse initialization component -->
+        <parse-init></parse-init>
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="w-full max-w-md">
+                <!-- Logo -->
+                <div class="flex justify-center mb-8">
+                    <img src="/assets/marki-logo.png" alt="Marki-parse Logo" class="h-16 w-auto">
+                </div>
+                
+                <!-- Carte de connexion -->
+                <div class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm">
+                    <h2 class="text-2xl font-bold text-gray-900 text-center mb-6">Connexion</h2>
+                    
+                    <form id="loginForm" class="space-y-4">
+                        <!-- Champ Email ou Username -->
+                        <div class="mb-4">
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                                Email ou Nom d'utilisateur
+                            </label>
+                            <input type="text" id="username" name="username" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                   placeholder="votre@email.com ou nom d'utilisateur" required>
+                        </div>
+                        
+                        <!-- Champ Mot de passe -->
+                        <div class="mb-4">
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                                Mot de passe
+                            </label>
+                            <input type="password" id="password" name="password" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                   placeholder="••••••••" required>
+                        </div>
+                        
+                        <!-- Bouton de connexion -->
+                        <div class="pt-2">
+                            <button type="submit" 
+                                    class="bg-marki-blue hover:bg-marki-blue-dark text-white w-full px-4 py-2.5 rounded-lg font-medium transition-colors">
+                                Se connecter
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Options supplémentaires -->
+                    <div class="mt-4 flex items-center">
+                        <input type="checkbox" id="rememberMe" name="rememberMe" 
+                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="rememberMe" class="ml-2 block text-sm text-gray-700">
+                            Se souvenir de moi
+                        </label>
+                    </div>
+                    
+                    <!-- Message d'erreur (caché par défaut) -->
+                    <div id="errorMessage" class="mt-4 p-3 rounded-md bg-red-50 text-red-700 text-sm hidden">
+                        <div class="flex items-center">
+                            <span class="material-icons mr-2" style="font-size: 18px;">error</span>
+                            <span id="errorText">Email ou mot de passe incorrect.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ss-app-layout>
+    
+    <!-- Script de gestion de la connexion -->
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            
+            // Masquer le message d'erreur
+            errorMessage.classList.add('hidden');
+            
+            try {
+                // Attendre que Parse soit prêt avec gestion d'erreur
+                await new Promise((resolve, reject) => {
+                    const checkParse = () => {
+                        if (window.Parse && typeof Parse.User !== 'undefined') {
+                            resolve();
+                        } else if (window.ParseInit) {
+                            // ParseInit existe mais Parse n'est pas encore prêt
+                            const timeout = setTimeout(() => {
+                                document.removeEventListener('parse-ready', parseReadyHandler);
+                                reject(new Error('Parse initialization timeout'));
+                            }, 5000);
+                            
+                            const parseReadyHandler = () => {
+                                clearTimeout(timeout);
+                                resolve();
+                            };
+                            
+                            document.addEventListener('parse-ready', parseReadyHandler, { once: true });
+                        } else {
+                            reject(new Error('Parse SDK not available'));
+                        }
+                    };
+                    
+                    // Vérifier immédiatement
+                    checkParse();
+                });
+                
+                // Connexion avec Parse (username peut être email ou username)
+                const user = await Parse.User.logIn(username, password);
+                
+                console.log('Connexion réussie:', user);
+                
+                // Gestion du token de session selon l'option "Se souvenir de moi"
+                const sessionToken = user.getSessionToken();
+                if (rememberMe) {
+                    // Sauvegarder en localStorage pour persistance longue
+                    localStorage.setItem('parseSessionToken', sessionToken);
+                    localStorage.setItem('parseRememberMe', 'true');
+                    console.log('Session sauvegardée en localStorage');
+                } else {
+                    // Sauvegarder en sessionStorage (disparaît à la fermeture du navigateur)
+                    sessionStorage.setItem('parseSessionToken', sessionToken);
+                    localStorage.removeItem('parseSessionToken');
+                    localStorage.removeItem('parseRememberMe');
+                    console.log('Session sauvegardée en sessionStorage');
+                }
+                
+                // Redirection vers l'URL de redirection si elle existe, sinon vers la page d'accueil
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirectUrl = urlParams.get('url_redirect');
+                
+                if (redirectUrl && redirectUrl.startsWith('/')) {
+                    // Rediriger vers l'URL de redirection originale
+                    window.location.href = redirectUrl;
+                } else {
+                    // Redirection par défaut vers la page d'accueil
+                    window.location.href = '/app2/';
+                }
+                
+            } catch (error) {
+                console.error('Erreur de connexion:', error);
+                
+                // Afficher le message d'erreur avec plus de détails
+                let errorMsg = 'Email ou mot de passe incorrect.';
+                
+                if (error.message) {
+                    if (error.message.includes('timeout')) {
+                        errorMsg = 'Service de connexion indisponible. Veuillez réessayer plus tard.';
+                    } else if (error.message.includes('not available')) {
+                        errorMsg = 'Erreur de configuration. Veuillez actualiser la page.';
+                    } else if (error.message.includes('Invalid username/password')) {
+                        errorMsg = 'Email ou mot de passe incorrect.';
+                    }
+                }
+                
+                errorText.textContent = errorMsg;
+                errorMessage.classList.remove('hidden');
+            }
+        });
+        
+        // Initialiser Parse si nécessaire
+        if (!window.Parse && window.ParseInit) {
+            window.ParseInit.initialize();
+        } else if (!window.Parse) {
+            console.error('Parse SDK not loaded and ParseInit not available');
+        } else {
+            console.log('Parse SDK already loaded:', typeof Parse);
+        }
+        
+        // Vérifier si l'utilisateur était déjà connecté
+        document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier d'abord en localStorage (si "se souvenir de moi" était coché)
+            const rememberMe = localStorage.getItem('parseRememberMe');
+            const sessionToken = rememberMe ? localStorage.getItem('parseSessionToken') : sessionStorage.getItem('parseSessionToken');
+            
+            if (sessionToken) {
+                console.log('Session existante trouvée, redirection...');
+                // Rediriger automatiquement si un token valide existe
+                window.location.href = '/app2/';
+            }
+        });
+    </script>
+</body>
+</html>

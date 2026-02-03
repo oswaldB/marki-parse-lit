@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Chargement Précoce</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .test-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-section h2 {
+            color: #334155;
+            margin-top: 0;
+            font-size: 18px;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-error { background-color: #ef4444; color: white; }
+        .btn-success { background-color: #10b981; color: white; }
+        
+        .code-example {
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Chargement Précoce</h1>
+    <p>Ce test montre comment capturer les erreurs qui surviennent très tôt dans le chargement de la page.</p>
+    
+    <!-- Test Section 1: Early Errors -->
+    <div class="test-section">
+        <h2>⏱️ Erreurs Précoces</h2>
+        <p>Ces erreurs sont générées avant que le composant ne soit complètement chargé.</p>
+        <div class="test-buttons">
+            <button class="btn-error" onclick="generateEarlyError()">Générer Erreur Précoce</button>
+            <button class="btn-error" onclick="generateErrorBeforeComponent()">Erreur Avant Composant</button>
+            <button class="btn-success" onclick="testEarlyLoading()">Test Chargement Précoce</button>
+        </div>
+        <div class="code-example">
+            // Exemple d'erreur qui survient avant le chargement du composant:
+            &lt;script&gt;
+            // Ce code est exécuté avant que le composant ne soit chargé
+            console.error('Erreur très précoce qui devrait être capturée');
+            &lt;/script&gt;
+        </div>
+    </div>
+    
+    <!-- Test Section 2: Loading Order -->
+    <div class="test-section">
+        <h2>📦 Ordre de Chargement</h2>
+        <p>Test de l'ordre dans lequel les scripts sont chargés.</p>
+        <div class="test-buttons">
+            <button class="btn-error" onclick="testScriptLoadOrder()">Test Ordre Scripts</button>
+            <button class="btn-error" onclick="testDOMReadyError()">Erreur à DOMReady</button>
+        </div>
+    </div>
+    
+    <!-- Load LitElement first (in head) -->
+    <script type="module">
+        // Import LitElement as early as possible
+        import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js';
+        window.LitElement = LitElement;
+        window.html = html;
+        window.css = css;
+        
+        console.log('✅ LitElement chargé très tôt');
+    </script>
+    
+    <!-- Load Console Monitor immediately after LitElement -->
+    <script type="module" src="/app2/components/console/ss-console-monitor.js"></script>
+    
+    <!-- Generate some early errors to test -->
+    <script>
+        // This error should be captured by the early initialization
+        console.log('🔍 Script exécuté après le chargement du console monitor');
+        
+        // Generate an early error
+        setTimeout(() => {
+            console.error('⚠️ Erreur générée 1 seconde après le chargement de la page');
+        }, 1000);
+        
+        // Generate a network error
+        setTimeout(() => {
+            fetch('https://example.com/nonexistent-endpoint-404')
+                .catch(error => {
+                    console.error('🌐 Erreur réseau précoce:', error.message);
+                });
+        }, 1500);
+    </script>
+    
+    <!-- Add the console monitor to the page -->
+    <ss-console-monitor></ss-console-monitor>
+    
+    <script>
+        // Test functions
+        function generateEarlyError() {
+            console.error('Erreur générée par bouton - devrait être capturée');
+            
+            // Also generate a network error
+            fetch('https://httpstat.us/404')
+                .then(response => {
+                    if (!response.ok) {
+                        console.error('Erreur réseau 404 générée par bouton');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur réseau catchée:', error.message);
+                });
+        }
+        
+        function generateErrorBeforeComponent() {
+            // Simulate an error that would occur before component loading
+            setTimeout(() => {
+                try {
+                    // This will generate a ReferenceError
+                    console.log('Testing early reference error:', nonExistentVariable);
+                } catch (error) {
+                    console.error('Erreur catchée:', error.message);
+                }
+            }, 50);
+        }
+        
+        function testEarlyLoading() {
+            console.log('🚀 Test du chargement précoce démarré...');
+            
+            // Generate multiple types of errors
+            console.error('Erreur test 1');
+            console.warn('Avertissement test 2');
+            
+            setTimeout(() => {
+                console.error('Erreur asynchrone test 3');
+            }, 100);
+            
+            // Network error
+            fetch('https://example.com/nonexistent-test-endpoint')
+                .catch(error => {
+                    console.error('Erreur réseau test 4:', error.message);
+                });
+            
+            alert('Multiple errors generated. Check if all are captured!');
+        }
+        
+        function testScriptLoadOrder() {
+            console.log('📚 Testing script load order...');
+            
+            // Create a script element dynamically
+            const script = document.createElement('script');
+            script.textContent = `
+                console.log('Script dynamique chargé');
+                console.error('Erreur depuis script dynamique');
+            `;
+            document.body.appendChild(script);
+        }
+        
+        function testDOMReadyError() {
+            console.log('📄 Testing DOMContentLoaded error...');
+            
+            // This error should be captured
+            console.error('Erreur générée à DOMContentLoaded');
+            
+            // Also test a network error
+            fetch('https://httpstat.us/500')
+                .then(response => {
+                    if (!response.ok) {
+                        console.error('Erreur serveur 500 à DOMContentLoaded');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur réseau à DOMContentLoaded:', error.message);
+                });
+        }
+        
+        // Log initial
+        console.log('🐞 Console Monitor Early Loading Test - Ready!');
+        console.info('All early errors should be captured by the early initialization.');
+    </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Console Monitor Complet</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .test-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-section h2 {
+            color: #334155;
+            margin-top: 0;
+            font-size: 18px;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-error { background-color: #ef4444; color: white; }
+        .btn-warn { background-color: #f59e0b; color: white; }
+        .btn-info { background-color: #3b82f6; color: white; }
+        .btn-log { background-color: #64748b; color: white; }
+        .btn-debug { background-color: #10b981; color: white; }
+        .btn-trace { background-color: #8b5cf6; color: white; }
+        
+        .code-example {
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Console Monitor Complet</h1>
+    <p>Ce test vérifie que toutes les erreurs de la console web sont capturées, y compris les erreurs natives.</p>
+    
+    <!-- Test Section 1: Console API -->
+    <div class="test-section">
+        <h2>📝 Appels Console API</h2>
+        <p>Test des différents niveaux de logging de la console.</p>
+        <div class="test-buttons">
+            <button class="btn-error" onclick="console.error('Ceci est une erreur test')">console.error()</button>
+            <button class="btn-warn" onclick="console.warn('Ceci est un avertissement test')">console.warn()</button>
+            <button class="btn-info" onclick="console.info('Ceci est une information test')">console.info()</button>
+            <button class="btn-log" onclick="console.log('Ceci est un log test')">console.log()</button>
+            <button class="btn-debug" onclick="console.debug('Ceci est un debug test')">console.debug()</button>
+            <button class="btn-trace" onclick="console.trace('Ceci est un trace test')">console.trace()</button>
+        </div>
+    </div>
+    
+    <!-- Test Section 2: Native Errors -->
+    <div class="test-section">
+        <h2>⚠️ Erreurs JavaScript Natives</h2>
+        <p>Test des erreurs qui apparaissent directement dans la console du navigateur.</p>
+        <div class="test-buttons">
+            <button class="btn-error" onclick="undefinedVariable++;">Variable non définie</button>
+            <button class="btn-error" onclick="null.function();">Appel sur null</button>
+            <button class="btn-error" onclick="throw new Error('Erreur lancée manuellement');">Lancer une erreur</button>
+            <button class="btn-error" onclick="throw new TypeError('TypeError test');">Lancer TypeError</button>
+            <button class="btn-error" onclick="JSON.parse('invalid json');">JSON invalide</button>
+        </div>
+        <div class="code-example">
+            // Exemple d'erreur native qui devrait être capturée :
+            console.log("Ce code va générer une erreur : " + nonExistentVariable);
+        </div>
+    </div>
+    
+    <!-- Test Section 3: Async Errors -->
+    <div class="test-section">
+        <h2>⏳ Erreurs Asynchrones</h2>
+        <p>Test des erreurs dans les promesses et les callbacks.</p>
+        <div class="test-buttons">
+            <button class="btn-error" onclick="Promise.reject('Promesse rejetée non capturée');">Promesse rejetée</button>
+            <button class="btn-error" onclick="setTimeout(() => { throw new Error('Erreur dans setTimeout'); }, 100);">Erreur dans setTimeout</button>
+            <button class="btn-error" onclick="
+                new Promise((resolve, reject) => {
+                    setTimeout(() => reject('Erreur asynchrone'), 100);
+                });
+            ">Erreur asynchrone</button>
+        </div>
+    </div>
+    
+    <!-- Test Section 4: Resource Errors -->
+    <div class="test-section">
+        <h2>🔗 Erreurs de Ressources</h2>
+        <p>Test des erreurs de chargement de ressources (images, scripts, etc.)</p>
+        <div class="test-buttons">
+            <button class="btn-error" onclick="
+                const img = new Image();
+                img.src = 'https://example.com/nonexistent-image-404.jpg';
+                document.body.appendChild(img);
+            ">Charger image 404</button>
+            <button class="btn-error" onclick="
+                const script = document.createElement('script');
+                script.src = 'https://example.com/nonexistent-script-404.js';
+                document.body.appendChild(script);
+            ">Charger script 404</button>
+        </div>
+    </div>
+    
+    <!-- Test Section 5: Network Errors -->
+    <div class="test-section">
+        <h2>🌐 Erreurs Réseau</h2>
+        <p>Test des erreurs de réseau (fetch, XMLHttpRequest)</p>
+        <div class="test-buttons">
+            <button class="btn-error" onclick="
+                fetch('https://example.com/nonexistent-endpoint-404')
+                    .then(r => r.json())
+                    .catch(e => console.error('Fetch error:', e));
+            ">Fetch 404</button>
+            <button class="btn-error" onclick="
+                fetch('https://nonexistent-domain-12345.com/api')
+                    .catch(e => console.error('DNS error:', e));
+            ">Fetch DNS Error</button>
+        </div>
+    </div>
+    
+    <!-- Import LitElement and the console monitor -->
+    <script type="module">
+        // Import LitElement (simplified for testing)
+        import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js';
+        window.LitElement = LitElement;
+        window.html = html;
+        window.css = css;
+    </script>
+    
+    <!-- Import the console monitor component -->
+    <script type="module" src="/app2/components/console/ss-console-monitor.js"></script>
+    
+    <!-- Add the console monitor to the page -->
+    <ss-console-monitor></ss-console-monitor>
+    
+    <script>
+        // Test: Generate some initial logs
+        console.log('Console Monitor chargé et prêt à capturer les erreurs !');
+        console.info('Ce message devrait apparaître dans le moniteur.');
+        
+        // Test: Generate a native error that would normally only show in browser console
+        setTimeout(() => {
+            try {
+                // This will generate a ReferenceError that should be captured
+                console.log('Testing native error capture:', nonExistentVariable);
+            } catch (e) {
+                console.error('Caught error:', e);
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

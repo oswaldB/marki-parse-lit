@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Console Monitor</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-error { background-color: #ef4444; color: white; }
+        .btn-warn { background-color: #f59e0b; color: white; }
+        .btn-info { background-color: #3b82f6; color: white; }
+        .btn-log { background-color: #64748b; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Test Console Monitor</h1>
+    <p>Cliquez sur les boutons pour générer différents types de logs console.</p>
+    
+    <div class="test-buttons">
+        <button class="btn-error" onclick="console.error('Ceci est une erreur test')">Générer une erreur</button>
+        <button class="btn-warn" onclick="console.warn('Ceci est un avertissement test')">Générer un avertissement</button>
+        <button class="btn-info" onclick="console.info('Ceci est une information test')">Générer une info</button>
+        <button class="btn-log" onclick="console.log('Ceci est un log test')">Générer un log</button>
+        <button class="btn-error" onclick="throw new Error('Erreur lancée manuellement')">Lancer une erreur</button>
+    </div>
+    
+    <!-- Import LitElement and the console monitor -->
+    <script type="module">
+        // Import LitElement (simplified for testing)
+        import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js';
+        window.LitElement = LitElement;
+        window.html = html;
+        window.css = css;
+    </script>
+    
+    <!-- Import the console monitor component -->
+    <script type="module" src="/app2/components/console/ss-console-monitor.js"></script>
+    
+    <!-- Add the console monitor to the page -->
+    <ss-console-monitor></ss-console-monitor>
+</body>
+</html>
