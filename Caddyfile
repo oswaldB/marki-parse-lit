@@ -21,6 +21,16 @@ marki.localhost {
     file_server
 }
 
+# Allow access via IP address for local network
+:80 {
+    redir https://{host}{uri}
+}
+
+:443 {
+    root * /usr/share/caddy
+    file_server
+}
+
 dev.markidiags.com:5000 {
     root * /usr/share/caddy
     file_server
@@ -29,17 +39,10 @@ dev.markidiags.com:5000 {
 dev.parse.markidiags.com {
     reverse_proxy parse-server:1337 {
         header_up Host {host}
-        header_down -Access-Control-Allow-Origin
-        header_down -Access-Control-Allow-Methods
-        header_down -Access-Control-Allow-Headers
-        header_down -Access-Control-Allow-Credentials
+        # Don't remove CORS headers from Parse Server
+        # Let Parse Server handle its own CORS headers
     }
-    header {
-        Access-Control-Allow-Origin "https://dev.markidiags.com:5000"
-        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-        Access-Control-Allow-Headers "Content-Type, Authorization"
-        Access-Control-Allow-Credentials "true"
-    }
+
 }
 
 dev.parse.dashboard.markidiags.com:4040 {

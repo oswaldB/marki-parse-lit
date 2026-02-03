@@ -10,21 +10,48 @@ zVoici un document structuré avec **le style guide complet**, **la configuratio
 
 ## **📌 1. Style Guide Complet**
 
-### **Couleurs - Design Moderne**
+### **Charte des Couleurs - Marki**
 
-Nom,Couleur,Usage,Classes CSS
-Primary,#3b82f6,Boutons principaux, accents,bg-primary, text-primary
-Primary Dark,#1e40af,Hover des boutons, en-têtes,bg-primary-dark
-Secondary,#6D5DCF,Accents secondaires,bg-secondary, text-secondary
-Success,#10b981,Messages de succès,bg-success, text-success
-Error,#ef4444,Erreurs, alertes,bg-error, text-error
-Warning,#f59e0b,Alertes modérées,bg-warning, text-warning
-Info,#3b82f6,Informations, callouts,bg-info, text-info
-Text,#1f2937,Texte principal,text-gray-900
-Text Light,#6b7280,Texte secondaire,text-gray-500
-Border,#d1d5db,Bordures, séparateurs,border-gray-200
-Background Light,#f9fafb,Arrière-plans clairs,bg-gray-50
-Background Card,#ffffff,Cartes et conteneurs,bg-white
+#### **Couleurs Principales (Marque Marki)**
+
+Nom,Couleur,Hex,RGB,Usage,Classes CSS
+**Marki Blue (Primary)**,Bleu Marki,#007ace,rgb(0, 122, 206),Boutons principaux, identité de marque,bg-marki-blue, text-marki-blue
+**Marki Blue Dark**,Bleu Marki foncé,#005a9e,rgb(0, 90, 158),Survol, états actifs,bg-marki-blue-dark, hover:bg-marki-blue-dark
+**Marki Blue Light**,Bleu Marki clair,#4da6ff,rgb(77, 166, 255),Arrière-plans, accents,bg-marki-blue-light, border-marki-blue-light
+
+#### **Couleurs Secondaires**
+
+Nom,Couleur,Hex,RGB,Usage,Classes CSS
+Secondary,Violet,#6D5DCF,rgb(109, 93, 207),Accents secondaires,bg-secondary, text-secondary
+Success,Vert,#10b981,rgb(16, 185, 129),Messages de succès,bg-success, text-success
+Error,Rouge,#ef4444,rgb(239, 68, 68),Erreurs et alertes,bg-error, text-error
+Warning,Orange,#f59e0b,rgb(245, 158, 11),Alertes modérées,bg-warning, text-warning
+Info,Bleu info,#3b82f6,rgb(59, 130, 246),Informations,bg-info, text-info
+
+#### **Couleurs Neutres**
+
+Nom,Couleur,Hex,RGB,Usage,Classes CSS
+Text Principal,Gris foncé,#1f2937,rgb(31, 41, 55),Texte principal,text-gray-900
+Text Secondaire,Gris moyen,#6b7280,rgb(107, 114, 128),Texte secondaire,text-gray-500
+Border,Gris clair,#d1d5db,rgb(209, 213, 219),Bordures et séparateurs,border-gray-200
+Background Light,Gris très clair,#f9fafb,rgb(249, 250, 251),Arrière-plans clairs,bg-gray-50
+Background Card,Blanc,#ffffff,rgb(255, 255, 255),Cartes et conteneurs,bg-white
+
+#### **Palettes de Couleurs Complémentaires**
+
+**Dégradés Marki:**
+- Dégradé principal: `linear-gradient(135deg, #007ace 0%, #005a9e 100%)`
+- Dégradé clair: `linear-gradient(135deg, #4da6ff 0%, #007ace 100%)`
+
+**Couleurs de Fond:**
+- Fond application: `#f3f4f6` (gris très clair)
+- Fond sidebar: `#ffffff` (blanc)
+- Fond carte survol: `#f9fafb` (gris presque blanc)
+
+**Couleurs de Texte:**
+- Texte sur fond bleu: `#ffffff` (blanc)
+- Texte sur fond clair: `#1f2937` (gris foncé)
+- Texte désactivé: `#9ca3af` (gris moyen)
 
 ---
 
@@ -42,8 +69,8 @@ Background Card,#ffffff,Cartes et conteneurs,bg-white
     | H4 | `text-lg font-semibold text-gray-900` |
     | Body Text | `text-base text-gray-700 leading-6` |
     | Small Text | `text-sm text-gray-500` |
-    | Lien | `text-blue-600 hover:text-blue-700 transition-colors` |
-    | Lien avec icône | `flex items-center text-blue-600 hover:text-blue-700 transition-colors` |
+    | Lien | `text-marki-blue hover:text-marki-blue-dark transition-colors` |
+    | Lien avec icône | `flex items-center text-marki-blue hover:text-marki-blue-dark transition-colors` |
 
 ---
 
@@ -84,7 +111,7 @@ Background Card,#ffffff,Cartes et conteneurs,bg-white
 
 ---
 
-## **📌 2. Configuration Tailwind (`tailwind.config.js`) - Version Moderne**
+## **📌 2. Configuration Tailwind (`tailwind.config.js`) - Version Marki**
 
 ```json
 json
@@ -93,25 +120,25 @@ Copier
 "theme": {
 "extend": {
 "colors": {
-"primary": {
-"DEFAULT":"#3b82f6",
-"dark":"#1e40af"
-        },
-"secondary":"#6D5DCF",
-"success":"#10b981",
-"error":"#ef4444",
-"warning":"#f59e0b",
-"info":"#3b82f6",
-"text": {
-"DEFAULT":"#1f2937",
-"light":"#6b7280"
-        },
-"border":"#d1d5db",
-"bg-light":"#f9fafb"
+"marki-blue": {
+"DEFAULT": "#007ace",
+"dark": "#005a9e",
+"light": "#4da6ff"
       },
+"secondary": "#6D5DCF",
+"success": "#10b981",
+"error": "#ef4444",
+"warning": "#f59e0b",
+"info": "#3b82f6",
+"text": {
+"DEFAULT": "#1f2937",
+"light": "#6b7280"
+      },
+"border": "#d1d5db",
+"bg-light": "#f9fafb"
+    },
 "fontFamily": {
-"sans": ["Inter","sans-serif"]
-      }
+"sans": ["Inter", "sans-serif"]
     }
   },
 "plugins": []
@@ -315,11 +342,11 @@ Copier
 
 ### **1. Boutons Modernes avec Icônes**
 
-#### **Bouton Principal Moderne**
+#### **Bouton Principal Marki**
 ```html
 html
 Copier
-<buttonclass="btn-modern bg-blue-600 text-white px-4 py-2 hover:bg-blue-700 shadow-modern transition-modern">
+<buttonclass="btn-marki bg-marki-blue text-white px-4 py-2 hover:bg-marki-blue-dark shadow-modern transition-modern">
   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
   </svg>
@@ -343,7 +370,7 @@ Copier
 ```html
 html
 Copier
-<buttonclass="btn-modern bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-modern shadow-modern">
+<buttonclass="btn-modern bg-success text-white px-4 py-2 hover:bg-green-700 transition-modern shadow-modern">
   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
   </svg>

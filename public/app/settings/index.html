@@ -1,147 +1,20 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paramètres - Marki Parse</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Marki - Parse</title>
+      <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/cjs/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
-    <script src="https://unpkg.com/parse/dist/parse.min.js"></script>
-    <script src="/components/parse-credentials.js"></script>
-    <script src="/assets/parse-config.js"></script>
-    <script type="module" src="/components/check-auth.js"></script>
-    <script type="module" src="/components/sidebar.js"></script>
-    <script type="module">
-        import { LitElement, html } from 'https://cdn.jsdelivr.net/npm/lit@2.0.0/+esm';
-        window.lit = { LitElement, html };
-    </script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
-</head>
-<body class="bg-gray-50">
-    <!-- Logo Marki -->
-    <div class="fixed top-4 left-4 z-50">
-        <img src="/assets/marki-logo.png" alt="Marki Logo" class="w-12 h-12">
-    </div>
-    
-    <!-- Galets en arrière-plan -->
-    <galet-component></galet-component>
-    <galet-component-dark></galet-component-dark>
-    <galet-component-wide></galet-component-wide>
-    
-    <div x-data="appState()" class="flex h-screen">
-        <!-- Sidebar -->
-        <sidebar-component></sidebar-component>
+    <script src="https://cdn.jsdelivr.net/npm/parse@3.3.0/lib/browser/Parse.min.js"></script>
+    <script type="module" src="/components/layout/app-base.js"></script>
+    </head>
 
-        <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
-            <!-- Header -->
-            <header class="bg-white shadow-sm p-4 flex justify-between items-center">
-                <h1 class="text-xl font-bold text-gray-800">Paramètres</h1>
-            </header>
-
-            <!-- Content -->
-            <main class="p-6">
-                <div class="max-w-6xl mx-auto">
-                    <h2 class="text-lg font-semibold mb-6 text-gray-800">Configuration du système</h2>
-
-                    <!-- Settings Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Email SMTP Settings -->
-                        <div class="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="window.location.href='/app/settings/emails-smtp'">
-                            <div class="flex items-center mb-4">
-                                <i data-feather="mail" class="w-6 h-6 text-blue-600 mr-3"></i>
-                                <h3 class="text-lg font-semibold text-gray-800">Configuration Email SMTP</h3>
-                            </div>
-                            <p class="text-gray-600 text-sm">Configurez les paramètres SMTP pour l'envoi des emails de relance.</p>
-                        </div>
-
-                        <!-- Team Management -->
-                        <div class="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="window.location.href='/app/settings/team'">
-                            <div class="flex items-center mb-4">
-                                <i data-feather="users" class="w-6 h-6 text-green-600 mr-3"></i>
-                                <h3 class="text-lg font-semibold text-gray-800">Gestion de l'équipe</h3>
-                            </div>
-                            <p class="text-gray-600 text-sm">Gérez les membres de votre équipe et leurs permissions.</p>
-                        </div>
-
-                        <!-- Placeholder for future settings -->
-                        <div class="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="alert('Fonctionnalité à venir')">
-                            <div class="flex items-center mb-4">
-                                <i data-feather="settings" class="w-6 h-6 text-gray-600 mr-3"></i>
-                                <h3 class="text-lg font-semibold text-gray-800">Paramètres généraux</h3>
-                            </div>
-                            <p class="text-gray-600 text-sm">Configuration générale du système et préférences.</p>
-                        </div>
-
-                        <!-- Placeholder for API settings -->
-                        <div class="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="alert('Fonctionnalité à venir')">
-                            <div class="flex items-center mb-4">
-                                <i data-feather="code" class="w-6 h-6 text-purple-600 mr-3"></i>
-                                <h3 class="text-lg font-semibold text-gray-800">Intégrations API</h3>
-                            </div>
-                            <p class="text-gray-600 text-sm">Gérez les intégrations avec d'autres systèmes et API.</p>
-                        </div>
-
-                        <!-- Placeholder for notifications -->
-                        <div class="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="alert('Fonctionnalité à venir')">
-                            <div class="flex items-center mb-4">
-                                <i data-feather="bell" class="w-6 h-6 text-yellow-600 mr-3"></i>
-                                <h3 class="text-lg font-semibold text-gray-800">Notifications</h3>
-                            </div>
-                            <p class="text-gray-600 text-sm">Configurez les préférences de notification pour votre équipe.</p>
-                        </div>
-
-                        <!-- Placeholder for security -->
-                        <div class="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="alert('Fonctionnalité à venir')">
-                            <div class="flex items-center mb-4">
-                                <i data-feather="shield" class="w-6 h-6 text-red-600 mr-3"></i>
-                                <h3 class="text-lg font-semibold text-gray-800">Sécurité</h3>
-                            </div>
-                            <p class="text-gray-600 text-sm">Gérez les paramètres de sécurité et d'authentification.</p>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <!-- Import des composants Lit pour les galets -->
-    <script type="module" src="/components/galet-component.js"></script>
-    <script type="module" src="/components/galet-component-dark.js"></script>
-    <script type="module" src="/components/galet-component-wide.js"></script>
-    <!-- Composant Toaster -->
-    <script type="module" src="/components/toaster.js"></script>
-    <script src="/components/toaster-store.js"></script>
-    
-    <script>
-        // Initialiser Parse
-        if (window.parseConfig) {
-            Parse.initialize(window.parseConfig.appId, window.parseConfig.javascriptKey);
-            Parse.serverURL = window.parseConfig.serverURL;
-        } else {
-            console.error('Configuration Parse non disponible');
-        }
-        
-        // Initialiser les icônes Feather
-        document.addEventListener('alpine:init', () => {
-            feather.replace();
-        });
-        
-        // Initialiser les icônes Lucide
-        document.addEventListener('alpine:init', () => {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        });
-    </script>
-    <!-- Composant Toaster -->
-    <toaster-component></toaster-component>
+<body class="bg-gray-100">
+    <appLayout>
+    </appLayout>
 </body>
+
 </html>
