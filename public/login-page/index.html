@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marki - Connexion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="./css/styles.css">
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Import Lit components -->
+    <script type="module" src="./components/login-layout.js"></script>
+    <script type="module" src="./components/login-form.js"></script>
+    <!-- Main application script -->
+    <script type="module" src="./js/main.js"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <login-layout title="Marki - Connexion" welcome-message="Bienvenue sur Marki" show-logo>
+        <!-- Main content with Alpine.js state -->
+        <div x-data class="py-8">
+            <div class="container mx-auto px-4">
+                <!-- Login form component -->
+                <login-form
+                    @login-submit="$event.stopPropagation()"
+                    x-on:login-submit="
+                        $store.auth.handleLoginSubmit($event);
+                        if ($store.auth.authError) {
+                            $el.showError($store.auth.authError);
+                        }
+                    "
+                ></login-form>
+            </div>
+        </div>
+
+        <!-- Custom footer -->
+        <div slot="footer">
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 text-sm">
+                <a href="/terms" class="hover:underline hover:text-marki-blue transition-colors">Conditions générales</a>
+                <a href="/privacy" class="hover:underline hover:text-marki-blue transition-colors">Politique de confidentialité</a>
+                <a href="/contact" class="hover:underline hover:text-marki-blue transition-colors">Contact</a>
+                <span class="text-gray-400">|</span>
+                <span>© <span x-text="new Date().getFullYear()"></span> Marki. Tous droits réservés.</span>
+            </div>
+        </div>
+    </login-layout>
+    
+    <!-- Loading indicator -->
+    <div 
+        x-show="$store.auth?.isLoading"
+        x-transition
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        style="display: none;"
+    >
+        <div class="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-4">
+            <div class="loading-spinner" style="width: 2rem; height: 2rem; border-width: 3px;"></div>
+            <p class="text-gray-700">Connexion en cours...</p>
+        </div>
+    </div>
+</body>
+</html>
