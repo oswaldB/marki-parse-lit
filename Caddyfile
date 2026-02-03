@@ -45,6 +45,6 @@ dev.parse.markidiags.com {
 
 }
 
-dev.parse.dashboard.markidiags.com:4040 {
+dev.parse.dashboard.markidiags.com {
     reverse_proxy parse-dashboard:4040
 }
