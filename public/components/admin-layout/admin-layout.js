@@ -1,28 +1,26 @@
-import { LitElement, html } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js';
-// Import the sidebar component
-import './sidebar.js';
-
 // Import the simple pebbles background component
 import '../pebbles/marki-pebbles-simple.js';
 
-class AdminLayout extends LitElement {
-  static properties = {
-    pageTitle: { type: String }
-  };
+// Import Alpine.js components
+import './sidebar-component.js';
+import './auth-store.js';
+import './is-auth-alpine.js';
 
-  createRenderRoot() {
-    return this;
-  }
-
+class AdminLayout extends HTMLElement {
   constructor() {
     super();
   }
 
+  connectedCallback() {
+    this.render();
+  }
+
   render() {
-    return html`
-      <div class="flex min-h-screen relative">
+    this.innerHTML = `
+      <div class="flex min-h-screen relative" x-data="adminSidebar()">
         <marki-pebbles-simple></marki-pebbles-simple>
-        <admin-sidebar></admin-sidebar>
+        <!-- Sidebar - Self-contained component -->
+        <div x-html="template" x-data="adminSidebar()"></div>
         <div class="ml-[250px] w-[calc(100%-250px)] min-h-screen transition-all duration-300 ease-in-out">
             <slot></slot>
         </div>
